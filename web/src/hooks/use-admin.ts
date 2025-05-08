@@ -48,8 +48,8 @@ export const useAdmin = () => {
 
   const { mutateAsync: updateUser } = useMutation({
     mutationKey: ["updateUser"],
-    mutationFn: async ({ id, data }: { id: string, data: UpdateUserInput }): Promise<IActionResponse<IUserView>> => {
-      const response = await updateUserAction(id, data)
+    mutationFn: async ({ id, userName, data }: { id: string, userName: string, data: UpdateUserInput }): Promise<IActionResponse<IUserView>> => {
+      const response = await updateUserAction(id, userName, data)
 
       if (!!response.data) {
         queryClient.setQueryData([queries.admin.users], (current: IUserView[]) => {

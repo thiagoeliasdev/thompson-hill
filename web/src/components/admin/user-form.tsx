@@ -10,13 +10,12 @@ import { toast } from "sonner"
 import { createUserSchema } from "@/actions/users/dtos/create-user.input"
 import { EUserRole, EUserStatus, IUserView } from "@/models/user"
 import { PasswordInput } from "../ui/password-input"
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAdmin } from "@/hooks/use-admin"
 import { Switch } from "../ui/switch"
-// import { CameraIcon } from "lucide-react"
-// import Image from "next/image"
-// import axios from "axios"
+import Image from "next/image"
 import { generateUserName } from "@/lib/utils"
+import { CameraIcon } from "lucide-react"
 
 interface Props {
   forRole: EUserRole
@@ -28,7 +27,7 @@ interface Props {
 export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
   const formSchema = createUserSchema(user ? "update" : "create")
   const { createUser, updateUser } = useAdmin()
-  // const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,7 +39,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
     }
   })
 
-  // const photoRef = useRef<HTMLInputElement>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
 
   // Log form errors
   useEffect(() => {
@@ -55,15 +54,14 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
   }, [form.watch().name])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // const profileImage = selectedFile?.name
-    // const profileImageContentType = selectedFile?.type
-    const profileImage = undefined
-    const profileImageContentType = undefined
+    const profileImage = selectedFile?.name
+    const profileImageContentType = selectedFile?.type
 
     try {
       if (user) {
         const response = await updateUser({
           id: user.id,
+          userName: user.userName,
           data: {
             name: values.name,
             password: values.password,
@@ -76,13 +74,15 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
 
         if (response.data) {
           // Upload the photo to the google firebase server using the signed URL
-          // if (response.data.profileImageSignedUrl) {
-          //   await axios.put(response.data.profileImageSignedUrl, selectedFile, {
-          //     headers: {
-          //       "Content-Type": selectedFile?.type || "image/jpeg",
-          //     }
-          //   })
-          // }
+          if (response.data.profileImageSignedUrl) {
+            await fetch(response.data.profileImageSignedUrl, {
+              method: "PUT",
+              body: selectedFile,
+              headers: {
+                "Content-Type": selectedFile?.type || "image/jpeg",
+              }
+            })
+          }
 
           toast.success("Usuário atualizado com sucesso")
           if (onSuccess) onSuccess()
@@ -103,6 +103,15 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
 
         if (response.data) {
           // Upload the photo to the google firebase server using the signed URL
+          if (response.data.profileImageSignedUrl) {
+            await fetch(response.data.profileImageSignedUrl, {
+              method: "PUT",
+              body: selectedFile,
+              headers: {
+                "Content-Type": selectedFile?.type || "image/jpeg",
+              }
+            })
+          }
           // if (response.data?.profileImageSignedUrl) {
           //   await axios.put(response.data?.profileImageSignedUrl, selectedFile, {
           //     headers: {
@@ -143,10 +152,9 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
     }
   }
 
-  // async function handlePhotoInput(file: File) {
-  //   setSelectedFile(file)
-  //   console.log("Photo input", file)
-  // }
+  async function handlePhotoInput(file: File) {
+    setSelectedFile(file)
+  }
 
   return (
     <Form {...form}>
@@ -175,7 +183,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
             )}
           />
         )}
-        {/* {forRole === EUserRole.ATTENDANT && (
+        {forRole === EUserRole.ATTENDANT && (
           <div className="w-full h-48 pt-4 flex items-center justify-center">
             <input
               autoFocus={false}
@@ -235,7 +243,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
               </div>
             )}
           </div>
-        )} */}
+        )}
         <FormField
           control={form.control}
           name="name"

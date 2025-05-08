@@ -88,7 +88,6 @@ export default function CustomerRegisterForm() {
 
   async function handlePhotoInput(file: File) {
     setSelectedFile(file)
-    console.log("Photo input", file)
   }
 
   return (

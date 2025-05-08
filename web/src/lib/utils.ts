@@ -44,10 +44,8 @@ export function isDateValid(input: string): boolean {
 
   const [day, month, year] = input.split("/").map(Number)
   const date = new Date(`${year}-${month}-${day}`)
-  console.log(date)
   // Check if date is valid in calendar
   if (!date || date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
-    console.log("Invalid date")
     return false
   }
   return true
