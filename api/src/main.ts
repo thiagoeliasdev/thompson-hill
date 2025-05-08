@@ -31,6 +31,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('v1/docs', app, document)
 
+  // Monitor de memoria
+  setInterval(() => {
+    const mem = process.memoryUsage()
+    console.log(`[MEMORY] Heap: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB / ${(mem.heapTotal / 1024 / 1024).toFixed(2)} MB | RSS: ${(mem.rss / 1024 / 1024).toFixed(2)} MB`)
+  }, 5000)
+
   await app.listen(process.env.PORT ?? 3000)
   console.log(`Application is running on: ${await app.getUrl()}`)
 }
