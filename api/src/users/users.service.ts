@@ -36,8 +36,8 @@ export class UsersService {
         const id = createId()
 
         // Create a signed URL for the profile image upload if it exists
-        let profileImage: string | undefined = undefined
-        let profileImageSignedUrl: string | undefined = undefined
+        // let profileImage: string | undefined = undefined
+        // let profileImageSignedUrl: string | undefined = undefined
         // if (createUserDto.profileImage && createUserDto.profileImageContentType) {
         //   try {
         //     const filePath = `users/${createUserDto.userName.toLowerCase().trim()}/profile.${createUserDto.profileImage.split('.').pop() || 'jpg'}`
@@ -67,14 +67,14 @@ export class UsersService {
           userName: createUserDto.userName.toLowerCase().trim().replaceAll(/\s/g, ""),
           password,
           role: createUserDto.role,
-          profileImage,
+          profileImage: createUserDto.profileImage,
           createdAt: new Date(),
           status: createUserDto.status || EUserStatus.ACTIVE,
         })
 
         await user.save()
 
-        return { ...toUser(user), profileImageSignedUrl }
+        return { ...toUser(user) }
       }
       console.error(error)
       throw error
@@ -108,8 +108,8 @@ export class UsersService {
       : user.password
 
     // Check if there is a profile image to upload
-    let profileImage: string | undefined = user.profileImage
-    let profileImageSignedUrl: string | undefined = undefined
+    // let profileImage: string | undefined = user.profileImage
+    // let profileImageSignedUrl: string | undefined = undefined
     // if (updateUserDto.profileImage && updateUserDto.profileImageContentType) {
     //   const filePath = `users/${user.userName.toLowerCase().trim()}/profile.${updateUserDto.profileImage.split('.').pop() || 'jpg'}`
 
@@ -130,8 +130,7 @@ export class UsersService {
     const updatedUser: User = {
       ...user,
       ...updateUserDto,
-      password: updatedPassword,
-      profileImage
+      password: updatedPassword
     }
 
     const updatedUserFromDB = await this.userSchema.findOneAndUpdate(
@@ -142,7 +141,7 @@ export class UsersService {
     )
 
     const userReturn = toUser(updatedUserFromDB!)
-    return { ...userReturn, profileImageSignedUrl }
+    return { ...userReturn }
   }
 
   async remove({ id, userName }: { id?: string, userName?: string }): Promise<User> {

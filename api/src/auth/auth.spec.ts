@@ -7,7 +7,6 @@ import { CreateUserInput } from "../users/dto/create-user.input"
 import { faker } from '@faker-js/faker'
 import { InvalidCredentialsException, UserRegisterException } from "../errors"
 import { ConfigModule } from "@nestjs/config"
-import { FirebaseModule } from "../firebase/firebase.module"
 import { EUserRole } from "../users/entities/user.entity"
 import { MongoModule } from "../mongo/mongo.module"
 
@@ -39,7 +38,6 @@ describe('AuthController', () => {
             signOptions: { expiresIn: '60s' },
           })
         }),
-        FirebaseModule,
         MongoModule
       ]
     }).compile()
