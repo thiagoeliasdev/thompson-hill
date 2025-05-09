@@ -1,5 +1,5 @@
 import { CreateServiceInput } from "../dto/create-service.input"
-import { de, faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 
 export function getRandomServiceCreateInputData(data?: Partial<CreateServiceInput>): CreateServiceInput {
   return {

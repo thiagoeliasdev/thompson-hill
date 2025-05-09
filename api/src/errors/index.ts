@@ -32,3 +32,16 @@ export class ServiceNotFoundException extends BadRequestException {
     super("Service not found")
   }
 }
+
+// Customer Errors
+export class CustomerNotFoundException extends BadRequestException {
+  constructor() {
+    super("Customer not found")
+  }
+}
+
+export class CustomerAlreadyExistsException extends BadRequestException {
+  constructor() {
+    super("Customer already exists")
+  }
+}

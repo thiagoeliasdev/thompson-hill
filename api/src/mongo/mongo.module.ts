@@ -3,8 +3,9 @@ import * as mongoose from 'mongoose'
 import { Connection, Model } from 'mongoose'
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { IMongoUser, userSchema } from "./schemas/user.schema"
-import { SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME } from "./constants"
+import { CUSTOMER_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME } from "./constants"
 import { IMongoService, serviceSchema } from "./schemas/service.schema"
+import { customerSchema, IMongoCustomer } from "./schemas/customer.schema"
 
 @Global()
 @Module({
@@ -38,8 +39,17 @@ import { IMongoService, serviceSchema } from "./schemas/service.schema"
 
         return ServiceSchema
       }
+    },
+    {
+      provide: "CustomerSchema",
+      inject: ["MongoConnection"],
+      useFactory: (connection: Connection) => {
+        const CustomerSchema: Model<IMongoCustomer> = connection.models.customer || connection.model<IMongoCustomer>(CUSTOMER_SCHEMA_NAME, customerSchema)
+
+        return CustomerSchema
+      }
     }
   ],
-  exports: ["UserSchema", "ServiceSchema"]
+  exports: ["UserSchema", "ServiceSchema", "CustomerSchema"]
 })
 export class MongoModule { }
