@@ -31,7 +31,6 @@ export class ServicesController {
   }
 
   @Get()
-  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get all services' })
   @ApiOkResponse({ type: [ServiceView] })
   async findAll() {
@@ -39,7 +38,6 @@ export class ServicesController {
   }
 
   @Get(':id')
-  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get a service by ID' })
   @ApiOkResponse({ type: ServiceView })
   @ApiBadRequestResponse({

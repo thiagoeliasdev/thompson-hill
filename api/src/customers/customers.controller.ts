@@ -71,6 +71,7 @@ export class CustomersController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @ApiOperation({ summary: 'Delete a customer by ID' })
   @ApiNoContentResponse()
   @ApiBadRequestResponse({

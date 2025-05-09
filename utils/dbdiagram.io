@@ -34,16 +34,16 @@ Table customers {
   created_at timestamp [not null]
 }
 
-Table appointment {
+Table appointments {
   id string [primary key]
-  customerId string [not null]
+  customer_id string [not null]
   attendant_id string 
-  services services[]
+  serviceIds string[]
   total_price decimal [not null]
-  discounts decimal
+  discount decimal
   final_price decimal [not null]
-  paymenth_method appointment_payment_methods
-  redeem_code string
+  payment_method appointment_payment_methods
+  redeem_coupon string
   status appointment_statuses [not null]
   created_at timestamp [not null]
   on_service_at timestamp
@@ -52,7 +52,6 @@ Table appointment {
 
 Ref: appointment.customerId > customers.id
 Ref: appointment.attendant_id > users.id
-Ref: appointment.services > services.id
 
 Enum appointment_statuses{
   WAITING
