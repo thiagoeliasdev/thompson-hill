@@ -15,6 +15,7 @@ import { MongoModule } from "../mongo/mongo.module"
 describe('Users Module', () => {
   let usersController: UsersController
   let usersServices: UsersService
+  let app: TestingModule
 
   // const imagePath = path.resolve(__dirname, "mocks", "test_image.png")
   // const imageBuffer = fs.readFileSync(imagePath)
@@ -31,21 +32,24 @@ describe('Users Module', () => {
     }
   }
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    app = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [UsersService],
       imports: [
         ConfigModule.forRoot({
           isGlobal: true
         }),
-        // FirebaseModule,
         MongoModule
       ]
     }).compile()
 
     usersController = app.get<UsersController>(UsersController)
     usersServices = app.get<UsersService>(UsersService)
+  })
+
+  afterAll(async () => {
+    await app.close()
   })
 
   describe('Services', () => {

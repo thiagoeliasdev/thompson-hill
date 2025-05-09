@@ -35,7 +35,7 @@ storage
     {
       maxAgeSeconds: 3600,
       method: ['GET', 'PUT'],
-      origin: ["http://localhost:3000"],
+      origin: ["http://localhost:3000", "https://thompson-hill.vercel.app/"],
       responseHeader: ["Content-Type"],
     }
   ])

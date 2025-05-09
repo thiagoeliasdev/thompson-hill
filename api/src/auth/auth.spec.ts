@@ -13,6 +13,7 @@ import { MongoModule } from "../mongo/mongo.module"
 describe('AuthController', () => {
   let authController: AuthController
   let usersService: UsersService
+  let app: TestingModule
 
   function getRandomUserData(data?: Partial<CreateUserInput>): CreateUserInput {
     return {
@@ -23,8 +24,8 @@ describe('AuthController', () => {
     }
   }
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    app = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [AuthService, UsersService],
       imports: [
@@ -44,6 +45,10 @@ describe('AuthController', () => {
 
     authController = app.get<AuthController>(AuthController)
     usersService = app.get<UsersService>(UsersService)
+  })
+
+  afterAll(async () => {
+    await app.close()
   })
 
   describe('Auth Module Test', () => {

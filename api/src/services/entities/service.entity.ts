@@ -1,0 +1,23 @@
+
+export interface IService {
+  id: string
+  name: string
+  description?: string
+  value: number
+  coverImage?: string
+  createdAt: Date
+}
+
+export class Service {
+  id: string
+  name: string
+  description?: string
+  value: number
+  coverImage?: string
+  createdAt: Date
+
+  constructor(data: IService) {
+    Object.assign(this, data)
+    this.createdAt = new Date(data.createdAt)
+  }
+}
