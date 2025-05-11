@@ -3,8 +3,8 @@ import { ServicesService } from './services.service'
 import { CreateServiceInput } from "./dto/create-service.input"
 import { UpdateServiceInput } from "./dto/update-service.input"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
-import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard"
-import { AdminGuard } from "src/users/guards/is-admin.guard"
+import { JwtAuthGuard } from "../auth/guards/jwt-auth/jwt-auth.guard"
+import { AdminGuard } from "../users/guards/is-admin.guard"
 import { ServiceView } from "./dto/service.view"
 
 @ApiTags('Services')

@@ -45,3 +45,16 @@ export class CustomerAlreadyExistsException extends BadRequestException {
     super("Customer already exists")
   }
 }
+
+// Appointment
+export class AppointmentNotFoundException extends BadRequestException {
+  constructor() {
+    super("Appointment not found")
+  }
+}
+
+export class MissingServicesException extends BadRequestException {
+  constructor() {
+    super("Missing services in appointment registration")
+  }
+}

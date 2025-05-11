@@ -4,6 +4,7 @@ import { CUSTOMER_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME } from "../
 import { IMongoService, toService } from "./service.schema"
 import { IMongoCustomer, toCustomer } from "./customer.schema"
 import { CustomerNotFoundException } from "../../errors"
+import { IMongoUser, toUser } from "./user.schema"
 
 
 export interface IMongoAppointment extends Document {
@@ -22,6 +23,7 @@ export interface IMongoAppointment extends Document {
   createdAt: Date
 
   // Virtuals
+  attendant?: IMongoUser
   services?: IMongoService[]
   customer?: IMongoCustomer
 }
@@ -29,7 +31,7 @@ export interface IMongoAppointment extends Document {
 export const appointmentSchema: Schema<IMongoAppointment> = new Schema({
   _id: { type: String, required: true },
   customerId: { type: String, required: true },
-  attendantId: { type: String, ref: USER_SCHEMA_NAME, required: false },
+  attendantId: { type: String, required: false },
   serviceIds: { type: [String], required: true },
   totalPrice: { type: Number, required: true },
   discount: { type: Number, required: false },
@@ -54,7 +56,16 @@ appointmentSchema.virtual('services', { ref: SERVICE_SCHEMA_NAME, localField: "s
 
 appointmentSchema.post('save', async function (doc, next) {
   try {
-    await doc.populate(['services', 'customer'])
+    await doc.populate(['services', 'customer', 'attendant'])
+    next()
+  } catch (err) {
+    next(err)
+  }
+})
+
+appointmentSchema.post('findOne', async function (doc, next) {
+  try {
+    await doc.populate(['services', 'customer', 'attendant'])
     next()
   } catch (err) {
     next(err)
@@ -68,13 +79,20 @@ appointmentSchema.virtual('customer', {
   justOne: true,
 })
 
+appointmentSchema.virtual('attendant', {
+  ref: USER_SCHEMA_NAME,
+  localField: "attendantId",
+  foreignField: "_id",
+  justOne: true,
+})
+
 export function toAppointment(appointment: IMongoAppointment): Appointment {
   if (!appointment.customer) throw new CustomerNotFoundException()
 
   return new Appointment({
     id: appointment.id,
     customer: toCustomer(appointment.customer),
-    attendant: undefined,
+    attendant: appointment.attendant ? toUser(appointment.attendant) : undefined,
     services: appointment.services?.map(toService) || [],
     totalPrice: appointment.totalPrice,
     discount: appointment.discount,

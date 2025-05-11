@@ -1,26 +1,52 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { CreateAppointmentInput } from "./dto/create-customer.input"
+import { CreateAppointmentInput } from "./dto/create-appointment.input"
 import { Appointment, EAppointmentStatuses } from "./entities/appointment.entity"
 import { Model } from "mongoose"
 import { IMongoAppointment, toAppointment } from "../mongo/schemas/appointment.schema"
 import { createId } from "@paralleldrive/cuid2"
+import { AppointmentNotFoundException, MissingServicesException } from "../errors"
+import { CustomersService } from "../customers/customers.service"
+import { UsersService } from "../users/users.service"
+import { ServicesService } from "../services/services.service"
+import { AppointmentQuery } from "./dto/appointment.query"
+import { endOfDay, startOfDay } from "date-fns"
+import { UpdateAppointmentInput } from "./dto/update-appointment.input"
 
 @Injectable()
 export class AppointmentsService {
   constructor(
     @Inject("AppointmentSchema") private readonly appointmentSchema: Model<IMongoAppointment>,
+    private readonly customersService: CustomersService,
+    private readonly usersService: UsersService,
+    private readonly servicesService: ServicesService
   ) { }
 
   async create(dto: CreateAppointmentInput): Promise<Appointment> {
+
+    //Check if the appointment has at least one service
+    if (!dto.serviceIds || dto.serviceIds.length === 0) throw new MissingServicesException()
+
+    //Check if the customer exists
+    const customer = await this.customersService.findOne({ id: dto.customerId })
+
+    //Check if attendant exists
+    if (!!dto.attendantId) {
+      await this.usersService.findOne({ id: dto.attendantId })
+    }
+
+    //Check if services exists
+    for (const serviceId of dto.serviceIds) {
+      await this.servicesService.findOne(serviceId)
+    }
+
     const id = createId()
-    console.log("Creating appointment", id, dto)
 
     let serviceIds: string[] = dto.serviceIds
 
     const appointment = new this.appointmentSchema(
       {
         _id: id,
-        customerId: dto.customerId,
+        customerId: customer.id,
         attendantId: dto.attendantId,
         serviceIds,
         totalPrice: 0,
@@ -31,6 +57,7 @@ export class AppointmentsService {
     )
 
     const createdAppointment = await appointment.save()
+
     createdAppointment.totalPrice = createdAppointment?.services?.reduce((acc, service) => acc + service.value, 0) || 0
     createdAppointment.finalPrice = createdAppointment.totalPrice - (createdAppointment.discount || 0)
     await createdAppointment.save()
@@ -38,15 +65,39 @@ export class AppointmentsService {
     return toAppointment(createdAppointment)
   }
 
-  async findAll(): Promise<Appointment[]> {
-    throw new Error('Method not implemented.')
+  async findAll(query?: AppointmentQuery): Promise<Appointment[]> {
+    const dbQuery: any = {}
+
+    if (query?.onlyToday) {
+      const today = new Date()
+      const start = startOfDay(today)
+      const end = endOfDay(today)
+
+      dbQuery.createdAt = { $gte: start, $lte: end }
+    }
+
+    const appointments = await this.appointmentSchema
+      .find(dbQuery)
+      .populate(['services', 'customer', 'attendant'])
+      .sort({ createdAt: -1 })
+
+    return appointments.map(toAppointment)
   }
 
   async findOne(id: string): Promise<Appointment> {
-    throw new Error('Method not implemented.')
+    const appointment = await this.appointmentSchema.findOne({ _id: id })
+    if (!appointment) throw new AppointmentNotFoundException()
+
+    return toAppointment(appointment)
   }
 
-  async remove(id: string): Promise<Appointment> {
-    throw new Error('Method not implemented.')
+  async update(id: string, dto: UpdateAppointmentInput): Promise<Appointment> {
+    throw new Error("Method not implemented.")
+  }
+
+  async remove(id: string): Promise<void> {
+    const appointment = await this.appointmentSchema.findOneAndDelete({ _id: id })
+    if (!appointment) throw new AppointmentNotFoundException()
+    return
   }
 }

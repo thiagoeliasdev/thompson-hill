@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode } from '@nestjs/common'
 import { AppointmentsService } from './appointments.service'
-import { CreateAppointmentInput } from "./dto/create-customer.input"
+import { CreateAppointmentInput } from "./dto/create-appointment.input"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth/jwt-auth.guard"
 import { AppointmentView } from "./dto/appointment.view"

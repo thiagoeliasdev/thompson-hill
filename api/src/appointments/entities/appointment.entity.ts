@@ -1,5 +1,6 @@
-import { ICustomer } from "src/customers/entities/customer.entity"
-import { IService } from "src/services/entities/service.entity"
+import { Customer, ICustomer } from "../../customers/entities/customer.entity"
+import { IService, Service } from "../../services/entities/service.entity"
+import { IUser, User } from "../../users/entities/user.entity"
 
 export enum EPaymentMethod {
   CASH = 'CASH',
@@ -21,15 +22,7 @@ export enum EAppointmentStatuses {
 export interface IAppointment {
   id: string
   customer: ICustomer
-  attendant?: {
-    id: string,
-    name: string,
-  }
-  // services: {
-  //   id: string,
-  //   name: string,
-  //   value: number,
-  // }[]
+  attendant?: IUser
   services: IService[]
   totalPrice: number
   discount?: number
@@ -44,20 +37,9 @@ export interface IAppointment {
 
 export class Appointment {
   id: string
-  customer: {
-    id: string,
-    name: string,
-    phoneNumber: string
-  }
-  attendant?: {
-    id: string,
-    name: string,
-  }
-  services: {
-    id: string,
-    name: string,
-    value: number,
-  }[]
+  customer: Customer
+  attendant?: User
+  services: Service[]
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -73,5 +55,9 @@ export class Appointment {
     this.createdAt = new Date(appointment.createdAt)
     this.onServiceAt = appointment.onServiceAt ? new Date(appointment.onServiceAt) : undefined
     this.finishedAt = appointment.finishedAt ? new Date(appointment.finishedAt) : undefined
+
+    this.customer = new Customer(appointment.customer)
+    this.attendant = appointment.attendant ? new User(appointment.attendant) : undefined
+    this.services = appointment.services.map(service => new Service(service))
   }
 }
