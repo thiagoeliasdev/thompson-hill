@@ -10,7 +10,8 @@ export class UpdateAppointmentInput {
 
   @ApiProperty({ required: false, type: [String] })
   @IsString({ each: true })
-  serviceIds: string[]
+  @IsOptional()
+  serviceIds?: string[]
 
   @ApiProperty({ required: false })
   @IsEnum(EPaymentMethod)

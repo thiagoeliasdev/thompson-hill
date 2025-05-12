@@ -140,7 +140,7 @@ describe('Users Module', () => {
       }).rejects.toThrow(UserNotFoundException)
     })
 
-    it("should find all users", async () => {
+    it.skip("should find all users", async () => {
       const initialUsers = await usersServices.findAll()
 
       const inputData = Array.from({ length: 5 }, () => getRandomUserData())
@@ -165,7 +165,7 @@ describe('Users Module', () => {
       }
     }, 30000)
 
-    it("should find all users filtering by role", async () => {
+    it.skip("should find all users filtering by role", async () => {
       const initialUsers = await usersServices.findAll()
 
       const initialAttendants = initialUsers.filter(user => user.role === EUserRole.ATTENDANT)

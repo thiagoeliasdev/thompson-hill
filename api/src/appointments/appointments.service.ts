@@ -85,19 +85,90 @@ export class AppointmentsService {
   }
 
   async findOne(id: string): Promise<Appointment> {
-    const appointment = await this.appointmentSchema.findOne({ _id: id })
-    if (!appointment) throw new AppointmentNotFoundException()
+    try {
+      const appointment = await this.appointmentSchema.findOne({ _id: id })
+      if (!appointment) throw new AppointmentNotFoundException()
 
-    return toAppointment(appointment)
+      return toAppointment(appointment)
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('Cannot read properties of null')) {
+        throw new AppointmentNotFoundException()
+      }
+
+      console.error('Error finding appointment:', error)
+      throw error
+    }
   }
 
   async update(id: string, dto: UpdateAppointmentInput): Promise<Appointment> {
-    throw new Error("Method not implemented.")
+    try {
+      const appointment = await this.appointmentSchema.findOne({ _id: id })
+      if (!appointment) throw new AppointmentNotFoundException()
+
+      let onServiceAt: Date | undefined = appointment.onServiceAt
+      let finishedAt: Date | undefined = appointment.finishedAt
+
+      //Check if attendant exists
+      if (!!dto.attendantId) {
+        await this.usersService.findOne({ id: dto.attendantId })
+      }
+
+      //Check if services exists
+      if (dto.serviceIds) {
+        for (const serviceId of dto.serviceIds) {
+          await this.servicesService.findOne(serviceId)
+        }
+      }
+
+      //Set the appointment status to ON_SERVICE if the appointment is being updated to ON_SERVICE
+      if (dto.status === EAppointmentStatuses.ON_SERVICE) {
+        onServiceAt = new Date()
+        appointment.status = EAppointmentStatuses.ON_SERVICE
+      }
+
+      //Set the appointment status to FINISHED if the appointment is being updated to FINISHED
+      if (dto.status === EAppointmentStatuses.FINISHED) {
+        finishedAt = new Date()
+        appointment.status = EAppointmentStatuses.FINISHED
+      }
+
+      Object.assign(appointment, {
+        ...dto,
+        onServiceAt,
+        finishedAt,
+      })
+
+      const updatedAppointment = await appointment.save()
+
+      if (dto.serviceIds) {
+        updatedAppointment.totalPrice = updatedAppointment?.services?.reduce((acc, service) => acc + service.value, 0) || 0
+        updatedAppointment.finalPrice = updatedAppointment.totalPrice - (updatedAppointment.discount || 0)
+        await updatedAppointment.save()
+      }
+
+      return toAppointment(updatedAppointment)
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('Cannot read properties of null')) {
+        throw new AppointmentNotFoundException()
+      }
+
+      console.error('Error updating appointment:', error)
+      throw error
+    }
   }
 
   async remove(id: string): Promise<void> {
-    const appointment = await this.appointmentSchema.findOneAndDelete({ _id: id })
-    if (!appointment) throw new AppointmentNotFoundException()
-    return
+    try {
+      const appointment = await this.appointmentSchema.findOneAndDelete({ _id: id })
+      if (!appointment) throw new AppointmentNotFoundException()
+      return
+    } catch (error) {
+      if (error instanceof TypeError) {
+        throw new AppointmentNotFoundException()
+      }
+
+      console.error('Error deleting appointment:', error)
+      throw error
+    }
   }
 }
