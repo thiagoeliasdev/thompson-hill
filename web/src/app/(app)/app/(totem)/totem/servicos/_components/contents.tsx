@@ -18,31 +18,36 @@ export default function ServicesPageContents() {
       id: "1",
       name: "Corte e Barba",
       value: 999.99,
-      image: images.servicePlaceholder,
+      coverImage: images.servicePlaceholder,
+      createdAt: new Date(),
     },
     {
       id: "2",
       name: "Corte e Barba",
       value: 999.99,
-      image: images.servicePlaceholder,
+      coverImage: images.servicePlaceholder,
+      createdAt: new Date(),
     },
     {
       id: "3",
       name: "Corte e Barba",
       value: 999.99,
-      image: images.servicePlaceholder,
+      coverImage: images.servicePlaceholder,
+      createdAt: new Date(),
     },
     {
       id: "4",
       name: "Corte e Barba",
       value: 999.99,
-      image: images.servicePlaceholder,
+      coverImage: images.servicePlaceholder,
+      createdAt: new Date(),
     },
     {
       id: "5",
       name: "Corte e Barba",
       value: 999.99,
-      image: images.servicePlaceholder,
+      coverImage: images.servicePlaceholder,
+      createdAt: new Date(),
     },
   ]
 
@@ -61,7 +66,7 @@ export default function ServicesPageContents() {
               id={service.id}
               title={service.name}
               subtitle={formatCurrency(service.value)}
-              image={service.image}
+              image={service.coverImage!}
               handleClick={() => handleSelect(service)}
             />
           ))}

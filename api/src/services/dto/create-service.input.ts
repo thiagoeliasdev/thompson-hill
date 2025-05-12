@@ -8,6 +8,7 @@ export class CreateServiceInput {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   description?: string
 
   @ApiProperty()
