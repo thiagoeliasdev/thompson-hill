@@ -38,7 +38,7 @@ export function applyDateMask(input: string): string {
 }
 
 export function isDateValid(input: string): boolean {
-  if (input.length < 10) {
+  if (input.length !== 10) {
     return false
   }
 

@@ -43,6 +43,19 @@ export class CustomersController {
     return customer.map((customer) => new CustomerView(customer))
   }
 
+  @Get('/phoneNumber/:phoneNumber')
+  @ApiOperation({ summary: 'Get a customer by phone number' })
+  @ApiOkResponse({ type: CustomerView })
+  @ApiBadRequestResponse({
+    description: "Customer not found",
+    schema: {
+      example: "Customer not found"
+    }
+  })
+  async findOneByPhoneNumber(@Param('phoneNumber') phoneNumber: string) {
+    return new CustomerView(await this.customersService.findOne({ phoneNumber }))
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a customer by ID' })
   @ApiOkResponse({ type: CustomerView })

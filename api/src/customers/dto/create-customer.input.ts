@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsDateString, IsEnum, IsOptional, IsPhoneNumber, IsString } from "class-validator"
+import { IsDateString, IsEnum, IsMobilePhone, IsOptional, IsPhoneNumber, IsString } from "class-validator"
 import { ECustomerGender } from "../entities/customer.entity"
 
 export class CreateCustomerInput {
@@ -9,7 +9,7 @@ export class CreateCustomerInput {
 
   @ApiProperty()
   @IsString()
-  @IsPhoneNumber("BR")
+  @IsMobilePhone("pt-BR")
   phoneNumber: string
 
   @ApiProperty({ required: false })
@@ -23,4 +23,9 @@ export class CreateCustomerInput {
   @ApiProperty()
   @IsEnum(ECustomerGender)
   gender: ECustomerGender
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  indicationCode?: string
 }

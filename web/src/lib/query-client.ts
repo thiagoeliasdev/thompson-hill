@@ -9,5 +9,6 @@ export const queries = {
   },
   totem: {
     attendants: "attendants",
+    customer: "customer",
   }
 }
