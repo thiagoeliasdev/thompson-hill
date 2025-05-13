@@ -117,3 +117,23 @@ export async function createCustomerAction(data: CreateCustomerInput): Promise<I
     }
   }
 }
+
+export async function getCustomersAction(): Promise<IActionResponse<ICustomerView[]>> {
+  try {
+    const { data } = await axiosClient.get<ICustomerView[]>(`/customers`)
+    return { data }
+
+  } catch (err) {
+    const error = err as Error
+    if (error.message.includes("ECONNREFUSED")) {
+      return {
+        error: "Servidor não está disponível, tente novamente mais tarde."
+      }
+    }
+
+    console.error(error)
+    return {
+      error: error.message
+    }
+  }
+}

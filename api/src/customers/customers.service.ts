@@ -6,6 +6,7 @@ import { Customer } from "./entities/customer.entity"
 import { CreateCustomerInput } from "./dto/create-customer.input"
 import { createId } from "@paralleldrive/cuid2"
 import { UpdateCustomerInput } from "./dto/update-customer.input"
+import { capitalizeName } from "src/utils"
 
 @Injectable()
 export class CustomersService {
@@ -33,7 +34,7 @@ export class CustomersService {
 
         const customer = new this.customerSchema({
           _id: id,
-          name: dto.name,
+          name: capitalizeName(dto.name),
           phoneNumber: dto.phoneNumber,
           profileImage: dto.profileImage,
           birthDate: dto.birthDate,

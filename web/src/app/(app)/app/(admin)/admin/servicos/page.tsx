@@ -19,7 +19,7 @@ export default function ServicesPage() {
 
   return (
     <div className="w-full flex flex-col max-w-[1440px] mx-auto">
-      <H1>Atendentes</H1>
+      <H1>Serviços</H1>
       <Sheet
         open={isSheetOpen}
         onOpenChange={setSheetOpen}

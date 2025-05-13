@@ -1,3 +1,4 @@
+import { getCustomersAction } from "@/actions/customers"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
 import { CreateServiceInput } from "@/actions/services/dto/create-service.input"
 import { UpdateServiceInput } from "@/actions/services/dto/update-service.input"
@@ -6,6 +7,7 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { ICustomerView } from "@/models/customer"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -131,6 +133,22 @@ export const useAdmin = () => {
     }
   })
 
+  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
+    queryKey: [queries.admin.customers],
+    queryFn: async (): Promise<ICustomerView[]> => {
+      const response = await getCustomersAction()
+
+      if (response.data) {
+        return response.data.map((service) => ({
+          ...service,
+          createdAt: new Date(service.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
 
   return {
     users,
@@ -140,6 +158,8 @@ export const useAdmin = () => {
     services,
     isLoadingServices,
     createService,
-    updateService
+    updateService,
+    customers,
+    isLoadingCustomers,
   }
 }

@@ -9,6 +9,8 @@ import { QueryUserInput } from "./dto/query-user.input"
 import { Model } from "mongoose"
 import { IMongoUser, toUser } from "../mongo/schemas/user.schema"
 import { createId } from "@paralleldrive/cuid2"
+import slugify from "slugify"
+import { capitalizeName } from "src/utils"
 
 @Injectable()
 export class UsersService {
@@ -62,9 +64,9 @@ export class UsersService {
 
         const user = new this.userSchema({
           _id: id,
-          name: createUserDto.name,
+          name: capitalizeName(createUserDto.name),
           // remove all white spaces and convert to lowercase
-          userName: createUserDto.userName.toLowerCase().trim().replaceAll(/\s/g, ""),
+          userName: slugify(createUserDto.userName.toLowerCase().trim().replaceAll(/\s/g, ""), { strict: true }),
           password,
           role: createUserDto.role,
           profileImage: createUserDto.profileImage,

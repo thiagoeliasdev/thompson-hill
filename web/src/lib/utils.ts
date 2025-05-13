@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import slugify from "slugify"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -80,11 +81,11 @@ export function generateUserName(name: string | undefined): string {
   if (!name) return ""
 
   const parts = name.trim().split(/\s+/)
-  if (parts.length < 2) return name.toLowerCase() // fallback para nome único
+  if (parts.length < 2) return slugify(name, { lower: true, strict: true, trim: true }) // fallback para nome único
 
   const firstLetter = parts[0][0].toLowerCase()
   const lastName = parts[parts.length - 1].toLowerCase()
 
-  return firstLetter + lastName
+  return slugify(firstLetter + lastName, { lower: true, strict: true, trim: true })
 }
 

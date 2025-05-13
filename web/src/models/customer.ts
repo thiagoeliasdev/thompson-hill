@@ -14,3 +14,8 @@ export enum EGender {
   MALE = "MALE",
   FEMALE = "FEMALE"
 }
+
+export const EGenderMapper: Record<EGender, string> = {
+  [EGender.MALE]: "Masculino",
+  [EGender.FEMALE]: "Feminino"
+}
