@@ -41,11 +41,6 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
 
   const photoRef = useRef<HTMLInputElement>(null)
 
-  // Log form errors
-  useEffect(() => {
-    // console.log(form.formState.errors)
-  }, [form.formState.errors])
-
   useEffect(() => {
     if (user) return
     const generatedUserName = generateUserName(form.getValues().name)

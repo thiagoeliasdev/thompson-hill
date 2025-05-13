@@ -84,7 +84,6 @@ export default function UpdateCustomerForm({ onSuccess, onError, customer }: Pro
           imageContentType
         }
       })
-      console.log(response)
       if (response.data) {
         // Upload the photo to the google firebase server using the signed URL
         if (response.data.imageSignedUrl) {

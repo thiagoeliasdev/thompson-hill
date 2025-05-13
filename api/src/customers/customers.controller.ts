@@ -39,7 +39,6 @@ export class CustomersController {
   @ApiOkResponse({ type: [CustomerView] })
   async findAll() {
     const customer = await this.customersService.findAll()
-    console.log(customer)
     return customer.map((customer) => new CustomerView(customer))
   }
 

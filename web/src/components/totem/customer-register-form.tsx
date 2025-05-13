@@ -85,14 +85,12 @@ export default function CustomerRegisterForm() {
         indicationCode: values.indicationCode,
         birthDate: new Date(`${year}-${month}-${day}`).toISOString(),
       }
-      console.log("normalizedValues", normalizedValues)
 
       const response = await registerCustomer({
         ...normalizedValues,
         profileImage,
         imageContentType
       })
-      console.log(response)
 
       if (response.data) {
         // Upload the photo to the google firebase server using the signed URL
