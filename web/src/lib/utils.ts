@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import slugify from "slugify"
+import { addHours } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -44,7 +45,8 @@ export function isDateValid(input: string): boolean {
   }
 
   const [day, month, year] = input.split("/").map(Number)
-  const date = new Date(`${year}-${month}-${day}`)
+  const date = addHours(new Date(`${year}-${month}-${day}`), 5)
+
   // Check if date is valid in calendar
   if (!date || date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
     return false

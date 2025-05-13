@@ -1,6 +1,7 @@
 "use client"
 
 import CustomersTable from "@/components/admin/customers-table"
+import UpdateCustomerForm from "@/components/admin/update-customer-form"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { H1 } from "@/components/ui/typography"
@@ -27,14 +28,14 @@ export default function CustomersPage() {
               {selectedCustomer ? "Atualize as informações do serviço" : "Preencha os dados para cadastrar um novo serviço"}
             </SheetDescription>
           </SheetHeader>
-          {/* {selectedService && (
-            <UpdateServiceForm
-              service={selectedService}
+          {selectedCustomer && (
+            <UpdateCustomerForm
+              customer={selectedCustomer}
               onSuccess={() => {
                 setSheetOpen(false)
               }}
             />
-          )} */}
+          )}
         </SheetContent>
       </Sheet>
 

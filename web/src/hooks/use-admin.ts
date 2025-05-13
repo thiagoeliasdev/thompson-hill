@@ -1,4 +1,5 @@
-import { getCustomersAction } from "@/actions/customers"
+import { getCustomersAction, updateCustomerAction } from "@/actions/customers"
+import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
 import { CreateServiceInput } from "@/actions/services/dto/create-service.input"
 import { UpdateServiceInput } from "@/actions/services/dto/update-service.input"
@@ -149,6 +150,28 @@ export const useAdmin = () => {
     },
   })
 
+  const { mutateAsync: updateCustomer } = useMutation({
+    mutationKey: ["updateSCustomer"],
+    mutationFn: async ({ id, data }: { id: string, data: UpdateCustomerInput }): Promise<IActionResponse<ICustomerView>> => {
+      const response = await updateCustomerAction(id, data)
+
+      if (!!response.data) {
+        queryClient.setQueryData([queries.admin.customers], (current: ICustomerView[]) => {
+          return current?.map((customer) => {
+            if (customer.id === response.data?.id) {
+              return { ...customer, ...response.data }
+            }
+            return customer
+          })
+        })
+
+        return response
+      }
+
+      return response
+    }
+  })
+
 
   return {
     users,
@@ -161,5 +184,6 @@ export const useAdmin = () => {
     updateService,
     customers,
     isLoadingCustomers,
+    updateCustomer
   }
 }
