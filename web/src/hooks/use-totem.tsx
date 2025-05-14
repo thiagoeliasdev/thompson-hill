@@ -1,9 +1,12 @@
+import { createAppointmentAction } from "@/actions/appointments"
+import { CreateAppointmentInput } from "@/actions/appointments/dto/create-appointment.input"
 import { createCustomerAction, getCustomerByPhoneAction } from "@/actions/customers"
 import { CreateCustomerInput } from "@/actions/customers/dto/create-customer.input"
 import { getServicesAction } from "@/actions/services"
 import { getAttendantsAction } from "@/actions/users"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { IAppointmentView } from "@/models/appointment"
 import { ICustomerView } from "@/models/customer"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
@@ -70,12 +73,23 @@ export const useTotem = () => {
     }
   })
 
+  const { mutateAsync: createAppointment, isPending: isCreatingAppointment } = useMutation({
+    mutationKey: ["createAppointment"],
+    mutationFn: async (data: CreateAppointmentInput): Promise<IActionResponse<IAppointmentView>> => {
+      const response = await createAppointmentAction(data)
+
+      return response
+    }
+  })
+
   return {
     getCustomer,
     registerCustomer,
     services,
     isLoadingServices,
     attendants,
-    isLoadingAttendants
+    isLoadingAttendants,
+    createAppointment,
+    isCreatingAppointment
   }
 }

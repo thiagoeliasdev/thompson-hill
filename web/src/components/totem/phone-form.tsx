@@ -52,7 +52,7 @@ export default function PhoneForm() {
       const response = await getCustomer(formattedPhone)
 
       if (response.data) {
-        router.push(`${EPages.TOTEM_SCHEDULE}?tel=${encodeURIComponent(formattedPhone)}`)
+        router.push(`${EPages.TOTEM_SCHEDULE}?id=${encodeURIComponent(response.data.id)}`)
       } else {
         router.push(`${EPages.TOTEM_REGISTER}?tel=${encodeURIComponent(formattedPhone)}`)
       }

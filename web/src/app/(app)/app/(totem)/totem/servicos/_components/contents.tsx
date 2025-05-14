@@ -12,12 +12,12 @@ import LoadingIndicator from "@/components/ui/loading-indicator"
 export default function ServicesPageContents() {
   const { services, isLoadingServices } = useTotem()
   const searchParams = useSearchParams()
-  const phoneNumber = searchParams.get('tel')
+  const customer = searchParams.get('id')
 
   const router = useRouter()
 
   function handleSelect(service: IServiceView) {
-    router.push(`${EPages.TOTEM_BARBER}?tel=${phoneNumber}&service=${service.id}`)
+    router.push(`${EPages.TOTEM_BARBER}?id=${customer}&service=${service.id}`)
   }
 
   return (

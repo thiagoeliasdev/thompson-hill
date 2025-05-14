@@ -104,7 +104,7 @@ export default function CustomerRegisterForm() {
           })
         }
 
-        router.push(`${EPages.TOTEM_SCHEDULE}?tel=${formattedPhone}`)
+        router.push(`${EPages.TOTEM_SCHEDULE}?id=${encodeURIComponent(response.data.id)}`)
       }
 
       if (response.error) {
