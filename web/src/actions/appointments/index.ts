@@ -44,3 +44,23 @@ export async function createAppointmentAction(data: CreateAppointmentInput): Pro
     }
   }
 }
+
+export async function getAppointmentsAction(): Promise<IActionResponse<IAppointmentView[]>> {
+  try {
+    const { data } = await axiosClient.get<IAppointmentView[]>(APPOINTMENTS_END_POINT)
+    return { data }
+
+  } catch (err) {
+    const error = err as Error
+    if (error.message.includes("ECONNREFUSED")) {
+      return {
+        error: "Servidor não está disponível, tente novamente mais tarde."
+      }
+    }
+
+    console.error(error)
+    return {
+      error: error.message
+    }
+  }
+}

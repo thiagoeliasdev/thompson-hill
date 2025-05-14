@@ -7,6 +7,7 @@ export const queries = {
     users: "admin_users",
     services: "admin_services",
     customers: "admin_customers",
+    appointments: "admin_appointments",
   },
   totem: {
     attendants: "totem_attendants",

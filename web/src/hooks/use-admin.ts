@@ -1,3 +1,4 @@
+import { getAppointmentsAction } from "@/actions/appointments"
 import { getCustomersAction, updateCustomerAction } from "@/actions/customers"
 import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
@@ -8,6 +9,7 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { IAppointmentView } from "@/models/appointment"
 import { ICustomerView } from "@/models/customer"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
@@ -172,6 +174,23 @@ export const useAdmin = () => {
     }
   })
 
+  const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
+    queryKey: [queries.admin.appointments],
+    queryFn: async (): Promise<IAppointmentView[]> => {
+      const response = await getAppointmentsAction()
+
+      if (response.data) {
+        return response.data.map((appointment) => ({
+          ...appointment,
+          createdAt: new Date(appointment.createdAt),
+          onServiceAt: appointment.onServiceAt ? new Date(appointment.onServiceAt) : undefined,
+          finishedAt: appointment.finishedAt ? new Date(appointment.finishedAt) : undefined,
+        }))
+      }
+
+      return response.data || []
+    },
+  })
 
   return {
     users,
@@ -184,6 +203,8 @@ export const useAdmin = () => {
     updateService,
     customers,
     isLoadingCustomers,
-    updateCustomer
+    updateCustomer,
+    appointments,
+    isLoadingAppointments,
   }
 }
