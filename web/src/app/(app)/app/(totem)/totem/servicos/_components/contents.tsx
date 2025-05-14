@@ -6,50 +6,15 @@ import { useRouter, useSearchParams } from "next/navigation"
 import TotemServiceCard from "@/components/totem/service-card"
 import { EPages } from "@/lib/pages.enum"
 import { formatCurrency } from "@/lib/utils"
+import { useTotem } from "@/hooks/use-totem"
+import LoadingIndicator from "@/components/ui/loading-indicator"
 
 export default function ServicesPageContents() {
+  const { services, isLoadingServices } = useTotem()
   const searchParams = useSearchParams()
   const phoneNumber = searchParams.get('tel')
 
   const router = useRouter()
-
-  const services: IServiceView[] = [
-    {
-      id: "1",
-      name: "Corte e Barba",
-      value: 999.99,
-      coverImage: images.servicePlaceholder,
-      createdAt: new Date(),
-    },
-    {
-      id: "2",
-      name: "Corte e Barba",
-      value: 999.99,
-      coverImage: images.servicePlaceholder,
-      createdAt: new Date(),
-    },
-    {
-      id: "3",
-      name: "Corte e Barba",
-      value: 999.99,
-      coverImage: images.servicePlaceholder,
-      createdAt: new Date(),
-    },
-    {
-      id: "4",
-      name: "Corte e Barba",
-      value: 999.99,
-      coverImage: images.servicePlaceholder,
-      createdAt: new Date(),
-    },
-    {
-      id: "5",
-      name: "Corte e Barba",
-      value: 999.99,
-      coverImage: images.servicePlaceholder,
-      createdAt: new Date(),
-    },
-  ]
 
   function handleSelect(service: IServiceView) {
     router.push(`${EPages.TOTEM_BARBER}?tel=${phoneNumber}&service=${service.id}`)
@@ -59,18 +24,23 @@ export default function ServicesPageContents() {
     <>
       <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed font-spectral tracking-wide">Selecione o serviço que deseja realizar</h1>
       <div className="flex-1 w-full flex flex-col gap-6 items-center justify-start">
-        <div className="w-full flex flex-row flex-wrap justify-center items-center gap-6">
-          {services.map((service) => (
-            <TotemServiceCard
-              key={service.id}
-              id={service.id}
-              title={service.name}
-              subtitle={formatCurrency(service.value)}
-              image={service.coverImage!}
-              handleClick={() => handleSelect(service)}
-            />
-          ))}
-        </div>
+
+        {isLoadingServices ? (
+          <LoadingIndicator size="xl" />
+        ) : (
+          <div className="w-full flex flex-row flex-wrap justify-center items-center gap-6">
+            {services?.data?.map((service) => (
+              <TotemServiceCard
+                key={service.id}
+                id={service.id}
+                title={service.name}
+                subtitle={formatCurrency(service.value)}
+                image={service.coverImage || images.servicePlaceholder}
+                handleClick={() => handleSelect(service)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </>
   )

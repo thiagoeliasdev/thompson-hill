@@ -1,9 +1,11 @@
 import { createCustomerAction, getCustomerByPhoneAction } from "@/actions/customers"
 import { CreateCustomerInput } from "@/actions/customers/dto/create-customer.input"
+import { getServicesAction } from "@/actions/services"
 import { getAttendantsAction } from "@/actions/users"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
 import { ICustomerView } from "@/models/customer"
+import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
@@ -26,7 +28,28 @@ export const useTotem = () => {
       return response
     },
     refetchOnWindowFocus: true,
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    refetchInterval: 1000 * 60 * 60, // 5 minutes
+  })
+
+  const { data: services, isLoading: isLoadingServices } = useQuery({
+    queryKey: [queries.totem.services],
+    queryFn: async (): Promise<IActionResponse<IServiceView[]>> => {
+
+      const response = await getServicesAction()
+
+      if (response.data) {
+        return {
+          data: response.data.map((service) => ({
+            ...service,
+            createdAt: new Date(service.createdAt)
+          }))
+        }
+      }
+
+      return response
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 60, // 60 minutes
   })
 
   const { mutateAsync: getCustomer } = useMutation({
@@ -50,6 +73,8 @@ export const useTotem = () => {
   return {
     getCustomer,
     registerCustomer,
+    services,
+    isLoadingServices,
     attendants,
     isLoadingAttendants
   }

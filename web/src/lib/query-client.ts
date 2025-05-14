@@ -4,12 +4,13 @@ export const queryClient = new QueryClient()
 
 export const queries = {
   admin: {
-    users: "users",
-    services: "services",
-    customers: "customers",
+    users: "admin_users",
+    services: "admin_services",
+    customers: "admin_customers",
   },
   totem: {
-    attendants: "attendants",
-    customer: "customer",
+    attendants: "totem_attendants",
+    customer: "totem_customer",
+    services: "totem_services",
   }
 }
