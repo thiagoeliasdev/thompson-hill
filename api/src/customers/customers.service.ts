@@ -6,7 +6,7 @@ import { Customer } from "./entities/customer.entity"
 import { CreateCustomerInput } from "./dto/create-customer.input"
 import { createId } from "@paralleldrive/cuid2"
 import { UpdateCustomerInput } from "./dto/update-customer.input"
-import { capitalizeName } from "src/utils"
+import { capitalizeName } from "../utils"
 
 @Injectable()
 export class CustomersService {

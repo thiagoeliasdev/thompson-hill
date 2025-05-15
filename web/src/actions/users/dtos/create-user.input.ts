@@ -8,7 +8,7 @@ export const createUserSchema = (type: "create" | "update") => z.object({
   role: type === "create" ? z.nativeEnum(EUserRole) : z.nativeEnum(EUserRole).optional(),
   status: z.nativeEnum(EUserStatus).optional(),
   profileImage: z.string().optional(),
-  profileImageContentType: z.string().optional()
+  imageContentType: z.string().optional()
 })
 
 export type CreateUserInput = z.infer<ReturnType<typeof createUserSchema>>

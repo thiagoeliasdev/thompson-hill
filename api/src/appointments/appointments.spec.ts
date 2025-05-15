@@ -13,6 +13,7 @@ import { ServicesModule } from "../services/services.module"
 import { getRandomServiceCreateInputData } from "../services/mocks"
 import { EAppointmentStatuses, EPaymentMethod } from "./entities/appointment.entity"
 import { AppointmentNotFoundException, CustomerNotFoundException, MissingServicesException, ServiceNotFoundException, UserNotFoundException } from "../errors"
+import { FirebaseModule } from "../firebase/firebase.module"
 
 describe("Appointment Module", () => {
   let appointmentsService: AppointmentsService
@@ -29,6 +30,7 @@ describe("Appointment Module", () => {
           isGlobal: true
         }),
         MongoModule,
+        FirebaseModule,
         UsersModule,
         ServicesModule,
         CustomersModule

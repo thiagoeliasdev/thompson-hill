@@ -5,6 +5,7 @@ import { ConfigModule } from "@nestjs/config"
 import { getRandomServiceCreateInputData } from "./mocks"
 import { CreateServiceInput } from "./dto/create-service.input"
 import { ServiceNotFoundException } from "../errors"
+import { FirebaseModule } from "../firebase/firebase.module"
 
 describe("Services Module", () => {
   let servicesService: ServicesService
@@ -17,7 +18,8 @@ describe("Services Module", () => {
         ConfigModule.forRoot({
           isGlobal: true
         }),
-        MongoModule
+        MongoModule,
+        FirebaseModule
       ]
     }).compile()
 

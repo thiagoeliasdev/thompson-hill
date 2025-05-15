@@ -16,6 +16,7 @@ import { Switch } from "../ui/switch"
 import Image from "next/image"
 import { generateUserName } from "@/lib/utils"
 import { CameraIcon } from "lucide-react"
+import { images } from "@/lib/images"
 
 interface Props {
   forRole: EUserRole
@@ -50,7 +51,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const profileImage = selectedFile?.name
-    const profileImageContentType = selectedFile?.type
+    const imageContentType = selectedFile?.type
 
     try {
       if (user) {
@@ -63,14 +64,14 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
             role: forRole,
             status: values.status,
             profileImage,
-            profileImageContentType
+            imageContentType
           }
         })
 
         if (response.data) {
           // Upload the photo to the google firebase server using the signed URL
-          if (response.data.profileImageSignedUrl) {
-            await fetch(response.data.profileImageSignedUrl, {
+          if (response.data.imageSignedUrl) {
+            await fetch(response.data.imageSignedUrl, {
               method: "PUT",
               body: selectedFile,
               headers: {
@@ -93,13 +94,13 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
         const response = await createUser({
           ...values,
           profileImage,
-          profileImageContentType
+          imageContentType
         })
 
         if (response.data) {
           // Upload the photo to the google firebase server using the signed URL
-          if (response.data.profileImageSignedUrl) {
-            await fetch(response.data.profileImageSignedUrl, {
+          if (response.data.imageSignedUrl) {
+            await fetch(response.data.imageSignedUrl, {
               method: "PUT",
               body: selectedFile,
               headers: {
@@ -222,7 +223,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
                 <Image
                   width={192}
                   height={192}
-                  src={user.profileImage}
+                  src={user.profileImage || images.userPlaceholder}
                   alt="Foto capturada"
                   className="size-48 object-cover rounded-lg aspect-square"
                 />

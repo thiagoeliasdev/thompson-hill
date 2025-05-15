@@ -8,6 +8,8 @@ import { UpdateUserInput } from "./dto/update-user.input"
 import { ConfigModule } from "@nestjs/config"
 import { EUserRole, EUserStatus } from "./entities/user.entity"
 import { MongoModule } from "../mongo/mongo.module"
+import { FirebaseModule } from "../firebase/firebase.module"
+import { getRandomUserData } from "./mocks"
 
 // const path = require("path")
 // const fs = require("fs")
@@ -17,21 +19,6 @@ describe('Users Module', () => {
   let usersServices: UsersService
   let app: TestingModule
 
-  // const imagePath = path.resolve(__dirname, "mocks", "test_image.png")
-  // const imageBuffer = fs.readFileSync(imagePath)
-
-
-  function getRandomUserData(data?: Partial<CreateUserInput>): CreateUserInput {
-    return {
-      name: data?.name || faker.person.fullName(),
-      userName: data?.userName || faker.internet.username(),
-      password: data?.password || faker.internet.password({ length: 12 }),
-      role: data?.role || faker.helpers.enumValue(EUserRole),
-      status: data?.status || faker.helpers.enumValue(EUserStatus),
-      profileImage: data?.profileImage || faker.image.urlPicsumPhotos(),
-    }
-  }
-
   beforeAll(async () => {
     app = await Test.createTestingModule({
       controllers: [UsersController],
@@ -40,7 +27,8 @@ describe('Users Module', () => {
         ConfigModule.forRoot({
           isGlobal: true
         }),
-        MongoModule
+        MongoModule,
+        FirebaseModule
       ]
     }).compile()
 

@@ -7,6 +7,7 @@ import { CustomerAlreadyExistsException, CustomerNotFoundException } from "../er
 import { UpdateCustomerInput } from "./dto/update-customer.input"
 import { CreateCustomerInput } from "./dto/create-customer.input"
 import { ECustomerGender } from "./entities/customer.entity"
+import { FirebaseModule } from "../firebase/firebase.module"
 
 describe("Services Module", () => {
   let customersService: CustomersService
@@ -19,7 +20,8 @@ describe("Services Module", () => {
         ConfigModule.forRoot({
           isGlobal: true
         }),
-        MongoModule
+        MongoModule,
+        FirebaseModule
       ]
     }).compile()
 
