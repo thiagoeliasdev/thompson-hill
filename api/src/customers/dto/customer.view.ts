@@ -7,6 +7,7 @@ export class CustomerView {
     this.name = customer.name
     this.phoneNumber = customer.phoneNumber
     this.profileImage = customer.profileImage
+    this.signedUrl = customer.signedUrl
     this.birthDate = customer.birthDate
     this.gender = customer.gender
     this.createdAt = customer.createdAt
@@ -23,6 +24,9 @@ export class CustomerView {
 
   @ApiProperty()
   profileImage?: string
+
+  @ApiProperty()
+  signedUrl?: string
 
   @ApiProperty()
   birthDate: Date

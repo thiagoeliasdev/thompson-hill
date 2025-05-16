@@ -4,6 +4,6 @@ export interface IServiceView {
   description?: string
   value: number
   coverImage?: string
-  imageSignedUrl?: string
+  signedUrl?: string
   createdAt: Date
 }

@@ -5,6 +5,7 @@ export interface IService {
   description?: string
   value: number
   coverImage?: string
+  signedUrl?: string
   createdAt: Date
 }
 
@@ -14,6 +15,7 @@ export class Service {
   description?: string
   value: number
   coverImage?: string
+  signedUrl?: string
   createdAt: Date
 
   constructor(data: IService) {

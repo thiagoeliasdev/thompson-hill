@@ -17,5 +17,11 @@ export class CreateServiceInput {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsString()
   coverImage?: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  imageContentType?: string
 }

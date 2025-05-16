@@ -8,6 +8,7 @@ export class ServiceView {
     this.description = service.description
     this.value = service.value
     this.coverImage = service.coverImage
+    this.signedUrl = service.signedUrl
     this.createdAt = service.createdAt
   }
 
@@ -25,6 +26,9 @@ export class ServiceView {
 
   @ApiProperty()
   coverImage?: string
+
+  @ApiProperty()
+  signedUrl?: string
 
   @ApiProperty()
   createdAt: Date

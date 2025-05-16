@@ -8,6 +8,7 @@ export interface ICustomer {
   name: string
   phoneNumber: string
   profileImage?: string
+  signedUrl?: string
   birthDate: Date
   gender: ECustomerGender
   createdAt: Date
@@ -18,6 +19,7 @@ export class Customer {
   name: string
   phoneNumber: string
   profileImage?: string
+  signedUrl?: string
   birthDate: Date
   gender: ECustomerGender
   createdAt: Date

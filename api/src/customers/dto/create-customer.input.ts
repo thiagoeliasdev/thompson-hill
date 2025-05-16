@@ -9,13 +9,18 @@ export class CreateCustomerInput {
   name: string
 
   @ApiProperty()
-  @IsString()
   @IsBrazilianPhoneE164()
   phoneNumber: string
 
   @ApiProperty({ required: false })
+  @IsString()
   @IsOptional()
   profileImage?: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  imageContentType?: string
 
   @ApiProperty()
   @IsDateString()

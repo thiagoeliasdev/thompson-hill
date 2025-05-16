@@ -6,8 +6,7 @@ export interface ICustomerView {
   birthDate: Date
   createdAt: Date
   gender: EGender
-
-  imageSignedUrl?: string
+  signedUrl?: string
 }
 
 export enum EGender {

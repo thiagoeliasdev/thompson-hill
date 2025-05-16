@@ -45,8 +45,8 @@ export default function CreateServiceForm({ onSuccess, onError }: Props) {
       })
       if (response.data) {
         // Upload the photo to the google firebase server using the signed URL
-        if (response.data.imageSignedUrl) {
-          await fetch(response.data.imageSignedUrl, {
+        if (response.data.signedUrl) {
+          await fetch(response.data.signedUrl, {
             method: "PUT",
             body: selectedFile,
             headers: {

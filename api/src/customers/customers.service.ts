@@ -7,12 +7,16 @@ import { CreateCustomerInput } from "./dto/create-customer.input"
 import { createId } from "@paralleldrive/cuid2"
 import { UpdateCustomerInput } from "./dto/update-customer.input"
 import { capitalizeName } from "../utils"
+import { FirebaseService } from "../firebase/firebase.service"
 
 @Injectable()
 export class CustomersService {
   constructor(
     @Inject("CustomerSchema") private readonly customerSchema: Model<IMongoCustomer>,
+    private readonly firebaseService: FirebaseService,
   ) { }
+
+  private readonly STORAGE = "customers"
 
   async findOne({ id, phoneNumber }: { id?: string, phoneNumber?: string }): Promise<Customer> {
     const query: any = {}
@@ -32,11 +36,18 @@ export class CustomersService {
       if (error instanceof CustomerNotFoundException) {
         const id = createId()
 
+        const { fileUrl, signedUrl } = await this.firebaseService.createSignedUrl({
+          contentType: dto.imageContentType,
+          fileName: dto.profileImage,
+          folder: this.STORAGE,
+          key: id,
+        })
+
         const customer = new this.customerSchema({
           _id: id,
           name: capitalizeName(dto.name),
           phoneNumber: dto.phoneNumber,
-          profileImage: dto.profileImage,
+          profileImage: fileUrl,
           birthDate: dto.birthDate,
           gender: dto.gender,
           createdAt: new Date(),
@@ -44,7 +55,7 @@ export class CustomersService {
 
         await customer.save()
 
-        return { ...toCustomer(customer) }
+        return { ...{ ...toCustomer(customer) }, signedUrl }
       } else {
         throw error
       }
@@ -58,14 +69,21 @@ export class CustomersService {
 
   async update(id: string, dto: UpdateCustomerInput): Promise<Customer> {
     try {
+      const { fileUrl, signedUrl } = await this.firebaseService.createSignedUrl({
+        contentType: dto.imageContentType,
+        fileName: dto.profileImage,
+        folder: this.STORAGE,
+        key: id,
+      })
+
       const customer = await this.customerSchema.findOneAndUpdate(
         { _id: id },
-        dto,
+        { ...dto, profileImage: fileUrl },
         { new: true }
       )
 
       if (!customer) throw new CustomerNotFoundException()
-      return toCustomer(customer)
+      return { ...toCustomer(customer), signedUrl }
     } catch (error) {
       if (error instanceof Error && error.message.includes("duplicate key error")) {
         throw new CustomerAlreadyExistsException()

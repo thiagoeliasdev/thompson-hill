@@ -5,8 +5,6 @@ import { IActionResponse } from "@/models/action-response"
 import { CreateCustomerInput, createCustomerSchema } from "./dto/create-customer.input"
 import { ICustomerView } from "@/models/customer"
 import { EUserRole } from "@/models/user"
-import { randomUUID } from "crypto"
-import { storage } from "@/lib/firebase"
 import axiosClient from "@/lib/axios"
 import { UpdateCustomerInput, updateCustomerSchema } from "./dto/update-customer.input"
 import { format } from "date-fns"
@@ -57,46 +55,9 @@ export async function createCustomerAction(data: CreateCustomerInput): Promise<I
   }
 
   try {
-    // Create a signed URL for the cover image upload if it exists
-    let profileImage: string | undefined = undefined
-    let imageSignedUrl: string | undefined = undefined
-
-    const uuid = randomUUID()
-
-    if (data.profileImage && data.imageContentType) {
-      try {
-        const filePath = `customers/${uuid}/profile.${data.profileImage.split('.').pop() || 'jpg'}`
-
-        const fileRef = storage.file(filePath)
-        const [signedUrl] = await fileRef.getSignedUrl({
-          action: 'write',
-          expires: Date.now() + 2 * 60 * 1000, // 2 minutes
-          contentType: data.imageContentType,
-          version: 'v4',
-        })
-        imageSignedUrl = signedUrl
-
-        // Create a url for the profile image public access
-        const encodedPath = encodeURIComponent(filePath)
-        profileImage = `https://firebasestorage.googleapis.com/v0/b/${storage.name}/o/${encodedPath}?alt=media`
-      } catch (error) {
-        console.error("Error generating signed URL:", error)
-        throw new Error("Error generating signed URL")
-      }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { imageContentType, ...dto } = data
-
-    const { data: customer } = await axiosClient.post<ICustomerView>(`/customers`, {
-      ...dto,
-      profileImage,
-    })
+    const { data: customer } = await axiosClient.post<ICustomerView>(`/customers`, data)
     return {
-      data: {
-        ...customer,
-        imageSignedUrl
-      }
+      data: customer
     }
 
   } catch (err) {
@@ -139,44 +100,9 @@ export async function updateCustomerAction(id: string, data: UpdateCustomerInput
   }
 
   try {
-    // Create a signed URL for the cover image upload if it exists
-    let profileImage: string | undefined = undefined
-    let imageSignedUrl: string | undefined = undefined
-
-    if (data.profileImage && data.imageContentType) {
-      try {
-        const filePath = `customers/${id}/profile.${data.profileImage.split('.').pop() || 'jpg'}`
-
-        const fileRef = storage.file(filePath)
-        const [signedUrl] = await fileRef.getSignedUrl({
-          action: 'write',
-          expires: Date.now() + 2 * 60 * 1000, // 2 minutes
-          contentType: data.imageContentType,
-          version: 'v4',
-        })
-        imageSignedUrl = signedUrl
-
-        // Create a url for the profile image public access
-        const encodedPath = encodeURIComponent(filePath)
-        profileImage = `https://firebasestorage.googleapis.com/v0/b/${storage.name}/o/${encodedPath}?alt=media`
-      } catch (error) {
-        console.error("Error generating signed URL:", error)
-        throw new Error("Error generating signed URL")
-      }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { imageContentType, ...dto } = data
-
-    const { data: customer } = await axiosClient.put<ICustomerView>(`/customers/${id}`, {
-      ...dto,
-      profileImage,
-    })
+    const { data: customer } = await axiosClient.put<ICustomerView>(`/customers/${id}`, data)
     return {
-      data: {
-        ...customer,
-        imageSignedUrl
-      }
+      data: customer
     }
 
   } catch (err) {
