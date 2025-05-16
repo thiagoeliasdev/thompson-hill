@@ -1,20 +1,14 @@
-import "server-only"
-import { cert, getApps, initializeApp } from "firebase-admin/app"
-import { getStorage } from "firebase-admin/storage"
+import { initializeApp } from "firebase/app"
+import { getFirestore } from "firebase/firestore"
 
-const serviceAccountKey = JSON.parse(Buffer.from(
-  process.env.FIREBASE_SERVICE_ACCOUNT_B64!, "base64"
-).toString("utf-8"))
-
-export const firebaseCertificate = cert(serviceAccountKey)
-
-if (!getApps().length) {
-  console.log("Initializing Firebase Admin SDK")
-  initializeApp({
-    credential: firebaseCertificate,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-  })
-  console.log("Firebase Admin SDK initialized")
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-export const storage = getStorage().bucket()
+const app = initializeApp(firebaseConfig)
+export const db = getFirestore(app)

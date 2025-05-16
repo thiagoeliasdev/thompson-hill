@@ -25,7 +25,7 @@ export class CustomersService {
 
     const customer = await this.customerSchema.findOne(query)
     if (!customer) throw new CustomerNotFoundException
-    return toCustomer(customer)
+    return new Customer(toCustomer(customer))
   }
 
   async create(dto: CreateCustomerInput): Promise<Customer> {
@@ -55,7 +55,7 @@ export class CustomersService {
 
         await customer.save()
 
-        return { ...{ ...toCustomer(customer) }, signedUrl }
+        return new Customer({ ...{ ...toCustomer(customer) }, signedUrl })
       } else {
         throw error
       }
@@ -64,7 +64,7 @@ export class CustomersService {
 
   async findAll(): Promise<Customer[]> {
     const customers = await this.customerSchema.find().sort({ name: 1 })
-    return customers.map((customer) => toCustomer(customer))
+    return customers.map((customer) => new Customer(toCustomer(customer)))
   }
 
   async update(id: string, dto: UpdateCustomerInput): Promise<Customer> {
@@ -83,7 +83,7 @@ export class CustomersService {
       )
 
       if (!customer) throw new CustomerNotFoundException()
-      return { ...toCustomer(customer), signedUrl }
+      return new Customer({ ...toCustomer(customer), signedUrl })
     } catch (error) {
       if (error instanceof Error && error.message.includes("duplicate key error")) {
         throw new CustomerAlreadyExistsException()
@@ -96,6 +96,6 @@ export class CustomersService {
   async remove(id: string): Promise<Customer> {
     const customer = await this.customerSchema.findOneAndDelete({ _id: id })
     if (!customer) throw new CustomerNotFoundException()
-    return toCustomer(customer)
+    return new Customer(toCustomer(customer))
   }
 }

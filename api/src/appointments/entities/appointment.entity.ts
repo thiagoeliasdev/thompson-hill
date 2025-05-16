@@ -60,4 +60,22 @@ export class Appointment {
     this.attendant = appointment.attendant ? new User(appointment.attendant) : undefined
     this.services = appointment.services.map(service => new Service(service))
   }
+
+  toFirebaseObject() {
+    return {
+      id: this.id,
+      customer: this.customer.toFirebaseObject(),
+      attendant: this.attendant ? this.attendant.toFirebaseObject() : null,
+      services: this.services.map(service => service.toFirebaseObject()),
+      totalPrice: this.totalPrice,
+      discount: this.discount || 0,
+      finalPrice: this.finalPrice,
+      paymentMethod: this.paymentMethod || null,
+      redeemCoupon: this.redeemCoupon || null,
+      status: this.status,
+      createdAt: this.createdAt.toISOString(),
+      onServiceAt: this.onServiceAt ? this.onServiceAt.toISOString() : null,
+      finishedAt: this.finishedAt ? this.finishedAt.toISOString() : null,
+    }
+  }
 }

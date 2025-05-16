@@ -20,7 +20,7 @@ export class ServicesService {
   async findOne(id: string): Promise<Service> {
     const service = await this.serviceSchema.findOne({ _id: id })
     if (!service) throw new ServiceNotFoundException()
-    return toService(service)
+    return new Service(toService(service))
   }
 
   async create(dto: CreateServiceInput): Promise<Service> {
@@ -44,12 +44,12 @@ export class ServicesService {
 
     await service.save()
 
-    return { ...{ ...toService(service) }, signedUrl }
+    return new Service({ ...{ ...toService(service) }, signedUrl })
   }
 
   async findAll(): Promise<Service[]> {
     const services = await this.serviceSchema.find().sort({ name: 1 })
-    return services.map((service) => toService(service))
+    return services.map((service) => new Service(toService(service)))
   }
 
   async update(id: string, updateServiceDto: UpdateServiceInput): Promise<Service> {
@@ -66,13 +66,13 @@ export class ServicesService {
       { new: true }
     )
     if (!service) throw new ServiceNotFoundException()
-    return { ...toService(service), signedUrl }
+    return new Service({ ...toService(service), signedUrl })
   }
 
   async remove(id: string): Promise<Service> {
     const service = await this.serviceSchema.findOneAndDelete({ _id: id })
     if (!service) throw new ServiceNotFoundException()
-    return toService(service)
+    return new Service(toService(service))
   }
 }
 

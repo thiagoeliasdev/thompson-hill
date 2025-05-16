@@ -22,4 +22,15 @@ export class Service {
     Object.assign(this, data)
     this.createdAt = new Date(data.createdAt)
   }
+
+  toFirebaseObject() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description || null,
+      value: this.value,
+      coverImage: this.coverImage || null,
+      createdAt: this.createdAt.toISOString()
+    }
+  }
 }

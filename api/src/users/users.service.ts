@@ -29,7 +29,7 @@ export class UsersService {
 
     const user = await this.userSchema.findOne(query)
     if (!user) throw new UserNotFoundException()
-    return toUser(user)
+    return new User(toUser(user))
   }
 
   async create(createUserDto: CreateUserInput): Promise<User> {
@@ -61,7 +61,7 @@ export class UsersService {
 
         await user.save()
 
-        return { ...{ ...toUser(user) }, imageSignedUrl: signedUrl }
+        return new User({ ...{ ...toUser(user) }, imageSignedUrl: signedUrl })
       }
       console.error(error)
       throw error
@@ -76,7 +76,7 @@ export class UsersService {
     }
 
     const users = await this.userSchema.find(queryConditions)
-    return users.map(user => toUser(user))
+    return users.map(user => new User(toUser(user)))
   }
 
   async getAvailableAttendants(): Promise<User[]> {
@@ -84,7 +84,7 @@ export class UsersService {
       role: EUserRole.ATTENDANT,
       status: EUserStatus.ACTIVE,
     })
-    return users.map(user => toUser(user))
+    return users.map(user => new User(toUser(user)))
   }
 
   async update({ id, userName }: { id?: string, userName?: string }, updateUserDto: UpdateUserInput): Promise<User> {
@@ -101,12 +101,12 @@ export class UsersService {
       key: user.id,
     })
 
-    const updatedUser: User = {
+    const updatedUser: User = new User({
       ...user,
       ...updateUserDto,
       profileImage: fileUrl,
       password: updatedPassword
-    }
+    })
 
     const updatedUserFromDB = await this.userSchema.findOneAndUpdate(
       { _id: user.id }
@@ -116,7 +116,7 @@ export class UsersService {
     )
 
     const userReturn = toUser(updatedUserFromDB!)
-    return { ...userReturn, imageSignedUrl: signedUrl }
+    return new User({ ...userReturn, imageSignedUrl: signedUrl })
   }
 
   async remove({ id, userName }: { id?: string, userName?: string }): Promise<User> {

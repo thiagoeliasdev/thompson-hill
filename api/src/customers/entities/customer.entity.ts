@@ -29,4 +29,16 @@ export class Customer {
     this.createdAt = new Date(data.createdAt)
     this.birthDate = new Date(data.birthDate)
   }
+
+  toFirebaseObject() {
+    return {
+      id: this.id,
+      name: this.name,
+      gender: this.gender,
+      phoneNumber: this.phoneNumber,
+      profileImage: this.profileImage || null,
+      birthDate: this.birthDate.toISOString(),
+      createdAt: this.createdAt.toISOString()
+    }
+  }
 }

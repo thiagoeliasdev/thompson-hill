@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as admin from 'firebase-admin'
+import { Appointment } from "../appointments/entities/appointment.entity"
 
 @Injectable()
 export class FirebaseService {
@@ -43,5 +44,17 @@ export class FirebaseService {
       }
     }
     return { signedUrl: undefined, fileUrl: undefined }
+  }
+
+  async addAppointmentToQueue(appointment: Appointment) {
+    const collectionRef = this.getFirestore().collection('queue')
+    const docRef = collectionRef.doc(appointment.attendant?.userName || "common")
+    const appointmentRef = docRef.collection('appointments').doc(appointment.id)
+    try {
+      await appointmentRef.set({ ...appointment.toFirebaseObject(), createdAt: admin.firestore.Timestamp.fromDate(appointment.createdAt) }, { merge: true })
+    } catch (error) {
+      console.error('Error adding appointment to queue:', error)
+      throw new Error('Error adding appointment to queue')
+    }
   }
 }

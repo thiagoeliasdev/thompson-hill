@@ -37,4 +37,16 @@ export class User {
     Object.assign(this, data)
     this.createdAt = new Date(data.createdAt)
   }
+
+  toFirebaseObject() {
+    return {
+      id: this.id,
+      name: this.name,
+      userName: this.userName,
+      role: this.role,
+      profileImage: this.profileImage || null,
+      status: this.status,
+      createdAt: this.createdAt.toISOString()
+    }
+  }
 }

@@ -11,6 +11,7 @@ import { ServicesService } from "../services/services.service"
 import { AppointmentQuery } from "./dto/appointment.query"
 import { endOfDay, startOfDay } from "date-fns"
 import { UpdateAppointmentInput } from "./dto/update-appointment.input"
+import { FirebaseService } from "../firebase/firebase.service"
 
 @Injectable()
 export class AppointmentsService {
@@ -18,7 +19,8 @@ export class AppointmentsService {
     @Inject("AppointmentSchema") private readonly appointmentSchema: Model<IMongoAppointment>,
     private readonly customersService: CustomersService,
     private readonly usersService: UsersService,
-    private readonly servicesService: ServicesService
+    private readonly servicesService: ServicesService,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   async create(dto: CreateAppointmentInput): Promise<Appointment> {
@@ -62,7 +64,12 @@ export class AppointmentsService {
     createdAppointment.finalPrice = createdAppointment.totalPrice - (createdAppointment.discount || 0)
     await createdAppointment.save()
 
-    return toAppointment(createdAppointment)
+    const createdAppointmentObj = new Appointment(toAppointment(createdAppointment))
+
+    // Add to queue
+    await this.firebaseService.addAppointmentToQueue(createdAppointmentObj)
+
+    return createdAppointmentObj
   }
 
   async findAll(query?: AppointmentQuery): Promise<Appointment[]> {
