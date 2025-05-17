@@ -15,6 +15,40 @@ export enum EAppointmentStatuses {
   NO_SHOW = 'NO_SHOW',
 }
 
+type EAppointmentStatusesMapperType = {
+  label: string,
+  bgColor: string,
+  textColor: string
+}
+
+export const EAppointmentStatusesMapper: Record<EAppointmentStatuses, EAppointmentStatusesMapperType> = {
+  [EAppointmentStatuses.WAITING]: {
+    label: 'Aguardando',
+    bgColor: '#FFD580',
+    textColor: '#1E1E1E',
+  },
+  [EAppointmentStatuses.ON_SERVICE]: {
+    label: 'Atendendo',
+    bgColor: '#80C7FF',
+    textColor: '#1E1E1E',
+  },
+  [EAppointmentStatuses.FINISHED]: {
+    label: 'Finalizado',
+    bgColor: '#A8E6CF',
+    textColor: '#1E1E1E',
+  },
+  [EAppointmentStatuses.CANCELLED]: {
+    label: 'Cancelado',
+    bgColor: '#FF8A80',
+    textColor: '#1E1E1E',
+  },
+  [EAppointmentStatuses.NO_SHOW]: {
+    label: 'Ausente',
+    bgColor: '#D1C4E9',
+    textColor: '#1E1E1E',
+  },
+}
+
 export interface IAppointmentView {
   id: string
   customer: {

@@ -1,17 +1,19 @@
+import { EAppointmentStatuses } from "./appointment"
+
 export interface IFirebaseAppointment {
-  id?: string
-  status?: string
-  services?: IFirebaseService[]
+  id: string
+  status: EAppointmentStatuses
+  services: IFirebaseService[]
   redeemCoupon?: null
-  totalPrice?: number
-  finalPrice?: number
-  finishedAt?: null
+  totalPrice: number
+  finalPrice: number
+  finishedAt: null
   attendant?: IFirebaseAttendant | null
-  customer?: IFirebaseCustomer
+  customer: IFirebaseCustomer
   discount?: number
   onServiceAt?: null
   paymentMethod?: null
-  createdAt?: Date
+  createdAt: Date
 }
 
 export interface IFirebaseAttendant {
