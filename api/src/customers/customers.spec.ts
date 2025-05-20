@@ -9,7 +9,7 @@ import { CreateCustomerInput } from "./dto/create-customer.input"
 import { ECustomerGender } from "./entities/customer.entity"
 import { FirebaseModule } from "../firebase/firebase.module"
 
-describe("Services Module", () => {
+describe("Customers Module", () => {
   let customersService: CustomersService
   let app: TestingModule
 
@@ -44,7 +44,6 @@ describe("Services Module", () => {
       expect(customer).toBeDefined()
       expect(customer.name).toBe(data.name)
       expect(customer.phoneNumber).toBe(data.phoneNumber)
-      expect(customer.profileImage).toBe(data.profileImage)
       expect(customer.birthDate).toEqual(data.birthDate)
       expect(customer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
@@ -64,7 +63,6 @@ describe("Services Module", () => {
       expect(customer).toBeDefined()
       expect(customer.name).toBe(data.name)
       expect(customer.phoneNumber).toBe(data.phoneNumber)
-      expect(customer.profileImage).toBeUndefined()
       expect(customer.birthDate).toEqual(data.birthDate)
       expect(customer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
@@ -93,7 +91,6 @@ describe("Services Module", () => {
       expect(foundCustomer).toBeDefined()
       expect(foundCustomer.name).toBe(data.name)
       expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
-      expect(foundCustomer.profileImage).toBe(data.profileImage)
       expect(foundCustomer.birthDate).toEqual(data.birthDate)
       expect(foundCustomer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
@@ -110,7 +107,6 @@ describe("Services Module", () => {
       expect(foundCustomer).toBeDefined()
       expect(foundCustomer.name).toBe(data.name)
       expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
-      expect(foundCustomer.profileImage).toBe(data.profileImage)
       expect(foundCustomer.birthDate).toEqual(data.birthDate)
       expect(foundCustomer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
@@ -145,7 +141,6 @@ describe("Services Module", () => {
         expect.arrayContaining(inputData.map((data) => expect.objectContaining({
           name: data.name,
           phoneNumber: data.phoneNumber,
-          profileImage: data.profileImage,
           birthDate: data.birthDate,
         })))
       )
@@ -166,7 +161,6 @@ describe("Services Module", () => {
       const customer = await customersService.create(data)
       const updatedData: UpdateCustomerInput = {
         name: "Updated Name",
-        profileImage: "https://example.com/updated-image.jpg",
         birthDate: new Date("1990-01-01"),
         gender: ECustomerGender.FEMALE
       }
@@ -176,7 +170,6 @@ describe("Services Module", () => {
       expect(updatedCustomer).toBeDefined()
       expect(updatedCustomer.name).toBe(updatedData.name)
       expect(updatedCustomer.phoneNumber).toBe(data.phoneNumber)
-      expect(updatedCustomer.profileImage).toBe(updatedData.profileImage)
       expect(updatedCustomer.birthDate).toEqual(updatedData.birthDate)
       expect(updatedCustomer.createdAt).toBeDefined()
       expect(updatedCustomer.gender).toBe(updatedData.gender)
@@ -185,7 +178,6 @@ describe("Services Module", () => {
       expect(foundCustomer).toBeDefined()
       expect(foundCustomer.name).toBe(updatedData.name)
       expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
-      expect(foundCustomer.profileImage).toBe(updatedData.profileImage)
       expect(foundCustomer.birthDate).toEqual(updatedData.birthDate)
       expect(foundCustomer.createdAt).toBeDefined()
       expect(foundCustomer.gender).toBe(updatedData.gender)
@@ -207,7 +199,6 @@ describe("Services Module", () => {
       expect(foundCustomer).toBeDefined()
       expect(foundCustomer.phoneNumber).toBe(newPhoneNumber)
       expect(foundCustomer.name).toBe(data.name)
-      expect(foundCustomer.profileImage).toBe(data.profileImage)
 
       await customersService.remove(createdCustomer.id)
     })
@@ -225,7 +216,6 @@ describe("Services Module", () => {
       expect(foundCustomer).toBeDefined()
       expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
       expect(foundCustomer.name).toBe(data.name)
-      expect(foundCustomer.profileImage).toBe(data.profileImage)
 
       await customersService.remove(createdCustomer.id)
     })

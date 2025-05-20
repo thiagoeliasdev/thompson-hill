@@ -43,7 +43,6 @@ describe("Services Module", () => {
       expect(service.name).toBe(data.name)
       expect(service.description).toBe(data.description)
       expect(service.value).toBe(data.value)
-      expect(service.coverImage).toBe(data.coverImage)
       expect(service.createdAt).toBeDefined()
 
       await servicesService.remove(service.id)
@@ -60,7 +59,6 @@ describe("Services Module", () => {
       expect(service.name).toBe(data.name)
       expect(service.description).toBeUndefined()
       expect(service.value).toBe(data.value)
-      expect(service.coverImage).toBeUndefined()
       expect(service.createdAt).toBeDefined()
 
       await servicesService.remove(service.id)
@@ -76,7 +74,6 @@ describe("Services Module", () => {
       expect(foundService.name).toBe(data.name)
       expect(foundService.description).toBe(data.description)
       expect(foundService.value).toBe(data.value)
-      expect(foundService.coverImage).toBe(data.coverImage)
       expect(foundService.createdAt).toBeDefined()
 
       await servicesService.remove(service.id)
@@ -104,7 +101,6 @@ describe("Services Module", () => {
           name: data.name,
           description: data.description,
           value: data.value,
-          coverImage: data.coverImage,
         })))
       )
 
@@ -122,7 +118,6 @@ describe("Services Module", () => {
       const updatedData = getRandomServiceCreateInputData({
         name: "Updated Service",
         description: "Updated Description",
-        coverImage: "https://example.com/updated-image.jpg",
         value: 200,
       })
 
@@ -131,7 +126,6 @@ describe("Services Module", () => {
       expect(updatedService.name).toBe(updatedData.name)
       expect(updatedService.description).toBe(updatedData.description)
       expect(updatedService.value).toBe(updatedData.value)
-      expect(updatedService.coverImage).toBe(updatedData.coverImage)
       expect(updatedService.createdAt).toBeDefined()
 
       const foundService = await servicesService.findOne(service.id)
@@ -139,7 +133,6 @@ describe("Services Module", () => {
       expect(foundService.name).toBe(updatedData.name)
       expect(foundService.description).toBe(updatedData.description)
       expect(foundService.value).toBe(updatedData.value)
-      expect(foundService.coverImage).toBe(updatedData.coverImage)
       expect(foundService.createdAt).toBeDefined()
     })
 

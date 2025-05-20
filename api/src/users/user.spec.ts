@@ -11,9 +11,6 @@ import { MongoModule } from "../mongo/mongo.module"
 import { FirebaseModule } from "../firebase/firebase.module"
 import { getRandomUserData } from "./mocks"
 
-// const path = require("path")
-// const fs = require("fs")
-
 describe('Users Module', () => {
   let usersController: UsersController
   let usersServices: UsersService
@@ -52,7 +49,8 @@ describe('Users Module', () => {
       expect(user).toHaveProperty("password")
       expect(user).toHaveProperty("role", inputData.role)
       expect(user).toHaveProperty("status", inputData.status)
-      expect(user).toHaveProperty("profileImage", inputData.profileImage)
+      expect(user.profileImage).toBeUndefined()
+      expect(user.imageSignedUrl).toBeUndefined()
 
       await usersServices.remove({ id: user.id })
     })
@@ -220,7 +218,6 @@ describe('Users Module', () => {
         name: faker.person.fullName(),
         role: EUserRole.MANAGER,
         status: EUserStatus.INACTIVE,
-        profileImage: faker.image.urlPicsumPhotos(),
       }
 
       const loggedUser = await usersServices.loginWithCredentials(inputData.userName, inputData.password)
@@ -235,7 +232,6 @@ describe('Users Module', () => {
       expect(updatedUser).toHaveProperty("password")
       expect(updatedUser).toHaveProperty("role", updatedData.role)
       expect(updatedUser).toHaveProperty("status", updatedData.status)
-      expect(updatedUser).toHaveProperty("profileImage", updatedData.profileImage)
 
       const loggedUser2 = await usersServices.loginWithCredentials(inputData.userName, inputData.password)
 
@@ -246,7 +242,6 @@ describe('Users Module', () => {
       expect(loggedUser2).toHaveProperty("password")
       expect(loggedUser2).toHaveProperty("role", updatedData.role)
       expect(loggedUser2).toHaveProperty("status", updatedData.status)
-      expect(loggedUser2).toHaveProperty("profileImage", updatedData.profileImage)
 
       await usersServices.remove({ id: user.id })
     })
