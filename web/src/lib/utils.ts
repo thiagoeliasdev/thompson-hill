@@ -36,6 +36,7 @@ export function applyDateMask(input: string): string {
   if (!date) return ""
   if (date.length > 2) date = `${date.slice(0, 2)}/${date.slice(2)}`
   if (date.length > 5) date = `${date.slice(0, 5)}/${date.slice(5)}`
+  if (date.length > 10) date = `${date.slice(0, 5)}/${date.slice(5, 10)}`
   return date
 }
 

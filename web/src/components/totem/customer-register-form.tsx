@@ -2,7 +2,7 @@
 
 import { EPages } from "@/lib/pages.enum"
 import { z } from "@/lib/pt-zod"
-import { applyDateMask, applyPhoneMask, cn, formatPhoneToE164, isDateValid } from "@/lib/utils"
+import { applyDateMask, applyPhoneMask, cn, formatPhoneToE164 } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from "react"
@@ -17,18 +17,10 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import Image from "next/image"
 import { useTotem } from "@/hooks/use-totem"
 import { toast } from "sonner"
+import { createCustomerSchema } from "@/actions/customers/dto/create-customer.input"
 
 export default function CustomerRegisterForm() {
-  const formSchema = z.object({
-    name: z.string().nonempty("Nome é obrigatório"),
-    phoneNumber: z.string().min(14, { message: "Telefone inválido" }).max(16, { message: "Telefone inválido" }),
-    birthDate: z.string().refine(value => isDateValid(value), { message: "Data inválida" }),
-    gender: z.nativeEnum(EGender),
-    indicationCode: z.string().optional(),
-
-    profileImage: z.string().optional(),
-    imageContentType: z.string().optional()
-  })
+  const formSchema = createCustomerSchema
 
   const { registerCustomer } = useTotem()
 
@@ -71,7 +63,6 @@ export default function CustomerRegisterForm() {
     const imageContentType = selectedFile?.type
 
     try {
-      const [day, month, year] = values.birthDate.split("/")
       const formattedPhone = formatPhoneToE164(values.phoneNumber)
       if (!formattedPhone) {
         form.setError("phoneNumber", { message: "Telefone inválido", type: "manual" })
@@ -83,7 +74,7 @@ export default function CustomerRegisterForm() {
         phoneNumber: formattedPhone,
         gender: values.gender,
         indicationCode: values.indicationCode,
-        birthDate: new Date(`${year}-${month}-${day}`).toISOString(),
+        birthDate: values.birthDate,
       }
 
       const response = await registerCustomer({

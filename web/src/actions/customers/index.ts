@@ -54,8 +54,11 @@ export async function createCustomerAction(data: CreateCustomerInput): Promise<I
     }
   }
 
+  const [day, month, year] = data.birthDate.split("/")
+  const birthDate = new Date(`${year}-${month}-${day}`).toISOString()
+
   try {
-    const { data: customer } = await axiosClient.post<ICustomerView>(`/customers`, data)
+    const { data: customer } = await axiosClient.post<ICustomerView>(`/customers`, { ...data, birthDate })
     return {
       data: customer
     }
