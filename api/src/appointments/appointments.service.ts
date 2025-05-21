@@ -153,7 +153,11 @@ export class AppointmentsService {
         await updatedAppointment.save()
       }
 
-      return toAppointment(updatedAppointment)
+      const updatedAppointmentObj = new Appointment(toAppointment(updatedAppointment))
+
+      await this.firebaseService.updateAppointment(updatedAppointmentObj)
+
+      return updatedAppointmentObj
     } catch (error) {
       if (error instanceof TypeError && error.message.includes('Cannot read properties of null')) {
         throw new AppointmentNotFoundException()

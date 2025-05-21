@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, Put } from '@nestjs/common'
 import { AppointmentsService } from './appointments.service'
 import { CreateAppointmentInput } from "./dto/create-appointment.input"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth/jwt-auth.guard"
 import { AppointmentView } from "./dto/appointment.view"
+import { UpdateAppointmentInput } from "./dto/update-appointment.input"
 
 @ApiTags('Appointments')
 @Controller('appointments')
@@ -39,6 +40,20 @@ export class AppointmentsController {
   })
   async findOne(@Param('id') id: string) {
     return new AppointmentView(await this.appointmentsService.findOne(id))
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a appointment by ID' })
+  @ApiBody({ type: UpdateAppointmentInput })
+  @ApiOkResponse({ type: AppointmentView })
+  @ApiBadRequestResponse({
+    description: "Appointment not found",
+    schema: {
+      example: "Appointment not found"
+    }
+  })
+  async update(@Param('id') id: string, @Body() dto: UpdateAppointmentInput) {
+    return new AppointmentView(await this.appointmentsService.update(id, dto))
   }
 
   @Delete(':id')
