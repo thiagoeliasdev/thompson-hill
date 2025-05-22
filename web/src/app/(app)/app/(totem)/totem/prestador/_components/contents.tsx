@@ -1,13 +1,12 @@
 "use client"
 
-import { images } from "@/lib/images"
 import { useRouter, useSearchParams } from "next/navigation"
 import { EPages } from "@/lib/pages.enum"
 import { IUserView } from "@/models/user"
-import TotemServiceCard from "@/components/totem/service-card"
 import NoPreferenceCard from "@/components/totem/no-preference-card"
 import { useTotem } from "@/hooks/use-totem"
 import LoadingIndicator from "@/components/ui/loading-indicator"
+import TotemAttendantCard from "@/components/totem/attendant-card"
 
 export default function AttendantsPageContents() {
   const searchParams = useSearchParams()
@@ -54,11 +53,9 @@ export default function AttendantsPageContents() {
         ) : (
           <div className="w-full flex flex-row flex-wrap justify-center items-center gap-6">
             {orderedAttendants?.map((attendant) => (
-              <TotemServiceCard
+              <TotemAttendantCard
                 key={attendant.id}
-                id={attendant.id}
-                title={attendant.name}
-                image={attendant.profileImage || images.userPlaceholder}
+                attendant={attendant}
                 handleClick={() => handleConfirmation(attendant)}
               />
             ))}

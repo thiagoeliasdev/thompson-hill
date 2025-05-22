@@ -46,6 +46,8 @@ export interface IFirebaseService {
   coverImage?: string
   createdAt?: Date
   value?: number
+  promoValue?: number
+  promoEnabled?: boolean
   name?: string
   id?: string
   description?: null

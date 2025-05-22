@@ -61,6 +61,7 @@ export class AppointmentsService {
     const createdAppointment = await appointment.save()
 
     createdAppointment.totalPrice = createdAppointment?.services?.reduce((acc, service) => acc + service.value, 0) || 0
+    createdAppointment.discount = createdAppointment?.services?.reduce((acc, service) => acc + (service.promoValue && service.promoEnabled ? (service.value - service.promoValue) : 0), 0)
     createdAppointment.finalPrice = createdAppointment.totalPrice - (createdAppointment.discount || 0)
     await createdAppointment.save()
 
@@ -149,6 +150,7 @@ export class AppointmentsService {
 
       if (dto.serviceIds) {
         updatedAppointment.totalPrice = updatedAppointment?.services?.reduce((acc, service) => acc + service.value, 0) || 0
+        updatedAppointment.discount = updatedAppointment?.services?.reduce((acc, service) => acc + (service.promoValue && service.promoEnabled ? (service.value - service.promoValue) : 0), 0)
         updatedAppointment.finalPrice = updatedAppointment.totalPrice - (updatedAppointment.discount || 0)
         await updatedAppointment.save()
       }

@@ -43,7 +43,31 @@ export default function ServicesTable({
       {
         accessorKey: "value",
         header: () => <p className="text-center">Preço</p>,
-        cell: (row) => <p className="text-center">{formatCurrency(Number(row.getValue()))}</p>,
+        cell: (row) => {
+          const service = row.row.original
+          const usePromoValue = service.promoEnabled && service.promoValue
+
+          if (usePromoValue) {
+            return (
+              <div className="flex flex-col items-center">
+                <p className="text-xs line-through text-muted-foreground">
+                  {formatCurrency(Number(service.value))}
+                </p>
+                <p className="text-primary font-semibold">
+                  {formatCurrency(Number(service.promoValue))}
+                </p>
+              </div>
+            )
+          }
+
+          return (
+            <p
+              className="text-center"
+            >
+              {formatCurrency(Number(row.getValue()))}
+            </p>
+          )
+        },
       },
       {
         accessorKey: "description",

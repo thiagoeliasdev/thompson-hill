@@ -1,11 +1,9 @@
 "use client"
 
-import { images } from "@/lib/images"
 import { IServiceView } from "@/models/service"
 import { useRouter, useSearchParams } from "next/navigation"
 import TotemServiceCard from "@/components/totem/service-card"
 import { EPages } from "@/lib/pages.enum"
-import { formatCurrency } from "@/lib/utils"
 import { useTotem } from "@/hooks/use-totem"
 import LoadingIndicator from "@/components/ui/loading-indicator"
 
@@ -32,10 +30,7 @@ export default function ServicesPageContents() {
             {services?.data?.map((service) => (
               <TotemServiceCard
                 key={service.id}
-                id={service.id}
-                title={service.name}
-                subtitle={formatCurrency(service.value)}
-                image={service.coverImage || images.servicePlaceholder}
+                service={service}
                 handleClick={() => handleSelect(service)}
               />
             ))}

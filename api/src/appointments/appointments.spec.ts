@@ -14,6 +14,7 @@ import { getRandomServiceCreateInputData } from "../services/mocks"
 import { EAppointmentStatuses, EPaymentMethod } from "./entities/appointment.entity"
 import { AppointmentNotFoundException, CustomerNotFoundException, MissingServicesException, ServiceNotFoundException, UserNotFoundException } from "../errors"
 import { FirebaseModule } from "../firebase/firebase.module"
+import { UpdateServiceInput } from "src/services/dto/update-service.input"
 
 describe("Appointment Module", () => {
   let appointmentsService: AppointmentsService
@@ -681,6 +682,156 @@ describe("Appointment Module", () => {
       } catch (error) {
         expect(error).toBeInstanceOf(AppointmentNotFoundException)
       }
+    })
+
+    it("should calculate discount by promo value when enabled (create)", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 20,
+        promoValue: 10,
+        promoEnabled: true
+      }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 50,
+        promoValue: 20,
+        promoEnabled: false
+      }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 30,
+        promoValue: 5,
+        promoEnabled: true
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id]
+      })
+
+      expect(appointment).toBeDefined()
+      expect(appointment.customer.id).toBe(customer.id)
+      expect(appointment.customer.name).toBe(customer.name)
+      expect(appointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(appointment.attendant?.id).toBe(attendant.id)
+      expect(appointment.attendant?.name).toBe(attendant.name)
+      expect(appointment.services).toHaveLength(3)
+      expect(appointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+      expect(appointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(appointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+      expect(appointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+      expect(foundAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(foundAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should not recalculate discount by promo value when original service price update", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 20
+      }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 50,
+        promoValue: 20,
+        promoEnabled: false
+      }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 30,
+        promoValue: 5,
+        promoEnabled: false
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id]
+      })
+
+      const updateService1Data: UpdateServiceInput = {
+        value: 100,
+        promoValue: 10,
+        promoEnabled: true
+      }
+      const updateService3Data: UpdateServiceInput = {
+        promoValue: 25,
+        promoEnabled: true
+      }
+
+      await servicesService.update(service1.id, updateService1Data)
+      await servicesService.update(service3.id, updateService3Data)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+      expect(foundAppointment.discount).toBe(0)
+      expect(foundAppointment.finalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should recalculate discount by promo value when service list is updated", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 20,
+        promoValue: 10,
+        promoEnabled: true
+      }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 50,
+        promoValue: 20,
+        promoEnabled: false
+      }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 30,
+        promoValue: 5,
+        promoEnabled: true
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        serviceIds: [service1.id, service2.id, service3.id]
+      })
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+      expect(updatedAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
+      expect(foundAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(foundAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await usersService.remove({ id: attendant.id })
     })
   })
 })

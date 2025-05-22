@@ -3,7 +3,7 @@
 import { z } from "@/lib/pt-zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -12,6 +12,7 @@ import Image from "next/image"
 import { CameraIcon } from "lucide-react"
 import { createServiceSchema } from "@/actions/services/dto/create-service.input"
 import { useAdmin } from "@/hooks/use-admin"
+import { Switch } from "../ui/switch"
 
 interface Props {
   onSuccess?: () => void
@@ -169,6 +170,46 @@ export default function CreateServiceForm({ onSuccess, onError }: Props) {
                 </div>
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="promoValue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor Promocional <i>(opcional)</i></FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 text-muted-foreground border-r">R$</span>
+                  <Input
+                    className="pl-12"
+                    placeholder="Digite o valor do serviço"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="promoEnabled"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel>Ativar valor promocional</FormLabel>
+                <FormDescription>
+                  Ative para usar o valor promocional na tela de serviços
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />
