@@ -5,6 +5,7 @@ import ServicesTable from "@/components/admin/services-table"
 import UpdateServiceForm from "@/components/admin/update-service-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { H1 } from "@/components/ui/typography"
 import { useAdmin } from "@/hooks/use-admin"
@@ -39,22 +40,26 @@ export default function ServicesPage() {
               {selectedService ? "Atualize as informações do serviço" : "Preencha os dados para cadastrar um novo serviço"}
             </SheetDescription>
           </SheetHeader>
-          {selectedService ? (
-            <UpdateServiceForm
-              service={selectedService}
-              onSuccess={() => {
-                setSheetOpen(false)
-              }}
-            />
-          ) : (
-            <CreateServiceForm
-              onSuccess={
-                () => {
-                  setSheetOpen(false)
-                }
-              }
-            />
-          )}
+          <ScrollArea className="h-[90%] pr-4">
+            <div className="px-1">
+              {selectedService ? (
+                <UpdateServiceForm
+                  service={selectedService}
+                  onSuccess={() => {
+                    setSheetOpen(false)
+                  }}
+                />
+              ) : (
+                <CreateServiceForm
+                  onSuccess={
+                    () => {
+                      setSheetOpen(false)
+                    }
+                  }
+                />
+              )}
+            </div>
+          </ScrollArea>
         </SheetContent>
       </Sheet>
 

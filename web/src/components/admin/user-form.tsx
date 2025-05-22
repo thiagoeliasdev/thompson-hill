@@ -291,7 +291,8 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
         <Button
           isLoading={form.formState.isSubmitting}
           type="submit"
-          className="w-full sm:w-fit sm:px-10 self-center"
+          size="lg"
+          className="w-full"
         >Salvar</Button>
       </form>
     </Form>

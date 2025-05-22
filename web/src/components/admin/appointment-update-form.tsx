@@ -216,7 +216,7 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
         <FormItem>
           <FormLabel>Serviços</FormLabel>
           <FormMessage>{form.getFieldState("serviceIds").error?.message}</FormMessage>
-          {form.getValues().serviceIds.map((service, index) => (
+          {form.getValues().serviceIds.map((_, index) => (
             <div
               key={index}
             >
@@ -310,14 +310,16 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
           isLoading={isLoading}
           type="button"
           variant="outline"
+          size="lg"
           onClick={handleAddService}
-          className="w-full"
+          className="w-full border-3 border-dashed"
         ><PlusIcon /> Adicionar serviço</Button>
 
         <Button
           isLoading={form.formState.isSubmitting}
           type="submit"
-          className="w-full sm:w-fit sm:px-10 self-center"
+          size="lg"
+          className="w-full"
         >Salvar</Button>
       </form>
     </Form>

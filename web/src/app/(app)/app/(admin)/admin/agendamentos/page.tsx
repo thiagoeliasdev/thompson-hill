@@ -9,6 +9,7 @@ import { useMemo, useState } from "react"
 import { IAppointmentView } from "@/models/appointment"
 import AppointmentUpdateForm from "@/components/admin/appointment-update-form"
 import { EUserRole } from "@/models/user"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function AppointmentsPage() {
   const [isSheetOpen, setSheetOpen] = useState(false)
@@ -34,15 +35,19 @@ export default function AppointmentsPage() {
               Atualize as informações do atendimento
             </SheetDescription>
           </SheetHeader>
-          <AppointmentUpdateForm
-            appointment={selectedAppointment!}
-            attendants={attendants || []}
-            services={services || []}
-            isLoading={isLoadingAppointments || isLoadingUsers || isLoadingServices}
-            onSuccess={() => {
-              setSheetOpen(false)
-            }}
-          />
+          <ScrollArea className="h-[90%] pr-4">
+            <div className="px-1">
+              <AppointmentUpdateForm
+                appointment={selectedAppointment!}
+                attendants={attendants || []}
+                services={services || []}
+                isLoading={isLoadingAppointments || isLoadingUsers || isLoadingServices}
+                onSuccess={() => {
+                  setSheetOpen(false)
+                }}
+              />
+            </div>
+          </ScrollArea>
         </SheetContent>
       </Sheet>
 

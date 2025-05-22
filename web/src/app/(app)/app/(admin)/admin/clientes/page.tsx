@@ -3,6 +3,7 @@
 import CustomersTable from "@/components/admin/customers-table"
 import UpdateCustomerForm from "@/components/admin/update-customer-form"
 import { Card, CardContent } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { H1 } from "@/components/ui/typography"
 import { useAdmin } from "@/hooks/use-admin"
@@ -29,12 +30,16 @@ export default function CustomersPage() {
             </SheetDescription>
           </SheetHeader>
           {selectedCustomer && (
-            <UpdateCustomerForm
-              customer={selectedCustomer}
-              onSuccess={() => {
-                setSheetOpen(false)
-              }}
-            />
+            <ScrollArea className="h-[90%] pr-4">
+              <div className="px-1">
+                <UpdateCustomerForm
+                  customer={selectedCustomer}
+                  onSuccess={() => {
+                    setSheetOpen(false)
+                  }}
+                />
+              </div>
+            </ScrollArea>
           )}
         </SheetContent>
       </Sheet>
