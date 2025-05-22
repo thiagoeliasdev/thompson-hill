@@ -4,8 +4,11 @@ import { DataTable } from "../ui/data-table"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { IAppointmentView } from "@/models/appointment"
+import { EAppointmentStatuses, IAppointmentView } from "@/models/appointment"
 import { formatCurrency } from "@/lib/utils"
+import AppointmentStatusBadge from "../appointment-status-badge"
+import { Button } from "../ui/button"
+import { Edit2Icon } from "lucide-react"
 
 interface Props {
   data?: IAppointmentView[]
@@ -17,7 +20,7 @@ interface Props {
     field: string
     placeholder: string
   }
-  onEditButtonClick?: (customer: IAppointmentView) => void
+  onEditButtonClick?: (appointment: IAppointmentView) => void
 }
 
 export default function AppointmentsTable({
@@ -29,7 +32,8 @@ export default function AppointmentsTable({
     enableFiltering: false,
     field: "name",
     placeholder: "Buscar por Nome",
-  }
+  },
+  onEditButtonClick
 }: Props) {
   function getColumns(): ColumnDef<IAppointmentView>[] {
     return [
@@ -56,12 +60,40 @@ export default function AppointmentsTable({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: () => <p className="text-center max-w-32">Status</p>,
+        cell: (row) => {
+          const status = row.getValue() as EAppointmentStatuses
+          return <AppointmentStatusBadge
+            status={status}
+            className="max-w-32 text-center"
+          />
+        },
       },
       {
         accessorKey: "attendant.name",
         header: "Atendente",
       },
+      {
+        id: "actions",
+        header: () => <p className="text-center">Ações</p>,
+        cell: (row) => {
+          const appointment = row.row.original
+
+          return (
+            <div className="flex justify-center items-center gap-1">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => {
+                  if (onEditButtonClick) {
+                    onEditButtonClick(appointment)
+                  }
+                }}
+              ><Edit2Icon /></Button>
+            </div>
+          )
+        }
+      }
     ]
   }
 

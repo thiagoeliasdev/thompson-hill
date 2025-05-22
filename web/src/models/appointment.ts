@@ -56,7 +56,7 @@ export interface IAppointmentView {
     name: string
     phoneNumber: string
   }
-  attendant: {
+  attendant?: {
     id: string
     name: string
   }

@@ -30,7 +30,7 @@ export default function ServicesPage() {
               setSelectedService(undefined)
             }}
             className="w-full sm:w-fit"
-          ><PlusIcon />{selectedService ? "Atualizar Serviço" : "Cadastrar Serviço"}</Button>
+          ><PlusIcon />Cadastrar Serviço</Button>
         </SheetTrigger>
         <SheetContent>
           <SheetHeader>

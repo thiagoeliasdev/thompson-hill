@@ -1,4 +1,5 @@
-import { getAppointmentsAction } from "@/actions/appointments"
+import { getAppointmentsAction, updateAppointmentAction } from "@/actions/appointments"
+import { UpdateAppointmentInput } from "@/actions/appointments/dto/update-appointment.input"
 import { getCustomersAction, updateCustomerAction } from "@/actions/customers"
 import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
@@ -192,6 +193,28 @@ export const useAdmin = () => {
     },
   })
 
+  const { mutateAsync: updateAppointment } = useMutation({
+    mutationKey: ["updateAppointment"],
+    mutationFn: async (data: { id: string, data: UpdateAppointmentInput }): Promise<IActionResponse<IAppointmentView>> => {
+      const response = await updateAppointmentAction(data.id, data.data)
+
+      if (!!response.data) {
+        queryClient.setQueryData([queries.admin.appointments], (current: IAppointmentView[]) => {
+          return current?.map((appointment) => {
+            if (appointment.id === response.data?.id) {
+              return { ...appointment, ...response.data }
+            }
+            return appointment
+          })
+        })
+
+        return response
+      }
+
+      return response
+    }
+  })
+
   return {
     users,
     isLoadingUsers,
@@ -206,5 +229,6 @@ export const useAdmin = () => {
     updateCustomer,
     appointments,
     isLoadingAppointments,
+    updateAppointment
   }
 }
