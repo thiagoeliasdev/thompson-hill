@@ -7,10 +7,8 @@ export const createCustomerSchema = z.object({
   phoneNumber: z.string().min(13, { message: "Telefone inválido" }).max(16, { message: "Telefone inválido" }),
   birthDate: z.string()
     .refine(value => isDateValid(value), { message: "Data inválida" }),
-  // .refine(value => isAfter(new Date(), new Date(value)), { message: "Valor não pode ser maior do que a data atual" })
-  // .refine(value => differenceInYears(new Date(), new Date(value)) <= 120, { message: "Data inválida" }),
   gender: z.nativeEnum(EGender),
-  indicationCode: z.string().optional(),
+  referralCodeUsed: z.string().optional(),
 
   profileImage: z.string().optional(),
   imageContentType: z.string().optional()

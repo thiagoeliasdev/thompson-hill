@@ -7,6 +7,9 @@ export interface ICustomerView {
   createdAt: Date
   gender: EGender
   signedUrl?: string
+  referralCode: string
+  referralCodeUsed?: string
+  referralCodeCount: number
 }
 
 export enum EGender {

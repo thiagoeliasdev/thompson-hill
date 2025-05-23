@@ -151,6 +151,7 @@ export const useAdmin = () => {
 
       return response.data || []
     },
+    refetchOnWindowFocus: true
   })
 
   const { mutateAsync: updateCustomer } = useMutation({
@@ -191,6 +192,7 @@ export const useAdmin = () => {
 
       return response.data || []
     },
+    refetchOnWindowFocus: true
   })
 
   const { mutateAsync: updateAppointment } = useMutation({

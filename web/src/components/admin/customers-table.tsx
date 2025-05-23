@@ -41,6 +41,14 @@ export default function CustomersTable({
         header: "Nome",
       },
       {
+        accessorKey: "referralCode",
+        header: "Código de Indicação",
+      },
+      {
+        accessorKey: "referralCodeCount",
+        header: "Indicações",
+      },
+      {
         accessorKey: "gender",
         header: () => <p className="text-start">Gênero</p>,
         cell: (row) => <p className="text-start">{EGenderMapper[row.getValue() as EGender]}</p>,

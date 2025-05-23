@@ -39,7 +39,7 @@ export default function CustomerRegisterForm() {
     defaultValues: {
       phoneNumber: phoneNumber ? applyPhoneMask(phoneNumber.substring(3)) : undefined,
       name: "",
-      indicationCode: "",
+      referralCodeUsed: "",
       gender: EGender.MALE,
       birthDate: "",
     },
@@ -73,7 +73,7 @@ export default function CustomerRegisterForm() {
         name: values.name,
         phoneNumber: formattedPhone,
         gender: values.gender,
-        indicationCode: values.indicationCode,
+        referralCodeUsed: values.referralCodeUsed,
         birthDate: values.birthDate,
       }
 
@@ -263,7 +263,7 @@ export default function CustomerRegisterForm() {
           />
           <FormField
             control={form.control}
-            name="indicationCode"
+            name="referralCodeUsed"
             render={({ field }) => (
               <FormItem className="space-y-0.5 w-full max-w-sm self-center">
                 <FormLabel className="sm:text-xl md:text-2xl">Possui código de indicação?</FormLabel>
@@ -273,9 +273,9 @@ export default function CustomerRegisterForm() {
                     readOnly
                     onFocus={() => {
                       setKeyboardLayout("qwerty")
-                      setActiveField("indicationCode")
+                      setActiveField("referralCodeUsed")
                     }}
-                    className={cn("w-full text-center sm:text-xl md:text-2xl", activeField === "indicationCode" ? "border-ring ring-ring/50 ring-[3px]" : "")}
+                    className={cn("w-full text-center sm:text-xl md:text-2xl", activeField === "referralCodeUsed" ? "border-ring ring-ring/50 ring-[3px]" : "")}
                   />
                 </FormControl>
                 <FormMessage />
