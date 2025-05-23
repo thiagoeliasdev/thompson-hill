@@ -18,10 +18,11 @@ export class CustomersService {
 
   private readonly STORAGE = "customers"
 
-  async findOne({ id, phoneNumber }: { id?: string, phoneNumber?: string }): Promise<Customer> {
+  async findOne({ id, phoneNumber, referralCode }: { id?: string, phoneNumber?: string, referralCode?: string }): Promise<Customer> {
     const query: any = {}
     if (id) query._id = id
     if (phoneNumber) query.phoneNumber = phoneNumber.toLowerCase().trim()
+    if (referralCode) query.referralCode = referralCode.toUpperCase().trim()
 
     const customer = await this.customerSchema.findOne(query)
     if (!customer) throw new CustomerNotFoundException
@@ -50,6 +51,9 @@ export class CustomersService {
           profileImage: fileUrl,
           birthDate: dto.birthDate,
           gender: dto.gender,
+          referralCode: generateRandomReferralCode(),
+          referralCodeUsed: dto.referralCodeUsed,
+          referralCodeCount: 0,
           createdAt: new Date(),
         })
 
@@ -98,4 +102,33 @@ export class CustomersService {
     if (!customer) throw new CustomerNotFoundException()
     return new Customer(toCustomer(customer))
   }
+
+  async incrementReferralCodeCount(id: string): Promise<Customer> {
+    try {
+      const customer = await this.customerSchema.findOneAndUpdate(
+        { _id: id },
+        { $inc: { referralCodeCount: 1 } },
+        { new: true }
+      )
+
+      if (!customer) {
+        throw new CustomerNotFoundException()
+      }
+
+      return new Customer({ ...toCustomer(customer) })
+
+    } catch (error) {
+      throw error
+    }
+  }
+}
+
+function generateRandomReferralCode(length: number = 6): string {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let code = ''
+  for (let i = 0; i < length; i++) {
+    const indice = Math.floor(Math.random() * letters.length)
+    code += letters[indice]
+  }
+  return code
 }

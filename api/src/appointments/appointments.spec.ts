@@ -833,5 +833,302 @@ describe("Appointment Module", () => {
       await servicesService.remove(service3.id)
       await usersService.remove({ id: attendant.id })
     })
+
+    it("should increment a customer (indicated) and customer (indicator) referralCodeCount when its code is used only when a service is concluded", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer1 = await customersService.create(getRandomCustomerCreateInputData())
+      const customer2 = await customersService.create(getRandomCustomerCreateInputData({
+        referralCodeUsed: customer1.referralCode
+      }))
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+
+      // Check if the referralCodeCount is 0 before creating the appointment
+      const foundCustomer1 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1).toBeDefined()
+      expect(foundCustomer2).toBeDefined()
+      expect(foundCustomer1.referralCodeCount).toBe(0)
+      expect(foundCustomer2.referralCodeCount).toBe(0)
+
+      const appointment = await appointmentsService.create({
+        customerId: customer2.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      // Change status to ON_SERVICE and check if the referralCodeCount is still 0
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.ON_SERVICE
+      })
+      expect(updatedAppointment.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_2 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_2 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_2.referralCodeCount).toBe(0)
+      expect(foundCustomer2_2.referralCodeCount).toBe(0)
+
+      // Change status to CANCELLED and check if the referralCodeCount is still 0
+      const updatedAppointment2 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.CANCELLED
+      })
+      expect(updatedAppointment2.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_3 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_3 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_3.referralCodeCount).toBe(0)
+      expect(foundCustomer2_3.referralCodeCount).toBe(0)
+
+      // Change status to NO_SHOW and check if the referralCodeCount is 0
+      const updatedAppointment3 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.NO_SHOW
+      })
+      expect(updatedAppointment3.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_4 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_4 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_4.referralCodeCount).toBe(0)
+      expect(foundCustomer2_4.referralCodeCount).toBe(0)
+
+      // Change status to FINISHED and check if the referralCodeCount is 1
+      const updatedAppointment4 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.FINISHED
+      })
+      expect(updatedAppointment4.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_5 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_5 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_5.referralCodeCount).toBe(1)
+      expect(foundCustomer2_5.referralCodeCount).toBe(1)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer1.id)
+      await customersService.remove(customer2.id)
+      await servicesService.remove(service1.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should not increment a customer (indicator) referralCodeCount if the code used is invalid", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData({
+        referralCodeUsed: "invalid-referral-code"
+      }))
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+
+      // Check if the referralCodeCount is 0 before creating the appointment
+      const foundCustomer2 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2).toBeDefined()
+      expect(foundCustomer2.referralCodeCount).toBe(0)
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      // Change status to ON_SERVICE and check if the referralCodeCount is still 0
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.ON_SERVICE
+      })
+      expect(updatedAppointment.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_2 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_2.referralCodeCount).toBe(0)
+
+      // Change status to CANCELLED and check if the referralCodeCount is still 0
+      const updatedAppointment2 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.CANCELLED
+      })
+      expect(updatedAppointment2.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_3 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_3.referralCodeCount).toBe(0)
+
+      // Change status to NO_SHOW and check if the referralCodeCount is still 0
+      const updatedAppointment3 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.NO_SHOW
+      })
+      expect(updatedAppointment3.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_4 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_4.referralCodeCount).toBe(0)
+
+      // Change status to FINISHED and check if the referralCodeCount is still 0
+      const updatedAppointment4 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.FINISHED
+      })
+      expect(updatedAppointment4.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_5 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_5.referralCodeCount).toBe(0)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should not increment a customer (indicator) referralCodeCount if no code used is used", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+
+      // Check if the referralCodeCount is 0 before creating the appointment
+      const foundCustomer2 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2).toBeDefined()
+      expect(foundCustomer2.referralCodeCount).toBe(0)
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      // Change status to ON_SERVICE and check if the referralCodeCount is still 0
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.ON_SERVICE
+      })
+      expect(updatedAppointment.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_2 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_2.referralCodeCount).toBe(0)
+
+      // Change status to CANCELLED and check if the referralCodeCount is still 0
+      const updatedAppointment2 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.CANCELLED
+      })
+      expect(updatedAppointment2.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_3 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_3.referralCodeCount).toBe(0)
+
+      // Change status to NO_SHOW and check if the referralCodeCount is still 0
+      const updatedAppointment3 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.NO_SHOW
+      })
+      expect(updatedAppointment3.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_4 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_4.referralCodeCount).toBe(0)
+
+      // Change status to FINISHED and check if the referralCodeCount is still 0
+      const updatedAppointment4 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.FINISHED
+      })
+      expect(updatedAppointment4.customer.referralCodeCount).toBe(0)
+      const foundCustomer2_5 = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer2_5.referralCodeCount).toBe(0)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+
+    it("should not increment a customer (indicated) and customer (indicator) referralCodeCount when its not first appointment", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer1 = await customersService.create(getRandomCustomerCreateInputData())
+      const customer2 = await customersService.create(getRandomCustomerCreateInputData({
+        referralCodeUsed: customer1.referralCode
+      }))
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+
+      // Check if the referralCodeCount is 0 before creating the appointment
+      const foundCustomer1 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1).toBeDefined()
+      expect(foundCustomer2).toBeDefined()
+      expect(foundCustomer1.referralCodeCount).toBe(0)
+      expect(foundCustomer2.referralCodeCount).toBe(0)
+
+      const appointment = await appointmentsService.create({
+        customerId: customer2.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      // Change status to ON_SERVICE and check if the referralCodeCount is still 0
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.ON_SERVICE
+      })
+      expect(updatedAppointment.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_2 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_2 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_2.referralCodeCount).toBe(0)
+      expect(foundCustomer2_2.referralCodeCount).toBe(0)
+
+      // Change status to CANCELLED and check if the referralCodeCount is still 0
+      const updatedAppointment2 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.CANCELLED
+      })
+      expect(updatedAppointment2.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_3 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_3 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_3.referralCodeCount).toBe(0)
+      expect(foundCustomer2_3.referralCodeCount).toBe(0)
+
+      // Change status to NO_SHOW and check if the referralCodeCount is 0
+      const updatedAppointment3 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.NO_SHOW
+      })
+      expect(updatedAppointment3.customer.referralCodeCount).toBe(0)
+      const foundCustomer1_4 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_4 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_4.referralCodeCount).toBe(0)
+      expect(foundCustomer2_4.referralCodeCount).toBe(0)
+
+      // Change status to FINISHED and check if the referralCodeCount is 1
+      const updatedAppointment4 = await appointmentsService.update(appointment.id, {
+        status: EAppointmentStatuses.FINISHED
+      })
+      expect(updatedAppointment4.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_5 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_5 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_5.referralCodeCount).toBe(1)
+      expect(foundCustomer2_5.referralCodeCount).toBe(1)
+
+      // Second appointment for customer2
+      const appointment2 = await appointmentsService.create({
+        customerId: customer2.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id]
+      })
+
+      // Change status to ON_SERVICE and check if the referralCodeCount is still 1
+      const updatedAppointment5 = await appointmentsService.update(appointment2.id, {
+        status: EAppointmentStatuses.ON_SERVICE
+      })
+      expect(updatedAppointment5.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_6 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_6 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_6.referralCodeCount).toBe(1)
+      expect(foundCustomer2_6.referralCodeCount).toBe(1)
+
+      // Change status to CANCELLED and check if the referralCodeCount is still 1
+      const updatedAppointment6 = await appointmentsService.update(appointment2.id, {
+        status: EAppointmentStatuses.CANCELLED
+      })
+      expect(updatedAppointment6.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_7 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_7 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_7.referralCodeCount).toBe(1)
+      expect(foundCustomer2_7.referralCodeCount).toBe(1)
+
+      // Change status to NO_SHOW and check if the referralCodeCount is still 1
+      const updatedAppointment7 = await appointmentsService.update(appointment2.id, {
+        status: EAppointmentStatuses.NO_SHOW
+      })
+      expect(updatedAppointment7.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_8 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_8 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_8.referralCodeCount).toBe(1)
+      expect(foundCustomer2_8.referralCodeCount).toBe(1)
+
+      // Change status to FINISHED and check if the referralCodeCount is still 1
+      const updatedAppointment8 = await appointmentsService.update(appointment2.id, {
+        status: EAppointmentStatuses.FINISHED
+      })
+      expect(updatedAppointment8.customer.referralCodeCount).toBe(1)
+      const foundCustomer1_9 = await customersService.findOne({ id: customer1.id })
+      const foundCustomer2_9 = await customersService.findOne({ id: customer2.id })
+      expect(foundCustomer1_9.referralCodeCount).toBe(1)
+      expect(foundCustomer2_9.referralCodeCount).toBe(1)
+
+      await appointmentsService.remove(appointment.id)
+      await appointmentsService.remove(appointment2.id)
+      await customersService.remove(customer1.id)
+      await customersService.remove(customer2.id)
+      await servicesService.remove(service1.id)
+      await usersService.remove({ id: attendant.id })
+    })
   })
 })

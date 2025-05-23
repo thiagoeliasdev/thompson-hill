@@ -4,7 +4,7 @@ import { Appointment, EAppointmentStatuses } from "./entities/appointment.entity
 import { Model } from "mongoose"
 import { IMongoAppointment, toAppointment } from "../mongo/schemas/appointment.schema"
 import { createId } from "@paralleldrive/cuid2"
-import { AppointmentNotFoundException, MissingServicesException } from "../errors"
+import { AppointmentNotFoundException, CustomerNotFoundException, MissingServicesException } from "../errors"
 import { CustomersService } from "../customers/customers.service"
 import { UsersService } from "../users/users.service"
 import { ServicesService } from "../services/services.service"
@@ -138,6 +138,26 @@ export class AppointmentsService {
       if (dto.status === EAppointmentStatuses.FINISHED) {
         finishedAt = new Date()
         appointment.status = EAppointmentStatuses.FINISHED
+
+        // Check referral code usage
+        if (appointment.customer?.id && appointment.customer?.referralCodeUsed) {
+          try {
+            const customer1 = await this.customersService.findOne({ id: appointment.customer.id })
+            const customer2 = await this.customersService.findOne({ referralCode: appointment.customer.referralCodeUsed })
+
+            // Check if the customer has used a referral code and it is first appointment
+            if (customer1.referralCodeCount === 0 && customer2) {
+              await this.customersService.incrementReferralCodeCount(customer1.id)
+              await this.customersService.incrementReferralCodeCount(customer2.id)
+            }
+          } catch (error) {
+            if (error instanceof CustomerNotFoundException) {
+
+            } else {
+              throw error
+            }
+          }
+        }
       }
 
       Object.assign(appointment, {

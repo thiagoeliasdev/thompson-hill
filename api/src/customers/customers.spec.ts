@@ -38,7 +38,9 @@ describe("Customers Module", () => {
     })
 
     it("should create a customer with all fields", async () => {
-      const data = getRandomCustomerCreateInputData()
+      const data = getRandomCustomerCreateInputData({
+        referralCodeUsed: "ABCDEF"
+      })
 
       const customer = await customersService.create(data)
       expect(customer).toBeDefined()
@@ -47,6 +49,9 @@ describe("Customers Module", () => {
       expect(customer.birthDate).toEqual(data.birthDate)
       expect(customer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
+      expect(customer.referralCode).toBeDefined()
+      expect(customer.referralCodeCount).toBe(0)
+      expect(customer.referralCodeUsed).toBe(data.referralCodeUsed)
 
       await customersService.remove(customer.id)
     })
@@ -66,6 +71,9 @@ describe("Customers Module", () => {
       expect(customer.birthDate).toEqual(data.birthDate)
       expect(customer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
+      expect(customer.referralCode).toBeDefined()
+      expect(customer.referralCodeCount).toBe(0)
+      expect(customer.referralCodeUsed).toBeUndefined()
 
       await customersService.remove(customer.id)
     })
@@ -83,7 +91,9 @@ describe("Customers Module", () => {
     })
 
     it("should find a customer by id", async () => {
-      const data = getRandomCustomerCreateInputData()
+      const data = getRandomCustomerCreateInputData({
+        referralCodeUsed: "ABCDEF"
+      })
 
       const customer = await customersService.create(data)
       const foundCustomer = await customersService.findOne({ id: customer.id })
@@ -93,7 +103,10 @@ describe("Customers Module", () => {
       expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
       expect(foundCustomer.birthDate).toEqual(data.birthDate)
       expect(foundCustomer.createdAt).toBeDefined()
-      expect(customer.gender).toBe(data.gender)
+      expect(foundCustomer.gender).toBe(data.gender)
+      expect(foundCustomer.referralCode).toBeDefined()
+      expect(foundCustomer.referralCodeCount).toBe(0)
+      expect(foundCustomer.referralCodeUsed).toBe(data.referralCodeUsed)
 
       await customersService.remove(customer.id)
     })
@@ -110,6 +123,28 @@ describe("Customers Module", () => {
       expect(foundCustomer.birthDate).toEqual(data.birthDate)
       expect(foundCustomer.createdAt).toBeDefined()
       expect(customer.gender).toBe(data.gender)
+      expect(foundCustomer.referralCode).toBeDefined()
+      expect(foundCustomer.referralCodeCount).toBe(0)
+      expect(foundCustomer.referralCodeUsed).toBeUndefined()
+
+      await customersService.remove(customer.id)
+    })
+
+    it("should find a customer by referralCode", async () => {
+      const data = getRandomCustomerCreateInputData()
+
+      const customer = await customersService.create(data)
+      const foundCustomer = await customersService.findOne({ referralCode: customer.referralCode })
+
+      expect(foundCustomer).toBeDefined()
+      expect(foundCustomer.name).toBe(data.name)
+      expect(foundCustomer.phoneNumber).toBe(data.phoneNumber)
+      expect(foundCustomer.birthDate).toEqual(data.birthDate)
+      expect(foundCustomer.createdAt).toBeDefined()
+      expect(customer.gender).toBe(data.gender)
+      expect(foundCustomer.referralCode).toBeDefined()
+      expect(foundCustomer.referralCodeCount).toBe(0)
+      expect(foundCustomer.referralCodeUsed).toBeUndefined()
 
       await customersService.remove(customer.id)
     })
@@ -123,6 +158,12 @@ describe("Customers Module", () => {
     it("should not find a customer by invalid phone number", async () => {
       expect(async () => {
         await customersService.findOne({ phoneNumber: "invalid-phone" })
+      }).rejects.toThrow(CustomerNotFoundException)
+    })
+
+    it("should not find a customer by invalid referralCode", async () => {
+      expect(async () => {
+        await customersService.findOne({ referralCode: "invalid-code" })
       }).rejects.toThrow(CustomerNotFoundException)
     })
 
@@ -257,6 +298,33 @@ describe("Customers Module", () => {
       expect(async () => {
         await customersService.remove("invalid-id")
       }).rejects.toThrow(CustomerNotFoundException)
+    })
+
+    it("should increment a customer referralCodeCount", async () => {
+      const data = getRandomCustomerCreateInputData()
+
+      const customer = await customersService.create(data)
+      expect(customer).toBeDefined()
+      expect(customer.name).toBe(data.name)
+      expect(customer.phoneNumber).toBe(data.phoneNumber)
+      expect(customer.birthDate).toEqual(data.birthDate)
+      expect(customer.createdAt).toBeDefined()
+      expect(customer.gender).toBe(data.gender)
+      expect(customer.referralCodeCount).toBe(0)
+
+      const updatedCustomer = await customersService.incrementReferralCodeCount(customer.id)
+      expect(updatedCustomer).toBeDefined()
+      expect(updatedCustomer.referralCodeCount).toBe(1)
+
+      for (let i = 0; i < 5; i++) {
+        await customersService.incrementReferralCodeCount(customer.id)
+      }
+
+      const foundCustomer = await customersService.findOne({ id: customer.id })
+      expect(foundCustomer).toBeDefined()
+      expect(foundCustomer.referralCodeCount).toBe(6)
+
+      await customersService.remove(customer.id)
     })
   })
 })
