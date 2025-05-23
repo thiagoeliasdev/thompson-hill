@@ -54,7 +54,8 @@ export class AppointmentsService {
         totalPrice: 0,
         discount: 0,
         finalPrice: 0,
-        status: EAppointmentStatuses.WAITING
+        status: EAppointmentStatuses.WAITING,
+        createdAt: dto.createdAt || new Date(),
       }
     )
 

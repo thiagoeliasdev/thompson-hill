@@ -1,78 +1,83 @@
 Table users {
-  id string [primary key]
+  _id string [primary key]
   name string [not null]
-  user_name string [not null, unique]
+  userName string [not null, unique]
   password string [not null]
-  role string [not null]
-  profile_image string
-  created_at timestamp [not null]
+  role userRoles [not null]
+  profileImage string
+  status userStatus [not null]
+  createdAt timestamp [not null]
 }
 
-Enum roles {
+Enum userRoles {
   ADMIN
   MANAGER
   TOTEM
   ATTENDANT
 }
 
+Enum userStatus {
+  ACTIVE
+  INACTIVE
+}
+
 Table services {
-  id string [primary key]
+  _id string [primary key]
   name string [not null]
-  slug string [not null]
-  description string [not null]
   value decimal [not null]
-  cover_image string
-  created_at string [not null]
+  promoValue decimal
+  promoEnabled bool [default: false]
+  description string [not null]
+  coverImage string
+  createdAt string [not null]
 }
 
 Table customers {
-  id string [primary key]
+  _id string [primary key]
   name string [not null]
-  phone_number string [not null, unique]
-  profile_image string
-  birth_date timestamp [not null]
-  created_at timestamp [not null]
+  phoneNumber string [not null, unique]
+  profileImage string
+  birthDate timestamp [not null]
+  gender string [not null]
+  referralCodeUsed string
+  referralCode string [unique]
+  referralCodeUseCount int [default: 0]
+  createdAt timestamp [not null]
 }
 
 Table appointments {
-  id string [primary key]
-  customer_id string [not null]
-  attendant_id string 
+  _id string [primary key]
+  customerId string [not null]
+  attendantId string 
   serviceIds string[]
-  total_price decimal [not null]
+  totalPrice decimal [not null]
   discount decimal
-  final_price decimal [not null]
-  payment_method appointment_payment_methods
-  redeem_coupon string
+  finalPrice decimal [not null]
+  paymentMethod appointment_payment_methods
+  redeemCoupon string
   status appointment_statuses [not null]
-  created_at timestamp [not null]
-  on_service_at timestamp
-  finished_at timestamp
+  createdAt timestamp [not null]
+  onServiceAt timestamp
+  finishedAt timestamp
 }
 
-Ref: appointment.customerId > customers.id
-Ref: appointment.attendant_id > users.id
+Ref: appointments.attendantId > users._id
+Ref: appointments.serviceIds > services._id
+Ref: appointments.customerId > customers._id
 
 Enum appointment_statuses{
   WAITING
   ON_SERVICE
   FINISHED
   CANCELED
+  NO_SHOW
 }
 
 Enum appointment_payment_methods{
   CASH
-  PIX
   CREDIT_CARD
   DEBIT_CARD
+  PIX
   TRANSFER
+  BONUS
 }
-
-Table attendant_queue {
-  id string [primary key]
-  attendant_id string [not null]
-  appointments appointment[]
-}
-
-Ref: attendant_queue.attendant_id > users.id
-Ref: attendant_queue.appointments > appointment.id
