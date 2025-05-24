@@ -26,12 +26,6 @@ export default function ServicesTable({
   data = [],
   isLoading = false,
   emptyMessage = "Nenhum serviço encontrado",
-  disablePagination = false,
-  filtering = {
-    enableFiltering: false,
-    field: "name",
-    placeholder: "Buscar por título",
-  },
   onEditButtonClick,
 }: Props) {
   function getColumns(): ColumnDef<IServiceView>[] {
@@ -111,8 +105,6 @@ export default function ServicesTable({
       data={data}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
-      enablePagination={!disablePagination}
-      filtering={filtering}
     />
   )
 }

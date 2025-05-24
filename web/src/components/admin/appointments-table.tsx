@@ -14,12 +14,6 @@ interface Props {
   data?: IAppointmentView[]
   isLoading?: boolean
   emptyMessage?: string
-  disablePagination?: boolean
-  filtering?: {
-    enableFiltering: boolean
-    field: string
-    placeholder: string
-  }
   onEditButtonClick?: (appointment: IAppointmentView) => void
 }
 
@@ -27,12 +21,6 @@ export default function AppointmentsTable({
   data = [],
   isLoading = false,
   emptyMessage = "Nenhum agendamento encontrado",
-  disablePagination = false,
-  filtering = {
-    enableFiltering: false,
-    field: "name",
-    placeholder: "Buscar por Nome",
-  },
   onEditButtonClick
 }: Props) {
   function getColumns(): ColumnDef<IAppointmentView>[] {
@@ -103,8 +91,6 @@ export default function AppointmentsTable({
       data={data}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
-      enablePagination={!disablePagination}
-      filtering={filtering}
     />
   )
 }

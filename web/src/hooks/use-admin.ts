@@ -1,6 +1,6 @@
 import { getAppointmentsAction, updateAppointmentAction } from "@/actions/appointments"
 import { UpdateAppointmentInput } from "@/actions/appointments/dto/update-appointment.input"
-import { getCustomersAction, updateCustomerAction } from "@/actions/customers"
+import { updateCustomerAction } from "@/actions/customers"
 import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
 import { CreateServiceInput } from "@/actions/services/dto/create-service.input"
@@ -15,6 +15,7 @@ import { ICustomerView } from "@/models/customer"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { IPaginated } from "./use-paginated-query"
 
 export const useAdmin = () => {
   const queryClient = useQueryClient()
@@ -137,39 +138,41 @@ export const useAdmin = () => {
     }
   })
 
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-    queryKey: [queries.admin.customers],
-    queryFn: async (): Promise<ICustomerView[]> => {
-      const response = await getCustomersAction()
+  // const { data: customers, isLoading: isLoadingCustomers } = useQuery({
+  //   queryKey: [queries.admin.customers],
+  //   queryFn: async (): Promise<ICustomerView[]> => {
+  //     const response = await getCustomersAction()
 
-      if (response.data) {
-        return response.data.map((service) => ({
-          ...service,
-          createdAt: new Date(service.createdAt)
-        }))
-      }
+  //     if (response.data) {
+  //       return response.data.map((service) => ({
+  //         ...service,
+  //         createdAt: new Date(service.createdAt)
+  //       }))
+  //     }
 
-      return response.data || []
-    },
-    refetchOnWindowFocus: true
-  })
+  //     return response.data || []
+  //   },
+  //   refetchOnWindowFocus: true
+  // })
 
   const { mutateAsync: updateCustomer } = useMutation({
     mutationKey: ["updateSCustomer"],
     mutationFn: async ({ id, data }: { id: string, data: UpdateCustomerInput }): Promise<IActionResponse<ICustomerView>> => {
       const response = await updateCustomerAction(id, data)
 
-      if (!!response.data) {
-        queryClient.setQueryData([queries.admin.customers], (current: ICustomerView[]) => {
-          return current?.map((customer) => {
-            if (customer.id === response.data?.id) {
-              return { ...customer, ...response.data }
-            }
-            return customer
-          })
-        })
+      if (response.data) {
+        queryClient.setQueryData([queries.admin.customers], (current: IPaginated<ICustomerView> | undefined) => {
+          if (!current) return current
 
-        return response
+          return {
+            ...current,
+            data: current.data.map((customer) =>
+              customer.id === response.data?.id
+                ? { ...customer, ...response.data }
+                : customer
+            ),
+          }
+        })
       }
 
       return response
@@ -226,8 +229,6 @@ export const useAdmin = () => {
     isLoadingServices,
     createService,
     updateService,
-    customers,
-    isLoadingCustomers,
     updateCustomer,
     appointments,
     isLoadingAppointments,

@@ -8,6 +8,7 @@ import { EUserRole } from "@/models/user"
 import axiosClient from "@/lib/axios"
 import { UpdateCustomerInput, updateCustomerSchema } from "./dto/update-customer.input"
 import { format } from "date-fns"
+import { IPaginated } from "@/hooks/use-paginated-query"
 
 export async function getCustomerByPhoneAction(phoneNumber: string): Promise<IActionResponse<ICustomerView>> {
   const session = await getSession()
@@ -129,22 +130,48 @@ export async function updateCustomerAction(id: string, data: UpdateCustomerInput
   }
 }
 
-export async function getCustomersAction(): Promise<IActionResponse<ICustomerView[]>> {
-  try {
-    const { data } = await axiosClient.get<ICustomerView[]>(`/customers`)
-    return { data }
+// export async function getCustomersAction(): Promise<IActionResponse<ICustomerView[]>> {
+//   try {
+//     const { data } = await axiosClient.get<ICustomerView[]>(`/customers`)
+//     return { data }
 
+//   } catch (err) {
+//     const error = err as Error
+//     if (error.message.includes("ECONNREFUSED")) {
+//       return {
+//         error: "Servidor não está disponível, tente novamente mais tarde."
+//       }
+//     }
+
+//     console.error(error)
+//     return {
+//       error: error.message
+//     }
+//   }
+// }
+
+export async function getCustomersAction(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<IActionResponse<IPaginated<ICustomerView>>> {
+  try {
+    const { data } = await axiosClient.get<IPaginated<ICustomerView>>('/customers', {
+      params,
+    })
+
+    return { data }
   } catch (err) {
     const error = err as Error
-    if (error.message.includes("ECONNREFUSED")) {
+
+    if (error.message.includes('ECONNREFUSED')) {
       return {
-        error: "Servidor não está disponível, tente novamente mais tarde."
+        error: 'Servidor não está disponível, tente novamente mais tarde.',
       }
     }
 
     console.error(error)
     return {
-      error: error.message
+      error: error.message,
     }
   }
 }

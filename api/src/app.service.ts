@@ -168,7 +168,9 @@ export class AppService {
 
   async seedAppointments() {
     console.log("Seeding appointments...")
-    const customers = await this.customersService.findAll()
+    const { results: customers } = await this.customersService.findAll({
+      limit: 200
+    })
     const services = await this.servicesService.findAll()
     const attendants = await this.usersService.findAll({ role: EUserRole.ATTENDANT })
 

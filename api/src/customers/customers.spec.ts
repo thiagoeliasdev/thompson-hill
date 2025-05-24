@@ -168,17 +168,17 @@ describe("Customers Module", () => {
     })
 
     it("should find all customers", async () => {
-      const initialCustomers = await customersService.findAll()
+      const initialCustomers = await customersService.findAll({ limit: 200 })
       const inputData = Array.from({ length: 5 }, () => getRandomCustomerCreateInputData())
 
       for (const data of inputData) {
         await customersService.create(data)
       }
 
-      const customers = await customersService.findAll()
+      const customers = await customersService.findAll({ limit: 200 })
       expect(customers).toBeDefined()
-      expect(customers.length).toBe(initialCustomers.length + inputData.length)
-      expect(customers).toEqual(
+      expect(customers.results.length).toBe(initialCustomers.results.length + inputData.length)
+      expect(customers.results).toEqual(
         expect.arrayContaining(inputData.map((data) => expect.objectContaining({
           name: data.name,
           phoneNumber: data.phoneNumber,
@@ -187,7 +187,7 @@ describe("Customers Module", () => {
       )
 
       for (const data of inputData) {
-        const customer = customers.find((s) => s.name === data.name)
+        const customer = customers.results.find((s) => s.name === data.name)
         if (customer) {
           await customersService.remove(customer.id)
         }

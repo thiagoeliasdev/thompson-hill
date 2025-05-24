@@ -26,12 +26,6 @@ export default function CustomersTable({
   data = [],
   isLoading = false,
   emptyMessage = "Nenhum cliente encontrado",
-  disablePagination = false,
-  filtering = {
-    enableFiltering: false,
-    field: "name",
-    placeholder: "Buscar por Nome",
-  },
   onEditButtonClick,
 }: Props) {
   function getColumns(): ColumnDef<ICustomerView>[] {
@@ -43,26 +37,35 @@ export default function CustomersTable({
       {
         accessorKey: "referralCode",
         header: "Código de Indicação",
+        cell: (row) => <p className="text-center">{row.getValue() as string}</p>,
       },
       {
         accessorKey: "referralCodeCount",
-        header: "Indicações",
+        header: () => <p className="text-center">Indicações</p>,
+        cell: (row) => <p className="text-center">{row.getValue() as string}</p>,
       },
       {
         accessorKey: "gender",
-        header: () => <p className="text-start">Gênero</p>,
+        header: () => <p className="text-center">Genero</p>,
         cell: (row) => <p className="text-start">{EGenderMapper[row.getValue() as EGender]}</p>,
       },
       {
         accessorKey: "phoneNumber",
-        header: () => <p className="hidden sm:block text-center">Telefone</p>,
-        cell: (row) => <p className="hidden sm:block text-center">{row.getValue() as string}</p>,
+        header: () => <p className="text-center">Telefone</p>,
+        cell: (row) => <p className="text-center">{row.getValue() as string}</p>,
       },
       {
         accessorKey: "birthDate",
-        header: () => <p className="hidden sm:block text-center">Idade</p>,
-        cell: (row) => <p className="hidden sm:block text-center">{differenceInYears(new Date(), new TZDate(row.getValue() as string, "+06:00"))} anos | {format(new TZDate(row.getValue() as string, "+06:00"), "dd/MMM/yyyy", {
+        header: () => <p className="text-center">Idade</p>,
+        cell: (row) => <p className="text-center">{differenceInYears(new Date(), new TZDate(row.getValue() as string, "+06:00"))} anos | {format(new TZDate(row.getValue() as string, "+06:00"), "dd/MMM/yyyy", {
           locale: ptBR,
+        })}</p>,
+      },
+      {
+        accessorKey: "createdAt",
+        header: () => <p className="text-center">Registrado em</p>,
+        cell: (row) => <p className="text-center">{format(new Date(row.getValue() as string), "dd/MMM/yy", {
+          locale: ptBR
         })}</p>,
       },
       {
@@ -95,8 +98,6 @@ export default function CustomersTable({
       data={data}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
-      enablePagination={!disablePagination}
-      filtering={filtering}
     />
   )
 }
