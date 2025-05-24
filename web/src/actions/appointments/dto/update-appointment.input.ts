@@ -1,5 +1,5 @@
 import { z } from "@/lib/pt-zod"
-import { EAppointmentStatuses } from "@/models/appointment"
+import { EAppointmentStatuses, EPaymentMethod } from "@/models/appointment"
 
 export const updateAppointmentSchema = z.object({
   attendantId: z.string().optional(),
@@ -7,7 +7,8 @@ export const updateAppointmentSchema = z.object({
     message: "Selecione pelo menos um serviço",
   }),
   redeemCoupon: z.string().optional(),
-  status: z.nativeEnum(EAppointmentStatuses)
+  status: z.nativeEnum(EAppointmentStatuses),
+  paymentMethod: z.nativeEnum(EPaymentMethod).optional()
 })
 
 export type UpdateAppointmentInput = z.infer<typeof updateAppointmentSchema>

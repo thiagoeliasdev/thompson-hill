@@ -6,6 +6,7 @@ import { EAppointmentStatuses, IAppointmentView } from "@/models/appointment"
 import { getSession } from "@/lib/session"
 import axiosClient from "@/lib/axios"
 import { UpdateAppointmentInput, updateAppointmentSchema } from "./dto/update-appointment.input"
+import { IPaginated } from "@/hooks/use-paginated-query"
 
 const APPOINTMENTS_END_POINT = "/appointments"
 
@@ -83,22 +84,28 @@ export async function updateAppointmentAction(id: string, data: UpdateAppointmen
   }
 }
 
-export async function getAppointmentsAction(): Promise<IActionResponse<IAppointmentView[]>> {
+export async function getAppointmentsAction(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: Record<string, any>
+): Promise<IActionResponse<IPaginated<IAppointmentView>>> {
   try {
-    const { data } = await axiosClient.get<IAppointmentView[]>(APPOINTMENTS_END_POINT)
-    return { data }
+    const { data } = await axiosClient.get<IPaginated<IAppointmentView>>(APPOINTMENTS_END_POINT, {
+      params,
+    })
 
+    return { data }
   } catch (err) {
     const error = err as Error
-    if (error.message.includes("ECONNREFUSED")) {
+
+    if (error.message.includes('ECONNREFUSED')) {
       return {
-        error: "Servidor não está disponível, tente novamente mais tarde."
+        error: 'Servidor não está disponível, tente novamente mais tarde.',
       }
     }
 
     console.error(error)
     return {
-      error: error.message
+      error: error.message,
     }
   }
 }

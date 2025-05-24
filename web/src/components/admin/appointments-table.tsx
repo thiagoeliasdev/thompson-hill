@@ -4,7 +4,7 @@ import { DataTable } from "../ui/data-table"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { EAppointmentStatuses, IAppointmentView } from "@/models/appointment"
+import { EAppointmentStatuses, EPaymentMethod, EPaymentMethodMapper, IAppointmentView } from "@/models/appointment"
 import { formatCurrency } from "@/lib/utils"
 import AppointmentStatusBadge from "../appointment-status-badge"
 import { Button } from "../ui/button"
@@ -58,8 +58,14 @@ export default function AppointmentsTable({
         },
       },
       {
+        accessorKey: "paymentMethod",
+        header: () => <p className="text-center">Método de Pagamento</p>,
+        cell: (row) => <p className="text-center">{EPaymentMethodMapper[row.getValue() as EPaymentMethod]}</p>,
+      },
+      {
         accessorKey: "attendant.name",
-        header: "Atendente",
+        header: () => <p className="text-center">Atendente</p>,
+        cell: (row) => <p className="text-center">{row.getValue() as string}</p>,
       },
       {
         id: "actions",

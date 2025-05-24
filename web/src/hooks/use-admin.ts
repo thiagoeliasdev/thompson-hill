@@ -1,7 +1,3 @@
-import { getAppointmentsAction, updateAppointmentAction } from "@/actions/appointments"
-import { UpdateAppointmentInput } from "@/actions/appointments/dto/update-appointment.input"
-import { updateCustomerAction } from "@/actions/customers"
-import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
 import { CreateServiceInput } from "@/actions/services/dto/create-service.input"
 import { UpdateServiceInput } from "@/actions/services/dto/update-service.input"
@@ -10,12 +6,9 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
-import { IAppointmentView } from "@/models/appointment"
-import { ICustomerView } from "@/models/customer"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { IPaginated } from "./use-paginated-query"
 
 export const useAdmin = () => {
   const queryClient = useQueryClient()
@@ -138,88 +131,6 @@ export const useAdmin = () => {
     }
   })
 
-  // const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-  //   queryKey: [queries.admin.customers],
-  //   queryFn: async (): Promise<ICustomerView[]> => {
-  //     const response = await getCustomersAction()
-
-  //     if (response.data) {
-  //       return response.data.map((service) => ({
-  //         ...service,
-  //         createdAt: new Date(service.createdAt)
-  //       }))
-  //     }
-
-  //     return response.data || []
-  //   },
-  //   refetchOnWindowFocus: true
-  // })
-
-  const { mutateAsync: updateCustomer } = useMutation({
-    mutationKey: ["updateSCustomer"],
-    mutationFn: async ({ id, data }: { id: string, data: UpdateCustomerInput }): Promise<IActionResponse<ICustomerView>> => {
-      const response = await updateCustomerAction(id, data)
-
-      if (response.data) {
-        queryClient.setQueryData([queries.admin.customers], (current: IPaginated<ICustomerView> | undefined) => {
-          if (!current) return current
-
-          return {
-            ...current,
-            data: current.data.map((customer) =>
-              customer.id === response.data?.id
-                ? { ...customer, ...response.data }
-                : customer
-            ),
-          }
-        })
-      }
-
-      return response
-    }
-  })
-
-  const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
-    queryKey: [queries.admin.appointments],
-    queryFn: async (): Promise<IAppointmentView[]> => {
-      const response = await getAppointmentsAction()
-
-      if (response.data) {
-        return response.data.map((appointment) => ({
-          ...appointment,
-          createdAt: new Date(appointment.createdAt),
-          onServiceAt: appointment.onServiceAt ? new Date(appointment.onServiceAt) : undefined,
-          finishedAt: appointment.finishedAt ? new Date(appointment.finishedAt) : undefined,
-        }))
-      }
-
-      return response.data || []
-    },
-    refetchOnWindowFocus: true
-  })
-
-  const { mutateAsync: updateAppointment } = useMutation({
-    mutationKey: ["updateAppointment"],
-    mutationFn: async (data: { id: string, data: UpdateAppointmentInput }): Promise<IActionResponse<IAppointmentView>> => {
-      const response = await updateAppointmentAction(data.id, data.data)
-
-      if (!!response.data) {
-        queryClient.setQueryData([queries.admin.appointments], (current: IAppointmentView[]) => {
-          return current?.map((appointment) => {
-            if (appointment.id === response.data?.id) {
-              return { ...appointment, ...response.data }
-            }
-            return appointment
-          })
-        })
-
-        return response
-      }
-
-      return response
-    }
-  })
-
   return {
     users,
     isLoadingUsers,
@@ -228,10 +139,6 @@ export const useAdmin = () => {
     services,
     isLoadingServices,
     createService,
-    updateService,
-    updateCustomer,
-    appointments,
-    isLoadingAppointments,
-    updateAppointment
+    updateService
   }
 }

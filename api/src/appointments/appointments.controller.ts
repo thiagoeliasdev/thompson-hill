@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, Put } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, HttpCode, Put, Query } from '@nestjs/common'
 import { AppointmentsService } from './appointments.service'
 import { CreateAppointmentInput } from "./dto/create-appointment.input"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth/jwt-auth.guard"
 import { AppointmentView } from "./dto/appointment.view"
 import { UpdateAppointmentInput } from "./dto/update-appointment.input"
+import { createPaginatedDto } from "../common/dto/paginated.view"
+import { AppointmentQuery } from "./dto/appointment.query"
+
+const PaginatedAppointmentView = createPaginatedDto(AppointmentView)
 
 @ApiTags('Appointments')
 @Controller('appointments')
@@ -24,9 +28,17 @@ export class AppointmentsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all appointments' })
-  @ApiOkResponse({ type: [AppointmentView] })
-  async findAll() {
-    return (await this.appointmentsService.findAll()).map((appointment) => new AppointmentView(appointment))
+  @ApiOkResponse({ type: PaginatedAppointmentView })
+  async findAll(@Query() query: AppointmentQuery) {
+    const { page = 1, limit = 10 } = query
+    const { results, total } = await this.appointmentsService.findAll(query)
+
+    return {
+      data: results.map((appointment) => new AppointmentView(appointment)),
+      total,
+      page,
+      limit,
+    }
   }
 
   @Get(':id')

@@ -26,7 +26,8 @@ export default function CustomersPage() {
   function handleFormSubmit(values: CustomerSearchFormSchema) {
     setParams((prev) => ({
       ...prev,
-      ...values
+      ...values,
+      limit: 10,
     }))
   }
 
@@ -55,6 +56,7 @@ export default function CustomersPage() {
             <ScrollArea className="h-[90%] pr-4">
               <div className="px-1">
                 <UpdateCustomerForm
+                  params={params}
                   customer={selectedCustomer}
                   onSuccess={() => {
                     setSheetOpen(false)

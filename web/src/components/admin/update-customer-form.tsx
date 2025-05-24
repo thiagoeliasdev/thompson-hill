@@ -10,23 +10,24 @@ import { CameraIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { useAdmin } from "@/hooks/use-admin"
 import { EGender, EGenderMapper, ICustomerView } from "@/models/customer"
 import { updateCustomerSchema } from "@/actions/customers/dto/update-customer.input"
 import { format } from "date-fns"
 import { tz } from "@date-fns/tz"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { applyDateMask, applyPhoneMask, formatPhoneToE164 } from "@/lib/utils"
+import { useCustomers, UseCustomersParams } from "@/hooks/use-customers"
 
 interface Props {
   customer: ICustomerView
+  params: UseCustomersParams
   onSuccess?: () => void
   onError?: () => void
 }
 
-export default function UpdateCustomerForm({ onSuccess, onError, customer }: Props) {
+export default function UpdateCustomerForm({ onSuccess, onError, customer, params }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
-  const { updateCustomer } = useAdmin()
+  const { updateCustomer } = useCustomers(params)
 
   const formSchema = updateCustomerSchema
   const form = useForm<z.infer<typeof formSchema>>({

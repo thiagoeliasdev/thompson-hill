@@ -49,6 +49,15 @@ export const EAppointmentStatusesMapper: Record<EAppointmentStatuses, EAppointme
   },
 }
 
+export const EPaymentMethodMapper: Record<EPaymentMethod, string> = {
+  [EPaymentMethod.CASH]: 'Dinheiro',
+  [EPaymentMethod.CREDIT_CARD]: 'Cartão de Crédito',
+  [EPaymentMethod.DEBIT_CARD]: 'Cartão de Débito',
+  [EPaymentMethod.PIX]: 'Pix',
+  [EPaymentMethod.TRANSFER]: 'Transferência',
+  [EPaymentMethod.BONUS]: 'Bônus',
+}
+
 export interface IAppointmentView {
   id: string
   customer: {

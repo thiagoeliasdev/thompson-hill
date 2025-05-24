@@ -1,9 +1,8 @@
 "use client"
 
 import { z } from "@/lib/pt-zod"
-import { EAppointmentStatuses, EAppointmentStatusesMapper, IAppointmentView } from "@/models/appointment"
+import { EAppointmentStatuses, EAppointmentStatusesMapper, EPaymentMethod, EPaymentMethodMapper, IAppointmentView } from "@/models/appointment"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -18,9 +17,10 @@ import { updateAppointmentSchema } from "@/actions/appointments/dto/update-appoi
 import { PlusIcon, XIcon } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { useAdmin } from "@/hooks/use-admin"
+import { useAppointments, UseAppointmentsParams } from "@/hooks/use-appointments"
 
 interface Props {
+  params: UseAppointmentsParams
   appointment: IAppointmentView
   attendants: IUserView[]
   services: IServiceView[]
@@ -28,7 +28,7 @@ interface Props {
   onSuccess?: () => void
 }
 
-export default function AppointmentUpdateForm({ appointment, attendants, services, isLoading, onSuccess }: Props) {
+export default function AppointmentUpdateForm({ appointment, attendants, services, isLoading, onSuccess, params }: Props) {
   const formSchema = updateAppointmentSchema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,10 +37,11 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
       redeemCoupon: appointment.redeemCoupon,
       serviceIds: appointment.services.map((service) => service.id) || [],
       status: appointment.status,
+      paymentMethod: appointment.paymentMethod,
     },
   })
 
-  const { updateAppointment } = useAdmin()
+  const { updateAppointment } = useAppointments(params)
 
   const attendantsOptions = useMemo(() => {
     return attendants.map((attendant) => ({
@@ -55,10 +56,6 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
       value: service.id,
     }))
   }, [services])
-
-  useEffect(() => {
-    console.log(form.formState.errors)
-  }, [form.formState.errors])
 
   function handleAddService() {
     const serviceIds = form.getValues("serviceIds")
@@ -314,6 +311,36 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
           onClick={handleAddService}
           className="w-full border-3 border-dashed"
         ><PlusIcon /> Adicionar serviço</Button>
+
+        <FormField
+          control={form.control}
+          name="paymentMethod"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Método de Pagamento</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                <FormControl className="w-full">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.values(EPaymentMethod).map((item) => (
+                    <SelectItem
+                      key={item}
+                      value={item}
+                    >{EPaymentMethodMapper[item]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           isLoading={form.formState.isSubmitting}

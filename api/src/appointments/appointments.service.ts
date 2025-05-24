@@ -74,23 +74,108 @@ export class AppointmentsService {
     return createdAppointmentObj
   }
 
-  async findAll(query?: AppointmentQuery): Promise<Appointment[]> {
-    const dbQuery: any = {}
+  async findAll(filters: AppointmentQuery = {}) {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      order = 'desc',
+      onlyToday,
+      customerName,
+      status,
+      paymentMethod,
+    } = filters
 
-    if (query?.onlyToday) {
+    const skip = (page - 1) * limit
+    const matchFilters: any = {}
+
+    if (onlyToday) {
       const today = new Date()
       const start = startOfDay(today)
       const end = endOfDay(today)
-
-      dbQuery.createdAt = { $gte: start, $lte: end }
+      matchFilters.createdAt = { $gte: start, $lte: end }
     }
 
-    const appointments = await this.appointmentSchema
-      .find(dbQuery)
-      .populate(['services', 'customer', 'attendant'])
-      .sort({ createdAt: -1 })
+    if (status) matchFilters.status = status
+    if (paymentMethod) matchFilters.paymentMethod = paymentMethod
 
-    return appointments.map(toAppointment)
+    const pipeline: any[] = [
+      { $match: matchFilters },
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customerId',
+          foreignField: '_id',
+          as: 'customer',
+        },
+      },
+      { $unwind: '$customer' },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'serviceIds',
+          foreignField: '_id',
+          as: 'services',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'attendantId',
+          foreignField: '_id',
+          as: 'attendant',
+        },
+      },
+      { $unwind: { path: '$attendant', preserveNullAndEmptyArrays: true } },
+    ]
+
+    if (customerName) {
+      pipeline.push({
+        $match: {
+          'customer.name': { $regex: customerName, $options: 'i' }, // case-insensitive
+        },
+      })
+    }
+
+    pipeline.push(
+      { $sort: { [sortBy]: order === 'asc' ? 1 : -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    )
+
+    const rawResults = await this.appointmentSchema.aggregate(pipeline).exec()
+
+    const results = rawResults.map((doc) =>
+      new Appointment(toAppointment({
+        ...doc, id: doc._id,
+        customer: {
+          ...doc.customer,
+          id: doc.customer._id,
+        },
+        attendant: doc.attendant ? {
+          ...doc.attendant,
+          id: doc.attendant._id,
+        } : undefined,
+        services: doc.services.map((service) => ({
+          ...service,
+          id: service._id,
+        })),
+      }))
+    )
+
+    const countPipeline = pipeline
+      .filter(p => !['$skip', '$limit', '$sort'].includes(Object.keys(p)[0]))
+      .concat({ $count: 'total' })
+
+    const countResult = await this.appointmentSchema.aggregate(countPipeline).exec()
+    const total = countResult[0]?.total || 0
+
+    return {
+      results,
+      total,
+      page,
+      limit,
+    }
   }
 
   async findOne(id: string): Promise<Appointment> {

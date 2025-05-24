@@ -90,7 +90,8 @@ export class CustomersService {
 
     const skip = (page - 1) * limit
 
-    const query = this.customerSchema.find(filterFields)
+    const query = this.customerSchema
+      .find(filterFields)
       .sort({ [sortBy]: order === 'asc' ? 1 : -1 })
       .skip(skip)
       .limit(limit)
