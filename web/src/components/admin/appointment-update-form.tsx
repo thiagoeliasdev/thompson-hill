@@ -213,7 +213,7 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
         <FormItem>
           <FormLabel>Serviços</FormLabel>
           <FormMessage>{form.getFieldState("serviceIds").error?.message}</FormMessage>
-          {form.getValues().serviceIds.map((_, index) => (
+          {form.watch().serviceIds.map((_, index) => (
             <div
               key={index}
             >

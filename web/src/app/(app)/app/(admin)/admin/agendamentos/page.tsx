@@ -13,9 +13,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAppointments, UseAppointmentsParams } from "@/hooks/use-appointments"
 import AppointmentSearchForm, { AppointmentSearchFormSchema } from "./appointment-search-form"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { ChevronDown, ChevronUp } from "lucide-react"
 
 export default function AppointmentsPage() {
   const [isSheetOpen, setSheetOpen] = useState(false)
+  const [isFiltersOpen, setFiltersOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<IAppointmentView | undefined>(undefined)
   const { users, isLoadingUsers, services, isLoadingServices } = useAdmin()
   const [params, setParams] = useState<UseAppointmentsParams>({
@@ -79,8 +82,19 @@ export default function AppointmentsPage() {
 
       <Card className="mt-4 mb-4">
         <CardContent>
-          <CardTitle>Parâmetros de Busca</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Parâmetros de Busca <i className="text-xs text-muted-foreground">(resultados: {appointments?.total})</i></CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setFiltersOpen(!isFiltersOpen)}
+            >
+              {isFiltersOpen ? <ChevronUp /> : <ChevronDown />}
+            </Button>
+          </div>
           <AppointmentSearchForm
+            className={cn("hidden lg:flex", isFiltersOpen ? "flex" : "hidden")}
             onSubmit={handleFormSubmit}
           />
         </CardContent>

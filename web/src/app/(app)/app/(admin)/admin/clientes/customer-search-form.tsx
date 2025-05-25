@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SearchIcon } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ClassNameValue } from "tailwind-merge"
+import { cn } from "@/lib/utils"
 
 enum ESortOrder {
   ASCENDING = "asc",
@@ -47,9 +49,10 @@ export type CustomerSearchFormSchema = z.infer<typeof formSchema>
 
 interface Props {
   onSubmit: (values: z.infer<typeof formSchema>) => void
+  className?: ClassNameValue
 }
 
-export default function CustomerSearchForm({ onSubmit }: Props) {
+export default function CustomerSearchForm({ onSubmit, className }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,12 +66,14 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full pt-6 flex flex-col flex-wrap lg:flex-nowrap sm:flex-row gap-4 justify-between items-end">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn("w-full pt-6 flex flex-col flex-wrap lg:flex-nowrap lg:flex-row gap-4 justify-between items-end", className)}>
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="w-full sm:w-auto lg:w-full">
+            <FormItem className="w-full sm:w-full">
               <FormLabel>Nome</FormLabel>
               <FormControl>
                 <Input placeholder="Digite..." {...field} />
@@ -81,7 +86,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
           control={form.control}
           name="phoneNumber"
           render={({ field }) => (
-            <FormItem className="w-full sm:w-auto lg:w-full">
+            <FormItem className="w-full sm:w-full">
               <FormLabel>Telefone</FormLabel>
               <FormControl>
                 <Input placeholder="Digite..." {...field} />
@@ -94,7 +99,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
           control={form.control}
           name="referralCode"
           render={({ field }) => (
-            <FormItem className="w-full sm:w-auto lg:w-full">
+            <FormItem className="w-full sm:w-full">
               <FormLabel>Código de Indicação</FormLabel>
               <FormControl>
                 <Input placeholder="Digite..." {...field} />
@@ -107,7 +112,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
           control={form.control}
           name="sortBy"
           render={({ field }) => (
-            <FormItem className="w-full sm:w-auto lg:w-full">
+            <FormItem className="w-full sm:w-full">
               <FormLabel>Ordenar por</FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -115,7 +120,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
                 value={field.value}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full sm:w-auto lg:w-full">
+                  <SelectTrigger className="w-full sm:w-full">
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
@@ -133,7 +138,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
           control={form.control}
           name="order"
           render={({ field }) => (
-            <FormItem className="w-full sm:w-auto lg:w-full">
+            <FormItem className="w-full sm:w-full">
               <FormLabel>Direção</FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -141,7 +146,7 @@ export default function CustomerSearchForm({ onSubmit }: Props) {
                 value={field.value}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full sm:w-auto lg:w-full">
+                  <SelectTrigger className="w-full sm:w-full">
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>

@@ -11,9 +11,12 @@ import { ICustomerView } from "@/models/customer"
 import CustomerSearchForm, { CustomerSearchFormSchema } from "./customer-search-form"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function CustomersPage() {
   const [isSheetOpen, setSheetOpen] = useState(false)
+  const [isFiltersOpen, setFiltersOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomerView | undefined>(undefined)
   const [params, setParams] = useState<UseCustomersParams>({
     page: 1,
@@ -70,8 +73,19 @@ export default function CustomersPage() {
 
       <Card className="mt-4 mb-4">
         <CardContent>
-          <CardTitle>Parâmetros de Busca</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Parâmetros de Busca <i className="text-xs text-muted-foreground">(resultados: {paginatedCustomers?.total})</i></CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setFiltersOpen(!isFiltersOpen)}
+            >
+              {isFiltersOpen ? <ChevronUp /> : <ChevronDown />}
+            </Button>
+          </div>
           <CustomerSearchForm
+            className={cn("hidden lg:flex", isFiltersOpen ? "flex" : "hidden")}
             onSubmit={handleFormSubmit}
           />
         </CardContent>
