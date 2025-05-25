@@ -29,7 +29,11 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
         <p className={cn("text-sm font-semibold", appointment.attendant ? "text-transparent" : "text-primary")}>Fila Geral</p>
       </div>
       <h3 className="font-bold text-lg">{appointment.customer?.name}</h3>
-      <h4 className="text-sm text-muted-foreground">{appointment.services?.[0].name}</h4>
+      {appointment.services.map((service) => (
+        <h4
+          key={service.id}
+          className="text-sm text-muted-foreground line-clamp-1">- {service.name}</h4>
+      ))}
     </div>
   )
 }
