@@ -10,6 +10,7 @@ export interface IService {
   signedUrl?: string
   createdAt: Date
   deletedAt?: Date
+  weight: number
 }
 
 export class Service {
@@ -23,6 +24,7 @@ export class Service {
   signedUrl?: string
   createdAt: Date
   deletedAt?: Date
+  weight: number
 
   constructor(data: IService) {
     Object.assign(this, data)
@@ -40,6 +42,7 @@ export class Service {
       coverImage: this.coverImage || null,
       createdAt: this.createdAt.toISOString(),
       deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
+      weight: this.weight || 1,
     }
   }
 }

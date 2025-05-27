@@ -13,6 +13,7 @@ export class ServiceView {
     this.signedUrl = service.signedUrl
     this.createdAt = service.createdAt
     this.deletedAt = service.deletedAt || undefined
+    this.weight = service.weight
   }
 
   @ApiProperty()
@@ -44,4 +45,7 @@ export class ServiceView {
 
   @ApiProperty()
   deletedAt?: Date
+
+  @ApiProperty()
+  weight: number
 }

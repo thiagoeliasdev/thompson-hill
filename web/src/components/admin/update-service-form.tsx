@@ -36,6 +36,7 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
       promoValue: service.promoValue,
       promoEnabled: service.promoEnabled,
       coverImage: service.coverImage,
+      weight: service.weight,
     }
   })
 
@@ -98,6 +99,7 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
       data: {
         delete: true,
         name: service.name,
+        weight: service.weight,
       }
     })
     setIsDeleting(false)
@@ -198,6 +200,21 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
               <FormControl>
                 <Input
                   placeholder="Digite a descrição do serviço"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="weight"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Peso</FormLabel>
+              <FormControl>
+                <Input
                   {...field}
                 />
               </FormControl>

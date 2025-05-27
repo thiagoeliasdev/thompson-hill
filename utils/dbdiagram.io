@@ -7,6 +7,7 @@ Table users {
   profileImage string
   status userStatus [not null]
   createdAt timestamp [not null]
+  deletedAt timestamp
 }
 
 Enum userRoles {
@@ -29,7 +30,9 @@ Table services {
   promoEnabled bool [default: false]
   description string [not null]
   coverImage string
-  createdAt string [not null]
+  weight int [default: 1]
+  createdAt timestamp [not null]
+  deletedAt timestamp
 }
 
 Table customers {

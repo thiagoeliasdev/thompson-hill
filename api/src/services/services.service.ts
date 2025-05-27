@@ -42,6 +42,7 @@ export class ServicesService {
       promoEnabled: dto.promoEnabled,
       coverImage: fileUrl,
       createdAt: new Date(),
+      weight: dto.weight,
     })
 
     await service.save()

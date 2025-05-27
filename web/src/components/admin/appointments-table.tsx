@@ -36,7 +36,7 @@ export default function AppointmentsTable({
       },
       {
         accessorKey: "createdAt",
-        header: () => <p className="hidden sm:block text-center">Agendado em</p>,
+        header: () => <p className="hidden sm:block text-center">Entrada em</p>,
         cell: (row) => <p className="hidden sm:block text-center">{format(new Date(row.getValue() as string), "dd/MM/yy - HH:mm", {
           locale: ptBR,
         })}</p>,

@@ -39,6 +39,7 @@ describe("Services Module", () => {
       const data = getRandomServiceCreateInputData({
         promoValue: 50,
         promoEnabled: true,
+        weight: 5,
       })
 
       const service = await servicesService.create(data)
@@ -48,6 +49,7 @@ describe("Services Module", () => {
       expect(service.value).toBe(data.value)
       expect(service.promoValue).toBe(data.promoValue)
       expect(service.promoEnabled).toBe(data.promoEnabled)
+      expect(service.weight).toBe(data.weight)
       expect(service.createdAt).toBeDefined()
 
       await servicesService.remove(service.id)
@@ -56,7 +58,8 @@ describe("Services Module", () => {
     it("should create a service with required fields", async () => {
       const data: CreateServiceInput = {
         name: "Test Service",
-        value: 100
+        value: 100,
+        weight: 5,
       }
 
       const service = await servicesService.create(data)
@@ -65,6 +68,7 @@ describe("Services Module", () => {
       expect(service.description).toBeUndefined()
       expect(service.value).toBe(data.value)
       expect(service.createdAt).toBeDefined()
+      expect(service.weight).toBe(data.weight)
 
       await servicesService.remove(service.id)
     })
@@ -84,6 +88,7 @@ describe("Services Module", () => {
       expect(foundService.value).toBe(data.value)
       expect(foundService.promoValue).toBe(data.promoValue)
       expect(foundService.promoEnabled).toBe(data.promoEnabled)
+      expect(foundService.weight).toBe(data.weight)
       expect(foundService.createdAt).toBeDefined()
 
       await servicesService.remove(service.id)
@@ -163,6 +168,7 @@ describe("Services Module", () => {
         value: 200,
         promoValue: 100,
         promoEnabled: true,
+        weight: 10,
       })
 
       const updatedService = await servicesService.update(service.id, updatedData)
@@ -172,6 +178,7 @@ describe("Services Module", () => {
       expect(updatedService.value).toBe(updatedData.value)
       expect(updatedService.promoValue).toBe(updatedData.promoValue)
       expect(updatedService.promoEnabled).toBe(updatedData.promoEnabled)
+      expect(updatedService.weight).toBe(updatedData.weight)
       expect(updatedService.createdAt).toBeDefined()
 
       const foundService = await servicesService.findOne(service.id)
@@ -181,6 +188,7 @@ describe("Services Module", () => {
       expect(foundService.value).toBe(updatedData.value)
       expect(foundService.promoValue).toBe(updatedData.promoValue)
       expect(foundService.promoEnabled).toBe(updatedData.promoEnabled)
+      expect(foundService.weight).toBe(updatedData.weight)
       expect(foundService.createdAt).toBeDefined()
     })
 
