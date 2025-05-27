@@ -20,6 +20,7 @@ export interface IUser {
   imageSignedUrl?: string
   status: EUserStatus
   createdAt: Date
+  deletedAt?: Date | null
 }
 
 export class User {
@@ -32,6 +33,7 @@ export class User {
   imageSignedUrl?: string
   status: EUserStatus
   createdAt: Date
+  deletedAt?: Date | null
 
   constructor(data: IUser) {
     Object.assign(this, data)
@@ -46,7 +48,8 @@ export class User {
       role: this.role,
       profileImage: this.profileImage || null,
       status: this.status,
-      createdAt: this.createdAt.toISOString()
+      createdAt: this.createdAt.toISOString(),
+      deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null
     }
   }
 }

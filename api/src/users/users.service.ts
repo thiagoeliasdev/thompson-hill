@@ -73,18 +73,19 @@ export class UsersService {
 
     if (query?.role) {
       queryConditions.role = query.role
+      queryConditions.deletedAt = null
     }
 
     const users = await this.userSchema.find(queryConditions)
-    return users.map(user => new User(toUser(user)))
+    return users.filter(user => !user.deletedAt).map(user => new User(toUser(user)))
   }
 
   async getAvailableAttendants(): Promise<User[]> {
     const users = await this.userSchema.find({
       role: EUserRole.ATTENDANT,
-      status: EUserStatus.ACTIVE,
+      status: EUserStatus.ACTIVE
     })
-    return users.map(user => new User(toUser(user)))
+    return users.filter(user => !user.deletedAt).map(user => new User(toUser(user)))
   }
 
   async update({ id, userName }: { id?: string, userName?: string }, updateUserDto: UpdateUserInput): Promise<User> {
@@ -101,11 +102,14 @@ export class UsersService {
       key: user.id,
     })
 
+    const { delete: deleteUser, ...rest } = updateUserDto
+
     const updatedUser: User = new User({
       ...user,
-      ...updateUserDto,
+      ...rest,
       profileImage: fileUrl,
-      password: updatedPassword
+      password: updatedPassword,
+      deletedAt: deleteUser ? new Date() : null,
     })
 
     const updatedUserFromDB = await this.userSchema.findOneAndUpdate(
@@ -145,7 +149,7 @@ export class UsersService {
   async loginWithCredentials(userName: string, password: string): Promise<User> {
     try {
       const user = await this.findOne({ userName })
-      if (!user) throw new InvalidCredentialsException()
+      if (!user || !!user.deletedAt) throw new InvalidCredentialsException()
 
       const passwordValid = await verify(user?.password || "wrong", password)
       if (!user || !passwordValid) throw new InvalidCredentialsException()

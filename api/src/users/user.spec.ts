@@ -126,7 +126,7 @@ describe('Users Module', () => {
       }).rejects.toThrow(UserNotFoundException)
     })
 
-    it.skip("should find all users", async () => {
+    it("should find all users", async () => {
       const initialUsers = await usersServices.findAll()
 
       const inputData = Array.from({ length: 5 }, () => getRandomUserData())
@@ -149,6 +149,39 @@ describe('Users Module', () => {
       for (const data of inputData) {
         await usersServices.remove({ userName: data.userName })
       }
+    }, 30000)
+
+    it("should not return deleted users by default when finding all users", async () => {
+      const initialUsers = await usersServices.findAll()
+
+      const inputData = Array.from({ length: 5 }, () => getRandomUserData())
+
+      const inputDeleteUserData = getRandomUserData({ name: "User to be deleted" })
+
+      for (const data of inputData) {
+        await usersServices.create(data)
+      }
+
+      const users1 = await usersServices.findAll()
+
+      expect(users1).toHaveLength(initialUsers.length + inputData.length)
+
+      await usersServices.create(inputDeleteUserData)
+
+      const users2 = await usersServices.findAll()
+
+      expect(users2).toHaveLength(initialUsers.length + inputData.length + 1)
+
+      await usersServices.update({ userName: inputDeleteUserData.userName }, { delete: true })
+
+      const users3 = await usersServices.findAll()
+
+      expect(users3).toHaveLength(initialUsers.length + inputData.length)
+
+      for (const data of inputData) {
+        await usersServices.remove({ userName: data.userName })
+      }
+      await usersServices.remove({ userName: inputDeleteUserData.userName })
     }, 30000)
 
     it.skip("should find all users filtering by role", async () => {
@@ -385,6 +418,34 @@ describe('Users Module', () => {
 
       expect(async () => {
         await usersServices.loginWithCredentials(inputData.userName, "wrong-password")
+      }).rejects.toThrow(InvalidCredentialsException)
+
+      await usersServices.remove({ userName: inputData.userName })
+    })
+
+    it("should soft delete a user by id", async () => {
+      const inputData = getRandomUserData()
+
+      const user = await usersServices.create(inputData)
+      const deletedUser = await usersServices.update({ id: user.id }, {
+        delete: true
+      })
+
+      expect(deletedUser).toHaveProperty("id", user.id)
+      expect(deletedUser).toHaveProperty("name", inputData.name)
+      expect(deletedUser).toHaveProperty("userName", inputData.userName.toLowerCase())
+      expect(deletedUser).toHaveProperty("password")
+      expect(deletedUser).toHaveProperty("deletedAt")
+    })
+
+    it("should not login with a soft deleted user", async () => {
+      const inputData = getRandomUserData()
+
+      await usersServices.create(inputData)
+      await usersServices.update({ userName: inputData.userName }, { delete: true })
+
+      expect(async () => {
+        await usersServices.loginWithCredentials(inputData.userName, inputData.password)
       }).rejects.toThrow(InvalidCredentialsException)
 
       await usersServices.remove({ userName: inputData.userName })

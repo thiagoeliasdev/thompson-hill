@@ -281,8 +281,8 @@ describe("Appointment Module", () => {
 
       const appointments = await appointmentsService.findAll()
 
-      expect(appointments).toBeDefined()
-      expect(appointments).toHaveLength(currentAppointments.length + 2)
+      expect(appointments.results).toBeDefined()
+      expect(appointments.total).toBe(currentAppointments.total + 2)
 
       await appointmentsService.remove(appointment1.id)
       await appointmentsService.remove(appointment2.id)
@@ -316,8 +316,8 @@ describe("Appointment Module", () => {
 
       const appointments = await appointmentsService.findAll({ onlyToday: true })
 
-      expect(appointments).toBeDefined()
-      expect(appointments).toHaveLength(currentAppointments.length + 2)
+      expect(appointments.results).toBeDefined()
+      expect(appointments.total).toBe(currentAppointments.total + 2)
 
       await appointmentsService.remove(appointment1.id)
       await appointmentsService.remove(appointment2.id)
