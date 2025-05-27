@@ -51,7 +51,7 @@ export class ServicesService {
 
   async findAll(): Promise<Service[]> {
     const services = await this.serviceSchema.find().sort({ name: 1 })
-    return services.map((service) => new Service(toService(service)))
+    return services.filter(service => !service.deletedAt).map((service) => new Service(toService(service)))
   }
 
   async update(id: string, updateServiceDto: UpdateServiceInput): Promise<Service> {
@@ -62,9 +62,15 @@ export class ServicesService {
       key: id,
     })
 
+    const { delete: deleteService, ...rest } = updateServiceDto
+
     const service = await this.serviceSchema.findOneAndUpdate(
       { _id: id },
-      { ...updateServiceDto, coverImage: fileUrl },
+      {
+        ...rest,
+        coverImage: fileUrl,
+        deletedAt: deleteService ? new Date() : undefined
+      },
       { new: true }
     )
     if (!service) throw new ServiceNotFoundException()

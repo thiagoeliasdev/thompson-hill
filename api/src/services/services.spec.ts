@@ -122,6 +122,38 @@ describe("Services Module", () => {
       }
     }, 30000)
 
+    it("should not list soft deleted services when find all runs", async () => {
+      const initialServices = await servicesService.findAll()
+      const inputData = Array.from({ length: 5 }, () => getRandomServiceCreateInputData())
+      const inputDataWithDelete = getRandomServiceCreateInputData()
+
+      for (const data of inputData) {
+        await servicesService.create(data)
+
+      }
+
+      const services1 = await servicesService.findAll()
+      expect(services1.length).toBe(initialServices.length + inputData.length)
+
+      const deleteThisService = await servicesService.create(inputDataWithDelete)
+      const services2 = await servicesService.findAll()
+      expect(services2.length).toBe(initialServices.length + inputData.length + 1)
+
+      await servicesService.update(deleteThisService.id, {
+        delete: true
+      })
+      const services3 = await servicesService.findAll()
+      expect(services3.length).toBe(initialServices.length + inputData.length)
+
+      for (const data of inputData) {
+        const service = services1.find((s) => s.name === data.name)
+        if (service) {
+          await servicesService.remove(service.id)
+        }
+      }
+      await servicesService.remove(deleteThisService.id)
+    }, 30000)
+
     it("should update a service", async () => {
       const data = getRandomServiceCreateInputData()
       const service = await servicesService.create(data)
@@ -173,6 +205,18 @@ describe("Services Module", () => {
       expect(async () => {
         await servicesService.remove("invalid-id")
       }).rejects.toThrow(ServiceNotFoundException)
+    })
+
+    it("should soft delete a service by id", async () => {
+      const inputData = getRandomServiceCreateInputData()
+
+      const service = await servicesService.create(inputData)
+      const deletedUser = await servicesService.update(service.id, {
+        delete: true
+      })
+
+      expect(deletedUser).toHaveProperty("id", service.id)
+      expect(deletedUser).toHaveProperty("deletedAt")
     })
   })
 })

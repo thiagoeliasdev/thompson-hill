@@ -9,6 +9,7 @@ export interface IService {
   coverImage?: string
   signedUrl?: string
   createdAt: Date
+  deletedAt?: Date
 }
 
 export class Service {
@@ -21,6 +22,7 @@ export class Service {
   coverImage?: string
   signedUrl?: string
   createdAt: Date
+  deletedAt?: Date
 
   constructor(data: IService) {
     Object.assign(this, data)
@@ -36,7 +38,8 @@ export class Service {
       promoValue: this.promoValue || null,
       promoEnabled: this.promoEnabled || false,
       coverImage: this.coverImage || null,
-      createdAt: this.createdAt.toISOString()
+      createdAt: this.createdAt.toISOString(),
+      deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
     }
   }
 }

@@ -12,6 +12,7 @@ export class ServiceView {
     this.coverImage = service.coverImage
     this.signedUrl = service.signedUrl
     this.createdAt = service.createdAt
+    this.deletedAt = service.deletedAt || undefined
   }
 
   @ApiProperty()
@@ -40,4 +41,7 @@ export class ServiceView {
 
   @ApiProperty()
   createdAt: Date
+
+  @ApiProperty()
+  deletedAt?: Date
 }
