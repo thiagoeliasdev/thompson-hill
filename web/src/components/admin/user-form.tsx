@@ -17,6 +17,7 @@ import Image from "next/image"
 import { generateUserName } from "@/lib/utils"
 import { CameraIcon } from "lucide-react"
 import { images } from "@/lib/images"
+import { Checkbox } from "../ui/checkbox"
 
 interface Props {
   forRole: EUserRole
@@ -41,6 +42,8 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
   })
 
   const photoRef = useRef<HTMLInputElement>(null)
+  const [enableDelete, setEnableDelete] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (user) return
@@ -150,6 +153,27 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
 
   async function handlePhotoInput(file: File) {
     setSelectedFile(file)
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true)
+    if (!user) return
+
+    const response = await updateUser({
+      id: user.id,
+      userName: user.userName,
+      data: {
+        delete: true
+      }
+    })
+    setIsDeleting(false)
+    if (response.data) {
+      toast.success("Usuário excluído com sucesso")
+      if (onSuccess) onSuccess()
+    } else {
+      toast.error("Erro ao excluir usuário")
+      if (onError) onError()
+    }
   }
 
   return (
@@ -288,6 +312,23 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
             </FormItem>
           )}
         />
+        {user && (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              className="dark:border-destructive dark:data-[state=checked]:bg-destructive dark:data-[state=checked]:text-destructive-foreground size-8 border-2"
+              checked={enableDelete}
+              onCheckedChange={() => setEnableDelete(!enableDelete)}
+            />
+            <Button
+              onClick={() => handleDelete()}
+              disabled={!enableDelete}
+              isLoading={isDeleting}
+              type="button"
+              variant="destructive"
+              className="w-full flex-1"
+            >Excluir</Button>
+          </div>
+        )}
         <Button
           isLoading={form.formState.isSubmitting}
           type="submit"

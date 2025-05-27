@@ -14,6 +14,7 @@ import { useRef, useState } from "react"
 import Image from "next/image"
 import { useAdmin } from "@/hooks/use-admin"
 import { Switch } from "../ui/switch"
+import { Checkbox } from "../ui/checkbox"
 
 interface Props {
   service: IServiceView
@@ -39,6 +40,8 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
   })
 
   const photoRef = useRef<HTMLInputElement>(null)
+  const [enableDelete, setEnableDelete] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const coverImage = selectedFile?.name
@@ -85,6 +88,26 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
 
   async function handlePhotoInput(file: File) {
     setSelectedFile(file)
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true)
+
+    const response = await updateService({
+      id: service.id,
+      data: {
+        delete: true,
+        name: service.name,
+      }
+    })
+    setIsDeleting(false)
+    if (response.data) {
+      toast.success("Serviço excluído com sucesso")
+      if (onSuccess) onSuccess()
+    } else {
+      toast.error("Erro ao excluir serviço")
+      if (onError) onError()
+    }
   }
 
   return (
@@ -242,6 +265,21 @@ export default function ProductForm({ onSuccess, onError, service }: Props) {
             </FormItem>
           )}
         />
+        <div className="flex items-center gap-2">
+          <Checkbox
+            className="dark:border-destructive dark:data-[state=checked]:bg-destructive dark:data-[state=checked]:text-destructive-foreground size-8 border-2"
+            checked={enableDelete}
+            onCheckedChange={() => setEnableDelete(!enableDelete)}
+          />
+          <Button
+            onClick={() => handleDelete()}
+            disabled={!enableDelete}
+            isLoading={isDeleting}
+            type="button"
+            variant="destructive"
+            className="w-full flex-1"
+          >Excluir</Button>
+        </div>
         <Button
           isLoading={form.formState.isSubmitting}
           type="submit"

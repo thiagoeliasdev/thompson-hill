@@ -26,7 +26,8 @@ export const updateServiceSchema = z.object({
   ]).optional(),
   promoEnabled: z.boolean().default(false).optional(),
   coverImage: z.string().optional(),
-  imageContentType: z.string().optional()
+  imageContentType: z.string().optional(),
+  delete: z.boolean().optional(),
 })
 
 export type UpdateServiceInput = z.infer<typeof updateServiceSchema>

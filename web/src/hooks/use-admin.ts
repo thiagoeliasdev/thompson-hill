@@ -69,7 +69,10 @@ export const useAdmin = () => {
       }
 
       return response
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
   })
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
@@ -128,7 +131,10 @@ export const useAdmin = () => {
       }
 
       return response
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
   })
 
   return {
