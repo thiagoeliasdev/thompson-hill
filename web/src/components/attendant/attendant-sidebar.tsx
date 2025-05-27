@@ -19,8 +19,8 @@ import React from "react"
 
 const routes = [
   {
-    slug: "dashboard",
-    title: "Dashboard",
+    slug: "atendimento",
+    title: "Atendimento",
     urlPrefix: EPages.ATTENDANCE_DASHBOARD,
     url: EPages.ATTENDANCE_DASHBOARD,
     icon: <LayoutDashboard />

@@ -13,5 +13,10 @@ export const queries = {
     attendants: "totem_attendants",
     customer: "totem_customer",
     services: "totem_services",
-  }
+  },
+  attendant: {
+    appointments: "attendant_appointments",
+    appointment: "attendant_appointment",
+    services: "attendant_services",
+  },
 }
