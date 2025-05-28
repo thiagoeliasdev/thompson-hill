@@ -28,9 +28,21 @@ Table services {
   value decimal [not null]
   promoValue decimal
   promoEnabled bool [default: false]
-  description string [not null]
+  description string
   coverImage string
   weight int [default: 1]
+  createdAt timestamp [not null]
+  deletedAt timestamp
+}
+
+Table products {
+  _id string [primary key]
+  name string [not null]
+  value decimal [not null]
+  promoValue decimal
+  promoEnabled bool [default: false]
+  description string
+  coverImage string
   createdAt timestamp [not null]
   deletedAt timestamp
 }
@@ -53,6 +65,7 @@ Table appointments {
   customerId string [not null]
   attendantId string 
   serviceIds string[]
+  productIds string[]
   totalPrice decimal [not null]
   discount decimal
   finalPrice decimal [not null]
@@ -66,6 +79,7 @@ Table appointments {
 
 Ref: appointments.attendantId > users._id
 Ref: appointments.serviceIds > services._id
+Ref: appointments.productIds > products._id
 Ref: appointments.customerId > customers._id
 
 Enum appointment_statuses{

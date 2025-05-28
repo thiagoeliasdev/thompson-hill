@@ -33,6 +33,13 @@ export class ServiceNotFoundException extends BadRequestException {
   }
 }
 
+// Products Errors
+export class ProductNotFoundException extends BadRequestException {
+  constructor() {
+    super("Product not found")
+  }
+}
+
 // Customer Errors
 export class CustomerNotFoundException extends BadRequestException {
   constructor() {

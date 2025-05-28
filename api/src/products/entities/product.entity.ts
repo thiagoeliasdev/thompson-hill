@@ -1,5 +1,5 @@
 
-export interface IService {
+export interface IProduct {
   id: string
   name: string
   description?: string
@@ -10,10 +10,9 @@ export interface IService {
   signedUrl?: string
   createdAt: Date
   deletedAt?: Date
-  weight: number
 }
 
-export class Service {
+export class Product {
   id: string
   name: string
   description?: string
@@ -24,9 +23,8 @@ export class Service {
   signedUrl?: string
   createdAt: Date
   deletedAt?: Date
-  weight: number
 
-  constructor(data: IService) {
+  constructor(data: IProduct) {
     Object.assign(this, data)
     this.createdAt = new Date(data.createdAt)
     if (data.deletedAt) {
@@ -45,7 +43,6 @@ export class Service {
       coverImage: this.coverImage || null,
       createdAt: this.createdAt.toISOString(),
       deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
-      weight: this.weight || 1,
     }
   }
 }

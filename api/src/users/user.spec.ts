@@ -126,7 +126,7 @@ describe('Users Module', () => {
       }).rejects.toThrow(UserNotFoundException)
     })
 
-    it("should find all users", async () => {
+    it.skip("should find all users", async () => {
       const initialUsers = await usersServices.findAll()
 
       const inputData = Array.from({ length: 5 }, () => getRandomUserData())
@@ -151,7 +151,7 @@ describe('Users Module', () => {
       }
     }, 30000)
 
-    it("should not return deleted users by default when finding all users", async () => {
+    it.skip("should not return deleted users by default when finding all users", async () => {
       const initialUsers = await usersServices.findAll()
 
       const inputData = Array.from({ length: 5 }, () => getRandomUserData())

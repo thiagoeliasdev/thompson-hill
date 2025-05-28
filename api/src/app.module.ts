@@ -9,6 +9,7 @@ import { ServicesModule } from './services/services.module'
 import { CustomersModule } from './customers/customers.module'
 import { AppointmentsModule } from './appointments/appointments.module'
 import { FirebaseModule } from "./firebase/firebase.module"
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { FirebaseModule } from "./firebase/firebase.module"
     AuthModule,
     ServicesModule,
     CustomersModule,
-    AppointmentsModule
+    AppointmentsModule,
+    ProductsModule
   ],
   controllers: [AppController],
   providers: [AppService],
