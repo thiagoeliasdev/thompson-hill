@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:build": "docker build -t thompson-web .",
+    "docker:run": "docker run -d --name thompson-web -p 3000:3000 thompson-web",
+    "docker:start": "docker start thompson-web",
+    "docker:stop": "docker stop thompson-web",
+    "docker:remove": "docker rm thompson-web",
+    "docker:logs": "docker logs -f thompson-web"
   },
   "dependencies": {
     "@date-fns/tz": "^1.2.0",
