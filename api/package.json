@@ -20,7 +20,13 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "docker": "docker compose down && docker compose up -d",
-    "seed": "npx ts-node ./utils/seed.ts"
+    "seed": "npx ts-node ./utils/seed.ts",
+    "docker:build": "docker build -t thompson-api .",
+    "docker:run": "docker run -d --name thompson-api -p 3333:3333 thompson-api",
+    "docker:start": "docker start thompson-api",
+    "docker:stop": "docker stop thompson-api",
+    "docker:remove": "docker rm thompson-api",
+    "docker:logs": "docker logs -f thompson-api"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
