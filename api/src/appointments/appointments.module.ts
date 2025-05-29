@@ -5,11 +5,18 @@ import { CustomersModule } from "src/customers/customers.module"
 import { ServicesModule } from "src/services/services.module"
 import { UsersModule } from "src/users/users.module"
 import { ProductsModule } from "src/products/products.module"
+import { PartnershipsModule } from "src/partnerships/partnerships.module"
 
 @Module({
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
-  imports: [CustomersModule, ServicesModule, UsersModule, ProductsModule],
+  imports: [
+    CustomersModule,
+    ServicesModule,
+    UsersModule,
+    ProductsModule,
+    PartnershipsModule
+  ],
   exports: [AppointmentsService]
 })
 export class AppointmentsModule { }

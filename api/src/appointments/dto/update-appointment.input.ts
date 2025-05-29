@@ -18,6 +18,11 @@ export class UpdateAppointmentInput {
   @IsOptional()
   productIds?: string[]
 
+  @ApiProperty({ required: false, type: [String] })
+  @IsString({ each: true })
+  @IsOptional()
+  partnershipIds?: string[]
+
   @ApiProperty({ required: false })
   @IsEnum(EPaymentMethod)
   @IsOptional()

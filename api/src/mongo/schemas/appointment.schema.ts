@@ -1,11 +1,12 @@
 import { Schema, Document, Model } from "mongoose"
 import { Appointment, EAppointmentStatuses, EPaymentMethod } from "../../appointments/entities/appointment.entity"
-import { CUSTOMER_SCHEMA_NAME, PRODUCT_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME } from "../constants"
+import { CUSTOMER_SCHEMA_NAME, PARTNERSHIP_SCHEMA_NAME, PRODUCT_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME } from "../constants"
 import { IMongoService, toService } from "./service.schema"
 import { IMongoCustomer, toCustomer } from "./customer.schema"
 import { CustomerNotFoundException } from "../../errors"
 import { IMongoUser, toUser } from "./user.schema"
 import { IMongoProduct, toProduct } from "./product.schema"
+import { IMongoPartnership } from "./partnership.schema"
 
 
 export interface IMongoAppointment extends Document {
@@ -14,6 +15,7 @@ export interface IMongoAppointment extends Document {
   attendantId?: unknown
   serviceIds: unknown
   productIds?: unknown
+  partnershipIds?: unknown
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -28,6 +30,7 @@ export interface IMongoAppointment extends Document {
   attendant?: IMongoUser
   services?: IMongoService[]
   products?: IMongoProduct[]
+  partnerships?: IMongoPartnership[]
   customer?: IMongoCustomer
 }
 
@@ -37,6 +40,7 @@ export const appointmentSchema: Schema<IMongoAppointment> = new Schema({
   attendantId: { type: String, required: false },
   serviceIds: { type: [String], required: true },
   productIds: { type: [String], required: false },
+  partnershipIds: { type: [String], required: false },
   totalPrice: { type: Number, required: true },
   discount: { type: Number, required: false },
   finalPrice: { type: Number, required: true },
@@ -58,10 +62,11 @@ appointmentSchema.virtual('id').get(function () {
 
 appointmentSchema.virtual('services', { ref: SERVICE_SCHEMA_NAME, localField: "serviceIds", foreignField: "_id" })
 appointmentSchema.virtual('products', { ref: PRODUCT_SCHEMA_NAME, localField: "productIds", foreignField: "_id" })
+appointmentSchema.virtual('partnerships', { ref: PARTNERSHIP_SCHEMA_NAME, localField: "partnershipIds", foreignField: "_id" })
 
 appointmentSchema.post('save', async function (doc, next) {
   try {
-    await doc.populate(['services', 'products', 'customer', 'attendant'])
+    await doc.populate(['services', 'products', 'customer', 'attendant', 'partnerships'])
     next()
   } catch (err) {
     next(err)
@@ -70,7 +75,7 @@ appointmentSchema.post('save', async function (doc, next) {
 
 appointmentSchema.post('findOne', async function (doc, next) {
   try {
-    await doc.populate(['services', 'products', 'customer', 'attendant'])
+    await doc.populate(['services', 'products', 'customer', 'attendant', 'partnerships'])
     next()
   } catch (err) {
     next(err)
@@ -100,6 +105,7 @@ export function toAppointment(appointment: IMongoAppointment): Appointment {
     attendant: appointment.attendant ? toUser(appointment.attendant) : undefined,
     services: appointment.services?.map(toService) || [],
     products: appointment.products?.map(toProduct) || [],
+    partnerships: appointment.partnerships || [],
     totalPrice: appointment.totalPrice,
     discount: appointment.discount,
     finalPrice: appointment.finalPrice,

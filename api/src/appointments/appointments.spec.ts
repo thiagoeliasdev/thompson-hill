@@ -18,6 +18,10 @@ import { UpdateServiceInput } from "../services/dto/update-service.input"
 import { ProductsService } from "../products/products.service"
 import { ProductsModule } from "../products/products.module"
 import { getRandomProductCreateInputData } from "../products/mocks"
+import { PartnershipsModule } from "../partnerships/partnerships.module"
+import { PartnershipsService } from "../partnerships/partnerships.service"
+import { getRandomPartnershipCreateInputData } from "../partnerships/mocks"
+import { EPartnershipDiscountType, EPartnershipType } from "../partnerships/entities/partnership.entity"
 
 describe("Appointment Module", () => {
   let appointmentsService: AppointmentsService
@@ -25,6 +29,7 @@ describe("Appointment Module", () => {
   let servicesService: ServicesService
   let productsService: ProductsService
   let customersService: CustomersService
+  let partnershipsService: PartnershipsService
   let app: TestingModule
 
   beforeAll(async () => {
@@ -39,7 +44,8 @@ describe("Appointment Module", () => {
         UsersModule,
         ServicesModule,
         ProductsModule,
-        CustomersModule
+        CustomersModule,
+        PartnershipsModule
       ]
     }).compile()
 
@@ -48,6 +54,7 @@ describe("Appointment Module", () => {
     customersService = app.get<CustomersService>(CustomersService)
     servicesService = app.get<ServicesService>(ServicesService)
     productsService = app.get<ProductsService>(ProductsService)
+    partnershipsService = app.get<PartnershipsService>(PartnershipsService)
   })
 
   afterAll(async () => {
@@ -61,6 +68,7 @@ describe("Appointment Module", () => {
       expect(productsService).toBeDefined()
       expect(customersService).toBeDefined()
       expect(appointmentsService).toBeDefined()
+      expect(partnershipsService).toBeDefined()
     })
 
     it("should create an appointment with a customer, attendant and one service and one product", async () => {
@@ -1810,6 +1818,546 @@ describe("Appointment Module", () => {
       await customersService.remove(customer2.id)
       await servicesService.remove(service1.id)
       await usersService.remove({ id: attendant.id })
+    })
+
+    it("should update and recalculate appointment prices when added a parking partnership 1", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 15.12,
+        promoValue: 5.23,
+        promoEnabled: true
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 2.71,
+        promoEnabled: true
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership.discountValue
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a parking partnership 2", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 15.12,
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = partnership.discountValue
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a fixed price partnership 1", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 15.12,
+        promoValue: 5.23,
+        promoEnabled: true
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 2.71,
+        promoEnabled: true
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.COMMON
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership.discountValue
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a fixed price partnership 2", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 15.12
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.COMMON
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = partnership.discountValue
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a percentage partnership 1", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({ value: 20 }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({ value: 50 }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70,
+        promoValue: 60,
+        promoEnabled: true
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData({ value: 8 }))
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 4,
+        promoEnabled: true
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = (service3.value - service3.promoValue! + product2.value - product2.promoValue!) + (totalPrice - (service3.value - service3.promoValue! + product2.value - product2.promoValue!)) * (partnership.discountValue / 100)
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a percentage partnership 2", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({ value: 20 }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({ value: 50 }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData({ value: 8 }))
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74
+      }))
+
+      const partnership = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = totalPrice * (partnership.discountValue / 100)
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(1)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(1)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a percentage and fixed price partnership 1", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({ value: 20 }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({ value: 50 }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70,
+        promoValue: 60,
+        promoEnabled: true
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData({ value: 8 }))
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 4,
+        promoEnabled: true
+      }))
+
+      const partnership1 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const partnership2 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership1.id, partnership2.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue) + (totalPrice - (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue)) * (partnership1.discountValue / 100)
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(2)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(2)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership1.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should update and recalculate appointment prices when added a percentage and fixed price partnership 2", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData({ value: 20 }))
+      const service2 = await servicesService.create(getRandomServiceCreateInputData({ value: 50 }))
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70,
+      }))
+
+      const product1 = await productsService.create(getRandomProductCreateInputData({ value: 8 }))
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+      }))
+
+      const partnership1 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const partnership2 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant1.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        partnershipIds: [partnership1.id, partnership2.id]
+      })
+
+      const totalPrice = service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      const discount = partnership2.discountValue + (totalPrice - partnership2.discountValue) * (partnership1.discountValue / 100)
+      const finalPrice = totalPrice - discount
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.partnerships).toHaveLength(2)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(updatedAppointment.discount).toBeCloseTo(discount)
+      expect(updatedAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.partnerships).toHaveLength(2)
+      expect(foundAppointment.totalPrice).toBeCloseTo(totalPrice)
+      expect(foundAppointment.discount).toBeCloseTo(discount)
+      expect(foundAppointment.finalPrice).toBeCloseTo(finalPrice)
+
+      await appointmentsService.remove(appointment.id)
+      await partnershipsService.remove(partnership1.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant1.id })
     })
   })
 })

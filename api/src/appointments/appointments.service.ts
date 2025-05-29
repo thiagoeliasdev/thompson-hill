@@ -13,6 +13,7 @@ import { endOfDay, startOfDay } from "date-fns"
 import { UpdateAppointmentInput } from "./dto/update-appointment.input"
 import { FirebaseService } from "../firebase/firebase.service"
 import { ProductsService } from "../products/products.service"
+import { EPartnershipDiscountType } from "../partnerships/entities/partnership.entity"
 
 @Injectable()
 export class AppointmentsService {
@@ -288,12 +289,30 @@ export class AppointmentsService {
 
       const updatedAppointment = await appointment.save()
 
-      if (dto.serviceIds || dto.productIds) {
+      if (dto.serviceIds || dto.productIds || dto.partnershipIds) {
         updatedAppointment.totalPrice = (updatedAppointment?.services?.reduce((acc, service) => acc + service.value, 0) || 0) + (updatedAppointment?.products?.reduce((acc, product) => acc + product.value, 0) || 0)
 
         updatedAppointment.discount = (updatedAppointment?.services?.reduce((acc, service) => acc + (service.promoValue && service.promoEnabled ? (service.value - service.promoValue) : 0), 0) || 0) + (updatedAppointment?.products?.reduce((acc, product) => acc + (product.promoValue && product.promoEnabled ? (product.value - product.promoValue) : 0), 0) || 0)
 
+        // Check partnerships fixed discounts
+        updatedAppointment.partnerships?.forEach(partnership => {
+          if (partnership.discountType === EPartnershipDiscountType.FIXED) {
+            updatedAppointment.discount ? updatedAppointment.discount += partnership.discountValue : updatedAppointment.discount = partnership.discountValue
+          }
+        })
+
         updatedAppointment.finalPrice = updatedAppointment.totalPrice - (updatedAppointment.discount || 0)
+
+        // Check partnerships percentage discounts
+        updatedAppointment.partnerships?.forEach(partnership => {
+          if (partnership.discountType === EPartnershipDiscountType.PERCENTAGE) {
+            const discountValue = (updatedAppointment.finalPrice * partnership.discountValue) / 100
+
+            updatedAppointment.finalPrice = updatedAppointment.finalPrice - discountValue
+            updatedAppointment.discount ? updatedAppointment.discount = updatedAppointment.discount + discountValue : updatedAppointment.discount = discountValue
+          }
+        })
+
         await updatedAppointment.save()
       }
 

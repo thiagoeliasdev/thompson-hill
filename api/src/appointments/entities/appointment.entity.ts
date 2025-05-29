@@ -2,6 +2,7 @@ import { IProduct, Product } from "../../products/entities/product.entity"
 import { Customer, ICustomer } from "../../customers/entities/customer.entity"
 import { IService, Service } from "../../services/entities/service.entity"
 import { IUser, User } from "../../users/entities/user.entity"
+import { IPartnership, Partnership } from "../../partnerships/entities/partnership.entity"
 
 export enum EPaymentMethod {
   CASH = 'CASH',
@@ -26,6 +27,7 @@ export interface IAppointment {
   attendant?: IUser
   services: IService[]
   products: IProduct[]
+  partnerships?: IPartnership[]
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -43,6 +45,7 @@ export class Appointment {
   attendant?: User
   services: Service[]
   products: Product[]
+  partnerships?: Partnership[]
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -63,6 +66,7 @@ export class Appointment {
     this.attendant = appointment.attendant ? new User(appointment.attendant) : undefined
     this.services = appointment.services.map(service => new Service(service))
     this.products = appointment.products.map(product => new Product(product))
+    this.partnerships = appointment.partnerships ? appointment.partnerships.map(partnership => new Partnership(partnership)) : undefined
   }
 
   toFirebaseObject() {
@@ -72,6 +76,7 @@ export class Appointment {
       attendant: this.attendant ? this.attendant.toFirebaseObject() : null,
       services: this.services.map(service => service.toFirebaseObject()),
       products: this.products.map(product => product.toFirebaseObject()),
+      partnerships: this.partnerships ? this.partnerships.map(partnership => partnership.toFirebaseObject()) : null,
       totalPrice: this.totalPrice,
       discount: this.discount || 0,
       finalPrice: this.finalPrice,
