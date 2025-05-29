@@ -46,7 +46,7 @@ import { IMongoProduct, productSchema } from "./schemas/product.schema"
       provide: "ProductSchema",
       inject: ["MongoConnection"],
       useFactory: (connection: Connection) => {
-        const ProductSchema: Model<IMongoProduct> = connection.models.service || connection.model<IMongoProduct>(PRODUCT_SCHEMA_NAME, productSchema)
+        const ProductSchema: Model<IMongoProduct> = connection.models.product || connection.model<IMongoProduct>(PRODUCT_SCHEMA_NAME, productSchema)
 
         return ProductSchema
       }
