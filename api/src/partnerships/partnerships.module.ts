@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { PartnershipsService } from './partnerships.service'
 import { PartnershipsController } from './partnerships.controller'
-import { UsersModule } from "src/users/users.module"
+import { UsersModule } from "../users/users.module"
 
 @Module({
   controllers: [PartnershipsController],

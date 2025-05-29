@@ -48,4 +48,10 @@ export class CustomerView {
 
   @ApiProperty()
   referralCodeCount: number
+
+  @ApiProperty()
+  partnershipId?: string
+
+  @ApiProperty()
+  partnershipIdentificationId?: string
 }

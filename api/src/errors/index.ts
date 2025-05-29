@@ -72,3 +72,9 @@ export class PartnershipNotFoundException extends BadRequestException {
     super("Partnership not found")
   }
 }
+
+export class MissingPartnershipIdentificationException extends BadRequestException {
+  constructor() {
+    super("Partnership identification is required when partnership id is provided")
+  }
+}
