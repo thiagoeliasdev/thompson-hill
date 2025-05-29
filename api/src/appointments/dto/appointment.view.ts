@@ -31,6 +31,17 @@ class AppointmentServiceView {
   value: number
 }
 
+class AppointmentProductView {
+  @ApiProperty()
+  id: string
+
+  @ApiProperty()
+  name: string
+
+  @ApiProperty()
+  value: number
+}
+
 export class AppointmentView {
   constructor(appointment: Appointment) {
     Object.assign(this, appointment)
@@ -54,6 +65,12 @@ export class AppointmentView {
       name: service.name,
       value: service.value
     }))
+
+    this.products = appointment.products.map((product) => ({
+      id: product.id,
+      name: product.name,
+      value: product.value
+    }))
   }
 
   @ApiProperty()
@@ -67,6 +84,9 @@ export class AppointmentView {
 
   @ApiProperty({ type: [AppointmentServiceView] })
   services: AppointmentServiceView[]
+
+  @ApiProperty({ type: [AppointmentProductView] })
+  products: AppointmentProductView[]
 
   @ApiProperty()
   totalPrice: number

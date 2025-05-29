@@ -1,3 +1,4 @@
+import { IProduct, Product } from "../../products/entities/product.entity"
 import { Customer, ICustomer } from "../../customers/entities/customer.entity"
 import { IService, Service } from "../../services/entities/service.entity"
 import { IUser, User } from "../../users/entities/user.entity"
@@ -24,6 +25,7 @@ export interface IAppointment {
   customer: ICustomer
   attendant?: IUser
   services: IService[]
+  products: IProduct[]
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -40,6 +42,7 @@ export class Appointment {
   customer: Customer
   attendant?: User
   services: Service[]
+  products: Product[]
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -59,6 +62,7 @@ export class Appointment {
     this.customer = new Customer(appointment.customer)
     this.attendant = appointment.attendant ? new User(appointment.attendant) : undefined
     this.services = appointment.services.map(service => new Service(service))
+    this.products = appointment.products.map(product => new Product(product))
   }
 
   toFirebaseObject() {
@@ -67,6 +71,7 @@ export class Appointment {
       customer: this.customer.toFirebaseObject(),
       attendant: this.attendant ? this.attendant.toFirebaseObject() : null,
       services: this.services.map(service => service.toFirebaseObject()),
+      products: this.products.map(product => product.toFirebaseObject()),
       totalPrice: this.totalPrice,
       discount: this.discount || 0,
       finalPrice: this.finalPrice,

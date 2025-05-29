@@ -4,11 +4,12 @@ import { AppointmentsController } from './appointments.controller'
 import { CustomersModule } from "src/customers/customers.module"
 import { ServicesModule } from "src/services/services.module"
 import { UsersModule } from "src/users/users.module"
+import { ProductsModule } from "src/products/products.module"
 
 @Module({
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
-  imports: [CustomersModule, ServicesModule, UsersModule],
+  imports: [CustomersModule, ServicesModule, UsersModule, ProductsModule],
   exports: [AppointmentsService]
 })
 export class AppointmentsModule { }
