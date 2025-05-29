@@ -10,6 +10,7 @@ import { CustomersModule } from './customers/customers.module'
 import { AppointmentsModule } from './appointments/appointments.module'
 import { FirebaseModule } from "./firebase/firebase.module"
 import { ProductsModule } from './products/products.module';
+import { PartnershipsModule } from './partnerships/partnerships.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { ProductsModule } from './products/products.module';
     ServicesModule,
     CustomersModule,
     AppointmentsModule,
-    ProductsModule
+    ProductsModule,
+    PartnershipsModule
   ],
   controllers: [AppController],
   providers: [AppService],

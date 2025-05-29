@@ -15,6 +15,7 @@ Enum userRoles {
   MANAGER
   TOTEM
   ATTENDANT
+  ATTENDANT_ADMIN
 }
 
 Enum userStatus {
@@ -57,15 +58,20 @@ Table customers {
   referralCodeUsed string
   referralCode string [unique]
   referralCodeUseCount int [default: 0]
+  partnershipId string
+  partnershipIdentificationId string
   createdAt timestamp [not null]
 }
+
+Ref: customers.partnershipId > partnerships._id
 
 Table appointments {
   _id string [primary key]
   customerId string [not null]
   attendantId string 
-  serviceIds string[]
+  serviceIds string[] [not null]
   productIds string[]
+  partnershipId string[]
   totalPrice decimal [not null]
   discount decimal
   finalPrice decimal [not null]
@@ -81,6 +87,7 @@ Ref: appointments.attendantId > users._id
 Ref: appointments.serviceIds > services._id
 Ref: appointments.productIds > products._id
 Ref: appointments.customerId > customers._id
+Ref: appointments.partnershipId > partnerships._id
 
 Enum appointment_statuses{
   WAITING
@@ -97,4 +104,25 @@ Enum appointment_payment_methods{
   PIX
   TRANSFER
   BONUS
+}
+
+Table partnerships {
+  _id string [primary key]
+  name string [not null]
+  identificationLabel string [not null]
+  type partnership_types [not null, default: "COMMON"]
+  discountValue decimal [not null, default: 0]
+  discountType partnership_discount_types [not null, default: "PERCENTAGE"]
+  createdAt timestamp [not null]
+  deletedAt timestamp
+}
+
+Enum partnership_discount_types {
+  FIXED
+  PERCENTAGE
+}
+
+Enum partnership_types {
+  COMMON
+  PARKING
 }

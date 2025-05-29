@@ -3,11 +3,12 @@ import * as mongoose from 'mongoose'
 import { Connection, Model } from 'mongoose'
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { IMongoUser, userSchema } from "./schemas/user.schema"
-import { APPOINTMENT_SCHEMA_NAME, CUSTOMER_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME, PRODUCT_SCHEMA_NAME } from "./constants"
+import { APPOINTMENT_SCHEMA_NAME, CUSTOMER_SCHEMA_NAME, SERVICE_SCHEMA_NAME, USER_SCHEMA_NAME, PRODUCT_SCHEMA_NAME, PARTNERSHIP_SCHEMA_NAME } from "./constants"
 import { IMongoService, serviceSchema } from "./schemas/service.schema"
 import { customerSchema, IMongoCustomer } from "./schemas/customer.schema"
 import { appointmentSchema, IMongoAppointment } from "./schemas/appointment.schema"
 import { IMongoProduct, productSchema } from "./schemas/product.schema"
+import { IMongoPartnership, partnershipSchema } from "./schemas/partnership.schema"
 
 @Global()
 @Module({
@@ -68,8 +69,17 @@ import { IMongoProduct, productSchema } from "./schemas/product.schema"
 
         return AppointmentSchema
       }
+    },
+    {
+      provide: "PartnershipSchema",
+      inject: ["MongoConnection"],
+      useFactory: (connection: Connection) => {
+        const PartnershipSchema: Model<IMongoPartnership> = connection.models.partnership || connection.model<IMongoPartnership>(PARTNERSHIP_SCHEMA_NAME, partnershipSchema)
+
+        return PartnershipSchema
+      }
     }
   ],
-  exports: ["UserSchema", "ServiceSchema", "ProductSchema", "CustomerSchema", "AppointmentSchema"]
+  exports: ["UserSchema", "ServiceSchema", "ProductSchema", "CustomerSchema", "AppointmentSchema", "PartnershipSchema"]
 })
 export class MongoModule { }

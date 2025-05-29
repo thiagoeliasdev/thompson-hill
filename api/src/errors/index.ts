@@ -65,3 +65,10 @@ export class MissingServicesException extends BadRequestException {
     super("Missing services in appointment registration")
   }
 }
+
+// Partnership
+export class PartnershipNotFoundException extends BadRequestException {
+  constructor() {
+    super("Partnership not found")
+  }
+}

@@ -161,6 +161,7 @@ The frontend is a modern, responsive interface designed to run on tablets (totem
 - **Form Validation**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 - **Authentication**: JWT via cookie/session
 - **HTTP Client**: fetch with [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) + [Axios](https://axios-http.com/ptbr/docs/intro)
+- **Containerization**: Docker-ready
 
 ### 🧭 Layouts Overview
 
@@ -220,6 +221,12 @@ NEXT_PUBLIC_FIREBASE_APP_ID="1:318876085316:web:3db1bc2e0130fcaa96a011"
 <img src="./utils/login-diagram.png" width="720px"/>
 </p>
 
+### 🖼️ Image Upload Flow
+
+<p align="center">
+<img src="./utils/image-diagram.png" width="720px"/>
+</p>
+
 ### 📲 Totem Features
 
 - Customer registration via phone number
@@ -244,6 +251,13 @@ NEXT_PUBLIC_FIREBASE_APP_ID="1:318876085316:web:3db1bc2e0130fcaa96a011"
 
 - Manage and check in appointments
 - Guided multi-step forms for faster input
+- Designed for tablet and mobile use
+
+### 🧾🧑‍💼 Admin Attendant Features
+
+- Manage and check in appointments
+- Guided multi-step forms for faster input
+- Set attendants status
 - Designed for tablet and mobile use
 
 ### 🚀 Deployment Requirements
