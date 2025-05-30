@@ -22,6 +22,7 @@ import { PartnershipsModule } from "../partnerships/partnerships.module"
 import { PartnershipsService } from "../partnerships/partnerships.service"
 import { getRandomPartnershipCreateInputData } from "../partnerships/mocks"
 import { EPartnershipDiscountType, EPartnershipType } from "../partnerships/entities/partnership.entity"
+import { subDays } from "date-fns"
 
 describe("Appointment Module", () => {
   let appointmentsService: AppointmentsService
@@ -431,13 +432,34 @@ describe("Appointment Module", () => {
       const appointment1 = await appointmentsService.create({
         customerId: customer.id,
         attendantId: attendant.id,
-        serviceIds: [service1.id, service2.id, service3.id]
+        serviceIds: [service1.id, service2.id, service3.id],
+        createdAt: subDays(new Date(), 2)
       })
 
       const appointment2 = await appointmentsService.create({
         customerId: customer.id,
         attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        createdAt: subDays(new Date(), 2)
+      })
+
+      const appointment3 = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
         serviceIds: [service1.id, service2.id, service3.id]
+      })
+
+      const appointment4 = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id]
+      })
+
+      const appointment5 = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        createdAt: subDays(new Date(), 2)
       })
 
       const appointments = await appointmentsService.findAll({ onlyToday: true })
@@ -447,6 +469,9 @@ describe("Appointment Module", () => {
 
       await appointmentsService.remove(appointment1.id)
       await appointmentsService.remove(appointment2.id)
+      await appointmentsService.remove(appointment3.id)
+      await appointmentsService.remove(appointment4.id)
+      await appointmentsService.remove(appointment5.id)
       await customersService.remove(customer.id)
       await servicesService.remove(service1.id)
       await servicesService.remove(service2.id)

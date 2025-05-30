@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { UsersService } from "./users/users.service"
 import { ConfigService } from "@nestjs/config"
 import { EUserRole, EUserStatus } from "./users/entities/user.entity"
@@ -12,6 +12,16 @@ import { fakerPT_BR as faker } from '@faker-js/faker'
 import { Customer, ECustomerGender } from "./customers/entities/customer.entity"
 import { Appointment, EAppointmentStatuses, EPaymentMethod } from "./appointments/entities/appointment.entity"
 import { setHours } from "date-fns"
+import { Model } from "mongoose"
+import { IMongoUser } from "./mongo/schemas/user.schema"
+import { Parser } from 'json2csv'
+import { Response } from "express"
+import * as archiver from 'archiver'
+import { IMongoCustomer } from "./mongo/schemas/customer.schema"
+import { IMongoAppointment } from "./mongo/schemas/appointment.schema"
+import { IMongoService } from "./mongo/schemas/service.schema"
+import { IMongoPartnership } from "./mongo/schemas/partnership.schema"
+import { IMongoProduct } from "./mongo/schemas/product.schema"
 
 @Injectable()
 export class AppService {
@@ -20,7 +30,13 @@ export class AppService {
     private readonly servicesService: ServicesService,
     private readonly customersService: CustomersService,
     private readonly appointmentsService: AppointmentsService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject("UserSchema") private readonly userSchema: Model<IMongoUser>,
+    @Inject("CustomerSchema") private readonly customerSchema: Model<IMongoCustomer>,
+    @Inject("AppointmentSchema") private readonly appointmentSchema: Model<IMongoAppointment>,
+    @Inject("ServiceSchema") private readonly serviceSchema: Model<IMongoService>,
+    @Inject("PartnershipSchema") private readonly partnershipSchema: Model<IMongoPartnership>,
+    @Inject("ProductSchema") private readonly productSchema: Model<IMongoProduct>
   ) {
     const userName = this.configService.get("ADMIN_USER")
     const password = this.configService.get("ADMIN_PASSWORD")
@@ -209,5 +225,49 @@ export class AppService {
     }
 
     console.log("Appointments seeded...")
+  }
+
+  async exportCSV(res: Response): Promise<void> {
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': 'attachment; filename=thompson_hill_export.zip',
+    })
+
+    const archive = archiver('zip', { zlib: { level: 9 } })
+    archive.pipe(res)
+
+    const collections = [
+      { name: 'users', model: this.userSchema, excludeFields: ["password", "status"] },
+      { name: 'customers', model: this.customerSchema },
+      { name: 'appointments', model: this.appointmentSchema },
+      { name: 'services', model: this.serviceSchema },
+      { name: 'partnerships', model: this.partnershipSchema },
+      { name: 'products', model: this.productSchema }
+    ]
+
+    for (const col of collections) {
+      // @ts-ignore unknown schema type
+      const data = await col.model.find().lean()
+
+      if (data.length > 0) {
+        // Sanitize data by excluding specified fields
+        const sanitizedData = data.map((doc) => {
+          const clone = { ...doc }
+          if (col.excludeFields) {
+            for (const field of col.excludeFields) {
+              delete clone[field]
+            }
+          }
+          return clone
+        })
+
+        const fields = Object.keys(sanitizedData[0])
+        const parser = new Parser({ fields })
+        const csv = parser.parse(sanitizedData)
+        archive.append(csv, { name: `${col.name}.csv` })
+      }
+    }
+
+    await archive.finalize()
   }
 }
