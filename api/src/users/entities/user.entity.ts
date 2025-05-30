@@ -3,6 +3,7 @@ export enum EUserRole {
   MANAGER = "MANAGER",
   TOTEM = "TOTEM",
   ATTENDANT = "ATTENDANT",
+  ATTENDANT_MANAGER = "ATTENDANT_MANAGER",
 }
 
 export enum EUserStatus {

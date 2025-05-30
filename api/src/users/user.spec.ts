@@ -12,13 +12,13 @@ import { FirebaseModule } from "../firebase/firebase.module"
 import { getRandomUserData } from "./mocks"
 
 describe('Users Module', () => {
-  let usersController: UsersController
+  // let usersController: UsersController
   let usersServices: UsersService
   let app: TestingModule
 
   beforeAll(async () => {
     app = await Test.createTestingModule({
-      controllers: [UsersController],
+      // controllers: [UsersController],
       providers: [UsersService],
       imports: [
         ConfigModule.forRoot({
@@ -29,7 +29,7 @@ describe('Users Module', () => {
       ]
     }).compile()
 
-    usersController = app.get<UsersController>(UsersController)
+    // usersController = app.get<UsersController>(UsersController)
     usersServices = app.get<UsersService>(UsersService)
   })
 
@@ -449,6 +449,39 @@ describe('Users Module', () => {
       }).rejects.toThrow(InvalidCredentialsException)
 
       await usersServices.remove({ userName: inputData.userName })
+    })
+
+    it("should toggle a user status", async () => {
+      const inputData = getRandomUserData(
+        {
+          role: EUserRole.ADMIN,
+          status: EUserStatus.ACTIVE,
+        })
+
+      const user = await usersServices.create(inputData)
+
+      const foundUser1 = await usersServices.findOne({ id: user.id })
+      expect(foundUser1).toHaveProperty("id", user.id)
+      expect(foundUser1).toHaveProperty("status", EUserStatus.ACTIVE)
+
+      const updatedUser1 = await usersServices.toggleUserStatus(user.id)
+
+      expect(updatedUser1).toHaveProperty("id", user.id)
+      expect(updatedUser1).toHaveProperty("status", EUserStatus.INACTIVE)
+
+      const foundUser2 = await usersServices.findOne({ id: user.id })
+      expect(foundUser2).toHaveProperty("id", user.id)
+      expect(foundUser2).toHaveProperty("status", EUserStatus.INACTIVE)
+
+      const updatedUser2 = await usersServices.toggleUserStatus(user.id)
+      expect(updatedUser2).toHaveProperty("id", user.id)
+      expect(updatedUser2).toHaveProperty("status", EUserStatus.ACTIVE)
+
+      const foundUser3 = await usersServices.findOne({ id: user.id })
+      expect(foundUser3).toHaveProperty("id", user.id)
+      expect(foundUser3).toHaveProperty("status", EUserStatus.ACTIVE)
+
+      await usersServices.remove({ id: user.id })
     })
   })
 })

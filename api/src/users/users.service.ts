@@ -123,6 +123,18 @@ export class UsersService {
     return new User({ ...userReturn, imageSignedUrl: signedUrl })
   }
 
+  async toggleUserStatus(id: string): Promise<User> {
+    const user = await this.findOne({ id })
+    const newStatus = user.status === EUserStatus.ACTIVE ? EUserStatus.INACTIVE : EUserStatus.ACTIVE
+    const updatedUser = await this.userSchema.findOneAndUpdate(
+      { _id: user.id },
+      { status: newStatus },
+      { new: true }
+    )
+    if (!updatedUser) throw new UserNotFoundException()
+    return new User(toUser(updatedUser))
+  }
+
   async remove({ id, userName }: { id?: string, userName?: string }): Promise<User> {
     const user = await this.findOne({ id, userName })
     await this.userSchema.findOneAndDelete({ _id: user.id })

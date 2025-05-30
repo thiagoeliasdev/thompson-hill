@@ -6,6 +6,7 @@ import { ServicesModule } from "src/services/services.module"
 import { UsersModule } from "src/users/users.module"
 import { ProductsModule } from "src/products/products.module"
 import { PartnershipsModule } from "src/partnerships/partnerships.module"
+import { AuthModule } from "src/auth/auth.module"
 
 @Module({
   controllers: [AppointmentsController],
@@ -15,7 +16,8 @@ import { PartnershipsModule } from "src/partnerships/partnerships.module"
     ServicesModule,
     UsersModule,
     ProductsModule,
-    PartnershipsModule
+    PartnershipsModule,
+    AuthModule
   ],
   exports: [AppointmentsService]
 })

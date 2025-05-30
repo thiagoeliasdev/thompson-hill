@@ -192,13 +192,13 @@ Use the .env file to configure the frontend. Do not commit sensitive values.
 NODE_ENV="development"
 
 # Url of the API server
-API_URL="http://10.0.0.14:3333/v1"
+API_URL="http://localhost/v1"
 
 # Auth
 # JWT secret key for signing tokens, must be at least 32 characters hex long
-SESSION_SECRET_KEY="cca831378fb5e895fd92e735a0a453cf9f30e2ab047df16a51b68c4b260336d6"
+SESSION_SECRET_KEY=""
 # JWT expiration time, duration for which the JWT token will be valid
-SESSION_EXPIRATION_TIME="365d"
+SESSION_EXPIRATION_TIME=""
 
 # Firebase Public Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=""
@@ -253,7 +253,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=""
 - Guided multi-step forms for faster input
 - Designed for tablet and mobile use
 
-### 🧾🧑‍💼 Admin Attendant Features
+### 🧾🧑‍💼 Attendant Manager Features
 
 - Manage and check in appointments
 - Guided multi-step forms for faster input
