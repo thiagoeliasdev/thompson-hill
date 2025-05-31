@@ -45,8 +45,7 @@ export class AuthController {
   }
 
   @Post('api-key')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create API key' })
   @ApiOkResponse({
@@ -57,8 +56,7 @@ export class AuthController {
   }
 
   @Get('api-key')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get API keys' })
   @ApiOkResponse({
@@ -69,8 +67,7 @@ export class AuthController {
   }
 
   @Delete('api-key/:id')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete API key' })
   @ApiOkResponse({

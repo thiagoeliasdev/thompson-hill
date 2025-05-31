@@ -14,8 +14,7 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new service' })
@@ -66,8 +65,7 @@ export class ServicesController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a service by ID' })
   @ApiBody({ type: UpdateServiceInput })
@@ -83,8 +81,7 @@ export class ServicesController {
   }
 
   // @Delete(':id')
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(AdminGuard)
+  // @UseGuards(JwtAuthGuard, AdminGuard)
   // @ApiBearerAuth()
   // @ApiOperation({ summary: 'Delete a service by ID' })
   // @ApiNoContentResponse()

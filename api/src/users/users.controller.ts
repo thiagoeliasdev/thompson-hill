@@ -15,8 +15,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new user' })
@@ -109,8 +108,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by id' })
   @ApiOkResponse({
@@ -120,13 +118,15 @@ export class UsersController {
     type: UserNotFoundException,
     example: "User not found"
   })
-  async update(@Param('id') id: string, @Body() data: UpdateUserInput) {
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateUserInput
+  ) {
     return new UserView(await this.usersService.update({ id }, data))
   }
 
-  @Patch(':id')
+  @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Toggle user status' })
   @ApiOkResponse({
@@ -141,8 +141,7 @@ export class UsersController {
   }
 
   // @Delete(':id')
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(AdminGuard)
+  // @UseGuards(JwtAuthGuard, AdminGuard)
   // @ApiBearerAuth()
   // @ApiOperation({ summary: 'Delete a user by id' })
   // @ApiOkResponse({

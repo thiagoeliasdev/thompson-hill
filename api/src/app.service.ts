@@ -11,7 +11,7 @@ import { getRandomCustomerCreateInputData } from "./customers/mocks"
 import { fakerPT_BR as faker } from '@faker-js/faker'
 import { Customer, ECustomerGender } from "./customers/entities/customer.entity"
 import { Appointment, EAppointmentStatuses, EPaymentMethod } from "./appointments/entities/appointment.entity"
-import { setHours } from "date-fns"
+import { setHours, subMinutes } from "date-fns"
 import { Model } from "mongoose"
 import { IMongoUser } from "./mongo/schemas/user.schema"
 import { Parser } from 'json2csv'
@@ -77,6 +77,7 @@ export class AppService {
     // await this.seedServices()
     // await this.seedCustomers()
     // await this.seedAppointments()
+    // await this.seedAppointmentsMass()
   }
 
   async seedAttendants() {
@@ -85,28 +86,28 @@ export class AppService {
       name: "José Alberto",
       password: "123456",
       role: EUserRole.ATTENDANT,
-      userName: "jalberto",
+      userName: "jalberto2",
       status: EUserStatus.ACTIVE
     }))
     await this.usersService.create(getRandomUserData({
       name: "Ana Maria",
       password: "123456",
       role: EUserRole.ATTENDANT,
-      userName: "amaria",
+      userName: "amaria2",
       status: EUserStatus.ACTIVE
     }))
     await this.usersService.create(getRandomUserData({
       name: "Carlos Roberto",
       password: "123456",
       role: EUserRole.ATTENDANT,
-      userName: "croberto",
+      userName: "croberto2",
       status: EUserStatus.ACTIVE
     }))
     await this.usersService.create(getRandomUserData({
       name: "Maria Clara",
       password: "123456",
       role: EUserRole.ATTENDANT,
-      userName: "mclara",
+      userName: "mclara2",
       status: EUserStatus.INACTIVE
     }))
     console.log("Attendants seeded...")
@@ -183,6 +184,32 @@ export class AppService {
   }
 
   async seedAppointments() {
+    console.log("Seeding appointments...")
+    const { results: customers } = await this.customersService.findAll({
+      limit: 200
+    })
+    const services = await this.servicesService.findAll()
+    const attendants = await this.usersService.findAll({ role: EUserRole.ATTENDANT })
+
+    const appointments: Appointment[] = []
+
+    for (let i = 0; i < 15; i++) {
+      const appointment = await this.appointmentsService.create({
+        customerId: faker.helpers.arrayElement(customers).id,
+        attendantId: faker.helpers.arrayElement(attendants).id,
+        serviceIds: [faker.helpers.arrayElement(services).id],
+        createdAt: faker.date.between({
+          from: subMinutes(new Date(), 50),
+          to: new Date()
+        }),
+      })
+      appointments.push(appointment)
+    }
+
+    console.log("Appointments seeded...")
+  }
+
+  async seedAppointmentsMass() {
     console.log("Seeding appointments...")
     const { results: customers } = await this.customersService.findAll({
       limit: 200

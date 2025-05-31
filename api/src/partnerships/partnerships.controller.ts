@@ -14,8 +14,7 @@ export class PartnershipsController {
   constructor(private readonly partnershipsService: PartnershipsService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new partnership' })
@@ -59,8 +58,7 @@ export class PartnershipsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a partnership by ID' })
   @ApiBody({ type: UpdatePartnershipInput })
@@ -77,8 +75,7 @@ export class PartnershipsController {
 
   // @Delete(':id')
   // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @UseGuards(AdminGuard)
+  // @UseGuards(JwtAuthGuard, AdminGuard)
   // @ApiOperation({ summary: 'Delete a partnership by ID' })
   // @ApiNoContentResponse()
   // @ApiBadRequestResponse({

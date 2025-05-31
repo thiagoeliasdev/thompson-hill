@@ -14,8 +14,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @HttpCode(201)
   @ApiOperation({ summary: 'Register a new product' })
@@ -66,8 +65,7 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a product by ID' })
   @ApiBody({ type: UpdateProductInput })
@@ -83,8 +81,7 @@ export class ProductsController {
   }
 
   // @Delete(':id')
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(AdminGuard)
+  // @UseGuards(JwtAuthGuard, AdminGuard)
   // @ApiBearerAuth()
   // @ApiOperation({ summary: 'Delete a product by ID' })
   // @ApiNoContentResponse()

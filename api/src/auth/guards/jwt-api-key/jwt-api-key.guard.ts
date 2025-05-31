@@ -18,7 +18,7 @@ export class CombinedAuthGuard implements CanActivate {
         return true
       }
     } catch (error) {
-      console.error('API Key validation failed:', error)
+      // console.error('API Key validation failed:', error)
     }
 
     try {
