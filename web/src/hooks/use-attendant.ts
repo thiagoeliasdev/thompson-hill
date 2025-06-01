@@ -1,8 +1,10 @@
 import { getAppointmentByIdAction, startAttendingAppointmentAction } from "@/actions/appointments"
+import { getProductsAction } from "@/actions/products"
 import { getServicesAction } from "@/actions/services"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
 import { IAppointmentView } from "@/models/appointment"
+import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
@@ -47,6 +49,22 @@ export const useAttendant = () => {
     },
   })
 
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
+    queryKey: [queries.attendant.products],
+    queryFn: async (): Promise<IProductView[]> => {
+      const response = await getProductsAction()
+
+      if (response.data) {
+        return response.data.map((product) => ({
+          ...product,
+          createdAt: new Date(product.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
   return {
     startAttendance,
     isStartingAttendance,
@@ -54,5 +72,7 @@ export const useAttendant = () => {
     isFindingAttendance,
     services,
     isLoadingServices,
+    products,
+    isLoadingProducts,
   }
 }

@@ -9,18 +9,18 @@ import { IFirebaseAppointment } from "@/models/firebase-appointment"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
-export default function AttendantQueuePageContents({ userId, userName }: { userId: string, userName: string }) {
+export default function AttendantQueuePageContents({ userId }: { userId: string }) {
   const queue = useQueue()
   const { startAttendance, isStartingAttendance } = useAttendant()
   const router = useRouter()
 
   const userQueue = useMemo(() => {
-    const officialQueue = queue[userName] || []
+    const officialQueue = queue[userId] || []
     if (officialQueue.length > 0) return officialQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING || appointment.status === EAppointmentStatuses.ON_SERVICE)
 
     const generalQueue = queue["fila_geral"] || []
     return generalQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING)
-  }, [queue, userName])
+  }, [queue, userId])
 
   async function onAttendanceStart(appointment: IFirebaseAppointment) {
     const response = await startAttendance({
@@ -41,7 +41,7 @@ export default function AttendantQueuePageContents({ userId, userName }: { userI
   console.log("User Queue:", userQueue)
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-2">
       {userQueue?.map((appointment, index) => (
         <AttendanceAppointmentCard
           key={appointment.id}

@@ -16,21 +16,24 @@ import { formatCurrency } from "@/lib/utils"
 import { H2 } from "../ui/typography"
 import Indicator from "../ui/indicator"
 import { Label } from "../ui/label"
+import { IProductView } from "@/models/product"
+import { useAppointments } from "@/hooks/use-appointments"
 
 interface Props {
   attendantId: string
   appointment: IAppointmentView
   services: IServiceView[]
+  products: IProductView[]
   onSuccess?: () => void
   onError?: () => void
 }
 
-export default function AppointmentCheckoutForm({ attendantId, appointment, services, onSuccess, onError }: Props) {
+export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, onSuccess, onError }: Props) {
   const formSchema = updateAppointmentSchema
 
   const [step, setStep] = useState(0)
 
-  const steps = ["Serviços Realizados", "Método de Pagamento", "Atendimento Finalizado"]
+  const steps = ["Serviços Realizados", "Método de Pagamento", "Confirmação"]
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,10 +42,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
       paymentMethod: appointment.paymentMethod,
       status: EAppointmentStatuses.FINISHED,
       serviceIds: appointment.services.map((service) => service.id) || [],
+      productIds: appointment.products.map((product) => product.id) || [],
     },
   })
 
   const formRef = useRef<HTMLFormElement>(null)
+
+  const { updateAppointment } = useAppointments()
 
   // Log form errors
   useEffect(() => {
@@ -51,7 +57,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log(values)
+      await updateAppointment({ id: appointment.id, data: { ...values } })
       toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
       if (onSuccess) onSuccess()
     } catch (error) {
@@ -74,6 +80,12 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     form.clearErrors("serviceIds")
   }
 
+  function handleAddProduct() {
+    const productIds = form.getValues("productIds") || []
+    form.setValue("productIds", [...productIds, ""])
+    form.clearErrors("productIds")
+  }
+
   function handleRemoveService(index: number) {
     const serviceIds = form.getValues("serviceIds")
     const newServicesIds = serviceIds.filter((_, i) => i !== index)
@@ -82,6 +94,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   function handleNextStep() {
     switch (step) {
+      // Services step
       case 0:
         form.trigger("serviceIds")
           .then((isValid) => {
@@ -89,9 +102,15 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           })
         break
 
-      // Submit step
+      // Payment method step
       case 1:
+        setStep((prev) => prev + 1)
+        break
+
+      // Submit step
+      case 2:
         formRef.current?.requestSubmit()
+        break
 
       default:
         setStep((prev) => prev + 1)
@@ -157,6 +176,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           </FormItem>
         )}
 
+        {/* Payment Method */}
         {step === 1 && (
           <FormItem>
             {Object.values(EPaymentMethod).map((item) => (
@@ -176,7 +196,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           </FormItem>
         )}
 
-        {/* Finalizar */}
+        {/* Checkout */}
         {step === 2 && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
@@ -193,14 +213,15 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             </div>
             <div className="flex flex-row justify-between items-center gap-2">
               <Label className="flex-1">Método de Pagamento</Label>
-              <Indicator className="w-32 justify-end">{form.getValues().paymentMethod && EPaymentMethodMapper[form.getValues().paymentMethod]}</Indicator>
+              <Indicator className="w-32 justify-end">{form.getValues().paymentMethod && EPaymentMethodMapper[form.getValues().paymentMethod as EPaymentMethod]}</Indicator>
             </div>
           </div>
         )}
 
         <div className="flex flex-row gap-2 w-full pt-6">
+
           <Button
-            isLoading={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting}
             type="button"
             variant="secondary"
             size="lg"
@@ -208,6 +229,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             hidden={step === 0}
             onClick={() => setStep(prev => prev - 1)}
           ><ChevronLeftIcon className="size-6" /></Button>
+
           <Button
             isLoading={form.formState.isSubmitting}
             type="button"
@@ -215,7 +237,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             className="flex-1"
             disabled={(step === 1 && form.watch().paymentMethod === undefined)}
             onClick={handleNextStep}
-          >Próximo</Button>
+          >{step === 2 ? "Finalizar" : "Próximo"}</Button>
         </div>
       </form>
     </Form>

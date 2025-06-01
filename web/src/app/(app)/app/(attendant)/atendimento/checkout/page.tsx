@@ -5,18 +5,21 @@ import { Card, CardContent } from "@/components/ui/card"
 import LoadingIndicator from "@/components/ui/loading-indicator"
 import { H1 } from "@/components/ui/typography"
 import { useAttendant } from "@/hooks/use-attendant"
+import { EPages } from "@/lib/pages.enum"
 import { IAppointmentView } from "@/models/appointment"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from 'react'
 
 export default function AttendantCheckoutPage() {
-  const { findAttendance, isFindingAttendance, services } = useAttendant()
+  const { findAttendance, isFindingAttendance, services, products } = useAttendant()
   const [attendance, setAttendance] = useState<IAppointmentView | null>(null)
 
   const searchParams = useSearchParams()
 
   const appointmentId = searchParams.get('appointmentId')
   const attendantId = searchParams.get('attendantId')
+
+  const router = useRouter()
 
   useEffect(() => {
     if (appointmentId && attendantId) {
@@ -53,6 +56,10 @@ export default function AttendantCheckoutPage() {
                 attendantId={attendantId}
                 appointment={attendance}
                 services={services || []}
+                products={products || []}
+                onSuccess={() => {
+                  router.push(EPages.ATTENDANCE_DASHBOARD)
+                }}
               />
             </CardContent>
           </Card>

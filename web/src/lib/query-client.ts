@@ -19,5 +19,6 @@ export const queries = {
     appointments: "attendant_appointments",
     appointment: "attendant_appointment",
     services: "attendant_services",
+    products: "attendant_products",
   },
 }

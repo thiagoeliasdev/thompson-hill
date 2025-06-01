@@ -74,6 +74,11 @@ export interface IAppointmentView {
     name: string
     value: number
   }[]
+  products: {
+    id: string
+    name: string
+    value: number
+  }[]
   totalPrice: number
   discount?: number
   finalPrice: number

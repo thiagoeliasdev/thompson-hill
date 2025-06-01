@@ -23,12 +23,16 @@ import { IMongoService } from "./mongo/schemas/service.schema"
 import { IMongoPartnership } from "./mongo/schemas/partnership.schema"
 import { IMongoProduct } from "./mongo/schemas/product.schema"
 import { FirebaseService } from "./firebase/firebase.service"
+import { ProductsService } from "./products/products.service"
+import { getRandomProductCreateInputData } from "./products/mocks"
+import { CreateProductInput } from "./products/dto/create-product.input"
 
 @Injectable()
 export class AppService {
   constructor(
     private readonly usersService: UsersService,
     private readonly servicesService: ServicesService,
+    private readonly productsService: ProductsService,
     private readonly customersService: CustomersService,
     private readonly appointmentsService: AppointmentsService,
     private readonly configService: ConfigService,
@@ -77,6 +81,7 @@ export class AppService {
   async seed() {
     // await this.seedAttendants()
     // await this.seedServices()
+    // await this.seedProducts()
     // await this.seedCustomers()
     // await this.seedAppointments()
     // await this.seedAppointmentsMass()
@@ -120,44 +125,168 @@ export class AppService {
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Corte de cabelo",
       description: "Corte de cabelo em geral",
-      value: 50,
-      promoValue: 40,
-      promoEnabled: false
+      value: 50.21,
+      promoValue: 40.45,
+      promoEnabled: false,
+      weight: 1
     }))
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Corte de Barba",
       description: "Barba em geral",
-      value: 30,
-      promoValue: 20,
-      promoEnabled: false
+      value: 30.99,
+      promoValue: 26.99,
+      promoEnabled: false,
+      weight: 1
     }))
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Corte + Barba",
       description: "Cabelo e barba em geral",
       value: 70,
       promoValue: 60,
-      promoEnabled: true
+      promoEnabled: true,
+      weight: 2
     }))
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Corte de Sobrancelhas",
       description: "Sobrancelha em geral",
-      value: 20,
-      promoValue: 15,
-      promoEnabled: false
+      value: 20.32,
+      promoValue: 15.13,
+      promoEnabled: false,
+      weight: 1
     }))
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Depilação de Nariz",
       description: "Nariz em geral",
-      value: 10,
-      promoValue: 8,
+      value: 10.87,
+      promoValue: 8.77,
+      weight: 1
     }))
     await this.servicesService.create(getRandomServiceCreateInputData({
       name: "Depilação de Orelha",
       description: "Orelha em geral",
-      value: 10,
-      promoValue: 8,
+      value: 10.08,
+      promoValue: 8.46,
+      weight: 1
     }))
     console.log("Services seeded...")
+  }
+
+  async seedProducts() {
+    console.log("Seeding products...")
+
+    const products: CreateProductInput[] = [
+      {
+        name: "Shampoo Anticaspa",
+        description: "Shampoo para controle de caspa e oleosidade",
+        value: 24.90,
+        promoValue: 19.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Pomada Modeladora",
+        description: "Pomada com efeito seco e fixação forte",
+        value: 39.90,
+        promoValue: 34.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Cera Capilar",
+        description: "Cera para penteados com brilho natural",
+        value: 32.00,
+        promoValue: 32.00,
+        promoEnabled: false,
+      },
+      {
+        name: "Óleo para Barba",
+        description: "Óleo hidratante para barba com fragrância amadeirada",
+        value: 45.50,
+        promoValue: 39.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Balm Pós-Barba",
+        description: "Loção calmante para uso após o barbear",
+        value: 28.00,
+        promoValue: 23.00,
+        promoEnabled: true,
+      },
+      {
+        name: "Espuma de Barbear",
+        description: "Espuma suave que facilita o deslizar da lâmina",
+        value: 21.99,
+        promoValue: 17.99,
+        promoEnabled: true,
+      },
+      {
+        name: "Shampoo para Barba",
+        description: "Limpa e amacia os fios da barba",
+        value: 27.50,
+        promoValue: 24.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Condicionador Masculino",
+        description: "Hidrata e fortalece os fios",
+        value: 26.90,
+        promoValue: 22.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Pente de Madeira",
+        description: "Pente artesanal ideal para barbas médias e longas",
+        value: 18.00,
+        promoValue: 15.00,
+        promoEnabled: false,
+      },
+      {
+        name: "Toalha de Rosto Personalizada",
+        description: "Toalha felpuda com logo da barbearia",
+        value: 22.00,
+        promoValue: 19.00,
+        promoEnabled: false,
+      },
+      {
+        name: "Kit Cuidados com a Barba",
+        description: "Kit com shampoo, óleo e balm para barba",
+        value: 89.90,
+        promoValue: 79.90,
+        promoEnabled: true,
+      },
+      {
+        name: "Gel Refrescante Pós-Barba",
+        description: "Sensação de frescor e alívio após o barbear",
+        value: 30.00,
+        promoValue: 25.00,
+        promoEnabled: true,
+      },
+      {
+        name: "Escova para Barba",
+        description: "Escova de cerdas naturais para alinhar os fios",
+        value: 35.00,
+        promoValue: 31.50,
+        promoEnabled: true,
+      },
+      {
+        name: "Cera para Bigode",
+        description: "Modela e dá forma ao bigode com fixação média",
+        value: 29.00,
+        promoValue: 26.00,
+        promoEnabled: true,
+      },
+      {
+        name: "Colônia Masculina",
+        description: "Fragrância marcante e sofisticada",
+        value: 59.90,
+        promoValue: 49.90,
+        promoEnabled: true,
+      }
+    ]
+
+    for (const product of products) {
+      await this.productsService.create(getRandomProductCreateInputData(product))
+    }
+
+    console.log("Products seeded...")
   }
 
   async seedCustomers() {
@@ -191,7 +320,8 @@ export class AppService {
       limit: 200
     })
     const services = await this.servicesService.findAll()
-    const attendants = await this.usersService.findAll({ role: EUserRole.ATTENDANT })
+    const products = await this.productsService.findAll()
+    const attendants = await this.usersService.getAvailableAttendants()
 
     const appointments: Appointment[] = []
 
@@ -200,6 +330,7 @@ export class AppService {
         customerId: faker.helpers.arrayElement(customers).id,
         attendantId: faker.helpers.arrayElement(attendants).id,
         serviceIds: [faker.helpers.arrayElement(services).id],
+        productIds: [faker.helpers.arrayElement(products).id],
         createdAt: faker.date.between({
           from: subMinutes(new Date(), 50),
           to: new Date()
