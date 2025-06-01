@@ -1,3 +1,6 @@
+import { createProductAction, getProductsAction, updateProductAction } from "@/actions/products"
+import { CreateProductInput } from "@/actions/products/dto/create-product.input"
+import { UpdateProductInput } from "@/actions/products/dto/update-product.input"
 import { createServiceAction, getServicesAction, updateServiceAction } from "@/actions/services"
 import { CreateServiceInput } from "@/actions/services/dto/create-service.input"
 import { UpdateServiceInput } from "@/actions/services/dto/update-service.input"
@@ -6,6 +9,7 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -137,6 +141,68 @@ export const useAdmin = () => {
     },
   })
 
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
+    queryKey: [queries.admin.products],
+    queryFn: async (): Promise<IProductView[]> => {
+      const response = await getProductsAction()
+
+      if (response.data) {
+        return response.data.map((product) => ({
+          ...product,
+          createdAt: new Date(product.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
+  const { mutateAsync: createProduct } = useMutation({
+    mutationKey: ["createProduct"],
+    mutationFn: async (data: CreateProductInput): Promise<IActionResponse<IProductView>> => {
+      const response = await createProductAction(data)
+
+      if (response.data) {
+        queryClient.setQueryData([queries.admin.products], (current: IProductView[]) => {
+          if (!current) return [response.data]
+          return [...current, response.data]
+        })
+
+        return response
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
+  })
+
+  const { mutateAsync: updateProduct } = useMutation({
+    mutationKey: ["updateProduct"],
+    mutationFn: async ({ id, data }: { id: string, data: UpdateProductInput }): Promise<IActionResponse<IProductView>> => {
+      const response = await updateProductAction(id, data)
+
+      if (!!response.data) {
+        queryClient.setQueryData([queries.admin.products], (current: IProductView[]) => {
+          return current?.map((product) => {
+            if (product.id === response.data?.id) {
+              return { ...product, ...response.data }
+            }
+            return product
+          })
+        })
+
+        return response
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
+  })
+
   return {
     users,
     isLoadingUsers,
@@ -145,6 +211,10 @@ export const useAdmin = () => {
     services,
     isLoadingServices,
     createService,
-    updateService
+    updateService,
+    products,
+    isLoadingProducts,
+    createProduct,
+    updateProduct,
   }
 }

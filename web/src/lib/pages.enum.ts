@@ -8,6 +8,7 @@ export enum EPages {
   ADMIN_ATTENDANTS = "/app/admin/atendentes",
   ADMIN_TOTEMS = "/app/admin/totens",
   ADMIN_SERVICES = "/app/admin/servicos",
+  ADMIN_PRODUCTS = "/app/admin/produtos",
   ADMIN_CUSTOMERS = "/app/admin/clientes",
   ADMIN_APPOINTMENTS = "/app/admin/agendamentos",
 

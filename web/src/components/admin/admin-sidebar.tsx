@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { EPages } from "@/lib/pages.enum"
-import { CalendarCheck, LayoutListIcon, LogOutIcon, Scissors, TabletIcon, User, UserCog, Users } from "lucide-react"
+import { CalendarCheck, LayoutListIcon, LogOutIcon, Scissors, ShoppingBagIcon, TabletIcon, User, UserCog, Users } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 import React from "react"
 
@@ -52,6 +52,13 @@ const routes = [
     urlPrefix: EPages.ADMIN_SERVICES,
     url: EPages.ADMIN_SERVICES,
     icon: <Scissors />
+  },
+  {
+    slug: "produtos",
+    title: "Produtos",
+    urlPrefix: EPages.ADMIN_PRODUCTS,
+    url: EPages.ADMIN_PRODUCTS,
+    icon: <ShoppingBagIcon />
   },
   {
     slug: "clientes",

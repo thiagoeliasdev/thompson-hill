@@ -82,7 +82,7 @@ export class UsersService {
 
   async getAvailableAttendants(): Promise<User[]> {
     const users = await this.userSchema.find({
-      role: EUserRole.ATTENDANT,
+      role: { $in: [EUserRole.ATTENDANT, EUserRole.ATTENDANT_MANAGER] },
       status: EUserStatus.ACTIVE
     })
     return users.filter(user => !user.deletedAt).map(user => new User(toUser(user)))

@@ -1,4 +1,4 @@
-export interface IServiceView {
+export interface IProductView {
   id: string
   name: string
   description?: string
@@ -9,5 +9,4 @@ export interface IServiceView {
   signedUrl?: string
   createdAt: Date
   deletedAt?: Date
-  weight: number
 }
