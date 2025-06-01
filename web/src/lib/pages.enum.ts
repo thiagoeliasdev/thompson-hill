@@ -11,6 +11,7 @@ export enum EPages {
   ADMIN_PRODUCTS = "/app/admin/produtos",
   ADMIN_CUSTOMERS = "/app/admin/clientes",
   ADMIN_APPOINTMENTS = "/app/admin/agendamentos",
+  ADMIN_PARTNERSHIPS = "/app/admin/convenios",
 
   TOTEM_HOME = "/app/totem/inicio",
   TOTEM_REGISTER = "/app/totem/cadastro",

@@ -9,6 +9,7 @@ export const queries = {
     products: "admin_products",
     customers: "admin_customers",
     appointments: "admin_appointments",
+    partnerships: "admin_partnerships",
   },
   totem: {
     attendants: "totem_attendants",

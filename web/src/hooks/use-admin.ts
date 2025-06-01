@@ -1,3 +1,6 @@
+import { createPartnershipAction, getPartnershipsAction, updatePartnershipAction } from "@/actions/partnerships"
+import { CreatePartnershipInput } from "@/actions/partnerships/dto/create-partnership.input"
+import { UpdatePartnershipInput } from "@/actions/partnerships/dto/update-partnership.input"
 import { createProductAction, getProductsAction, updateProductAction } from "@/actions/products"
 import { CreateProductInput } from "@/actions/products/dto/create-product.input"
 import { UpdateProductInput } from "@/actions/products/dto/update-product.input"
@@ -9,6 +12,7 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { IPartnershipView } from "@/models/partnerships"
 import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
 import { IUserView } from "@/models/user"
@@ -203,6 +207,68 @@ export const useAdmin = () => {
     },
   })
 
+  const { data: partnerships, isLoading: isLoadingPartnerships } = useQuery({
+    queryKey: [queries.admin.partnerships],
+    queryFn: async (): Promise<IPartnershipView[]> => {
+      const response = await getPartnershipsAction()
+
+      if (response.data) {
+        return response.data.map((partnership) => ({
+          ...partnership,
+          createdAt: new Date(partnership.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
+  const { mutateAsync: createPartnership } = useMutation({
+    mutationKey: ["createPartnership"],
+    mutationFn: async (data: CreatePartnershipInput): Promise<IActionResponse<IPartnershipView>> => {
+      const response = await createPartnershipAction(data)
+
+      if (response.data) {
+        queryClient.setQueryData([queries.admin.partnerships], (current: IPartnershipView[]) => {
+          if (!current) return [response.data]
+          return [...current, response.data]
+        })
+
+        return response
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
+  })
+
+  const { mutateAsync: updatePartnership } = useMutation({
+    mutationKey: ["updatePartnership"],
+    mutationFn: async ({ id, data }: { id: string, data: UpdatePartnershipInput }): Promise<IActionResponse<IPartnershipView>> => {
+      const response = await updatePartnershipAction(id, data)
+
+      if (!!response.data) {
+        queryClient.setQueryData([queries.admin.partnerships], (current: IPartnershipView[]) => {
+          return current?.map((partnership) => {
+            if (partnership.id === response.data?.id) {
+              return { ...partnership, ...response.data }
+            }
+            return partnership
+          })
+        })
+
+        return response
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    },
+  })
+
   return {
     users,
     isLoadingUsers,
@@ -216,5 +282,9 @@ export const useAdmin = () => {
     isLoadingProducts,
     createProduct,
     updateProduct,
+    partnerships,
+    isLoadingPartnerships,
+    createPartnership,
+    updatePartnership,
   }
 }
