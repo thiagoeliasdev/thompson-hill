@@ -22,6 +22,7 @@ import { IMongoAppointment } from "./mongo/schemas/appointment.schema"
 import { IMongoService } from "./mongo/schemas/service.schema"
 import { IMongoPartnership } from "./mongo/schemas/partnership.schema"
 import { IMongoProduct } from "./mongo/schemas/product.schema"
+import { FirebaseService } from "./firebase/firebase.service"
 
 @Injectable()
 export class AppService {
@@ -36,7 +37,8 @@ export class AppService {
     @Inject("AppointmentSchema") private readonly appointmentSchema: Model<IMongoAppointment>,
     @Inject("ServiceSchema") private readonly serviceSchema: Model<IMongoService>,
     @Inject("PartnershipSchema") private readonly partnershipSchema: Model<IMongoPartnership>,
-    @Inject("ProductSchema") private readonly productSchema: Model<IMongoProduct>
+    @Inject("ProductSchema") private readonly productSchema: Model<IMongoProduct>,
+    private readonly firebaseService: FirebaseService
   ) {
     const userName = this.configService.get("ADMIN_USER")
     const password = this.configService.get("ADMIN_PASSWORD")
@@ -296,5 +298,14 @@ export class AppService {
     }
 
     await archive.finalize()
+  }
+
+  private async restoreFirebase() {
+    return await this.firebaseService.deleteAllAppointments()
+  }
+
+  async cleanup() {
+    await this.restoreFirebase()
+    return
   }
 }
