@@ -11,6 +11,7 @@ import { createPartnershipSchema } from "@/actions/partnerships/dto/create-partn
 import { useAdmin } from "@/hooks/use-admin"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { EPartnershipDiscountType, EPartnershipDiscountTypeMapper, EPartnershipType, EPartnershipTypeMapper } from "@/models/partnerships"
+import { useEffect } from "react"
 
 interface Props {
   onSuccess?: () => void
@@ -53,6 +54,15 @@ export default function CreatePartnershipForm({ onSuccess, onError }: Props) {
       if (onError) onError()
     }
   }
+
+  useEffect(() => {
+    if (form.getValues().type === EPartnershipType.PARKING) {
+      form.setValue("identificationLabel", "Ticket")
+    } else {
+      form.setValue("identificationLabel", "")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch().type])
 
   return (
     <Form {...form}>
@@ -102,24 +112,25 @@ export default function CreatePartnershipForm({ onSuccess, onError }: Props) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="identificationLabel"
-          render={({ field }) => (
-            <FormItem className="pt-4">
-              <FormLabel>Identificação</FormLabel>
-              <FormDescription>Esse campo será exibido para orientar o cliente qual indicação deve preencher no cadastro. Ex: CRM, OAB...</FormDescription>
-              <FormControl>
-                <Input
-                  autoFocus
-                  placeholder="Digite o nome da identificação do convênio"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {form.watch("type") === EPartnershipType.COMMON && (
+          <FormField
+            control={form.control}
+            name="identificationLabel"
+            render={({ field }) => (
+              <FormItem className="pt-4">
+                <FormLabel>Identificação</FormLabel>
+                <FormDescription>Esse campo será exibido para orientar o cliente qual documento deve preencher no cadastro. Ex: CRM, OAB...</FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Digite o nome da identificação do convênio"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
@@ -148,25 +159,27 @@ export default function CreatePartnershipForm({ onSuccess, onError }: Props) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="discountValue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 text-muted-foreground border-r">R$</span>
-                  <Input
-                    className="pl-12"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {form.watch().discountType && (
+          <FormField
+            control={form.control}
+            name="discountValue"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 text-muted-foreground border-r">{form.watch().discountType === EPartnershipDiscountType.FIXED ? "R$" : "%"}</span>
+                    <Input
+                      className="pl-12"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button
           isLoading={form.formState.isSubmitting}

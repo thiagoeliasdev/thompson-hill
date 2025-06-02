@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { updatePartnershipSchema } from "@/actions/partnerships/dto/update-partnership.input"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useAdmin } from "@/hooks/use-admin"
 import { Checkbox } from "../ui/checkbox"
 import { EPartnershipDiscountType, EPartnershipDiscountTypeMapper, EPartnershipType, EPartnershipTypeMapper, IPartnershipView } from "@/models/partnerships"
@@ -72,19 +72,32 @@ export default function PartnershipForm({ onSuccess, onError, partnership }: Pro
     const response = await updatePartnership({
       id: partnership.id,
       data: {
-        ...partnership,
-        delete: true
+        delete: true,
+        discountType: partnership.discountType,
+        discountValue: partnership.discountValue,
+        identificationLabel: partnership.identificationLabel,
+        type: partnership.type,
+        name: partnership.name,
       }
     })
     setIsDeleting(false)
     if (response.data) {
-      toast.success("Serviço excluído com sucesso")
+      toast.success("Excluído com sucesso")
       if (onSuccess) onSuccess()
     } else {
-      toast.error("Erro ao excluir produto")
+      toast.error("Erro ao excluir")
       if (onError) onError()
     }
   }
+
+  useEffect(() => {
+    if (form.getValues().type === EPartnershipType.PARKING) {
+      form.setValue("identificationLabel", "Ticket")
+    } else {
+      form.setValue("identificationLabel", partnership.identificationLabel || "")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch().type])
 
   return (
     <Form {...form}>
@@ -134,24 +147,25 @@ export default function PartnershipForm({ onSuccess, onError, partnership }: Pro
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="identificationLabel"
-          render={({ field }) => (
-            <FormItem className="pt-4">
-              <FormLabel>Identificação</FormLabel>
-              <FormDescription>Esse campo será exibido para orientar o cliente qual indicação deve preencher no cadastro. Ex: CRM, OAB...</FormDescription>
-              <FormControl>
-                <Input
-                  autoFocus
-                  placeholder="Digite o nome da identificação do convênio"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {form.watch("type") === EPartnershipType.COMMON && (
+          <FormField
+            control={form.control}
+            name="identificationLabel"
+            render={({ field }) => (
+              <FormItem className="pt-4">
+                <FormLabel>Identificação</FormLabel>
+                <FormDescription>Esse campo será exibido para orientar o cliente qual documento deve preencher no cadastro. Ex: CRM, OAB...</FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Digite o nome da identificação do convênio"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
@@ -180,25 +194,27 @@ export default function PartnershipForm({ onSuccess, onError, partnership }: Pro
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="discountValue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 text-muted-foreground border-r">R$</span>
-                  <Input
-                    className="pl-12"
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {form.watch().discountType && (
+          <FormField
+            control={form.control}
+            name="discountValue"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 text-muted-foreground border-r">{form.watch().discountType === EPartnershipDiscountType.FIXED ? "R$" : "%"}</span>
+                    <Input
+                      className="pl-12"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex items-center gap-2">
           <Checkbox

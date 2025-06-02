@@ -6,8 +6,8 @@ import { Button } from "../ui/button"
 import { Edit2Icon } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { formatCurrency } from "@/lib/utils"
-import { IPartnershipView } from "@/models/partnerships"
+import { formatCurrency, formatPercentage } from "@/lib/utils"
+import { EPartnershipDiscountType, EPartnershipType, EPartnershipTypeMapper, IPartnershipView } from "@/models/partnerships"
 
 interface Props {
   data?: IPartnershipView[]
@@ -35,9 +35,34 @@ export default function PartnershipsTable({
         header: "Título",
       },
       {
+        accessorKey: "identificationLabel",
+        header: () => <p className="text-center">Identificação</p>,
+        cell: (row) => {
+          const original = row.row.original
+          const value = original.identificationLabel
+          const type = original.type
+
+          return (
+            <p className="text-center">
+              {type === EPartnershipType.COMMON ? value : "-"}
+            </p>
+          )
+        },
+      },
+      {
+        accessorKey: "type",
+        header: () => <p className="text-center">Tipo</p>,
+        cell: (row) => <p className="text-center">{EPartnershipTypeMapper[row.getValue() as EPartnershipType]}</p>,
+      },
+      {
         accessorKey: "discountValue",
-        header: () => <p className="text-center">Preço</p>,
-        cell: (row) => <p className="text-center">{formatCurrency(row.getValue() as number)}</p>,
+        header: () => <p className="text-center">Desconto</p>,
+        cell: (row) => {
+          const original = row.row.original
+          const value = original.discountValue
+          const discountType = original.discountType
+          return <p className="text-center">{discountType === EPartnershipDiscountType.FIXED ? formatCurrency(value) : formatPercentage(value)}</p>
+        },
       },
       {
         accessorKey: "createdAt",
