@@ -96,11 +96,11 @@ export async function getApiKeysAction(): Promise<IActionResponse<IApiKeyView[]>
   }
 }
 
-export async function deleteApiKeyAction(id: string): Promise<IActionResponse<IApiKeyView[]>> {
+export async function deleteApiKeyAction(id: string): Promise<IActionResponse<IApiKeyView>> {
   try {
     console.log("Deleting API Key with ID:", id)
 
-    const { data } = await axiosClient.delete<IApiKeyView[]>(`auth/api-key/${id}`)
+    const { data } = await axiosClient.delete<IApiKeyView>(`auth/api-key/${id}`)
     return { data }
 
   } catch (err) {

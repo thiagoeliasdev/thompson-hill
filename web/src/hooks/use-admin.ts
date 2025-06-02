@@ -311,21 +311,21 @@ export const useAdmin = () => {
 
   const { mutateAsync: deleteApiKey } = useMutation({
     mutationKey: ["deleteApiKey"],
-    mutationFn: async (id: string): Promise<IActionResponse<void>> => {
+    mutationFn: async (id: string): Promise<void> => {
       try {
         const response = await deleteApiKeyAction(id)
 
-        if (response.data === undefined) {
-          queryClient.setQueryData([queries.admin.apiKeys], (current: IApiKeyView[]) => {
-            return current?.filter((key) => key.id !== id)
-          })
-          return response
+        if (response.error) {
+          throw new Error(response.error)
         }
-        return response
+        queryClient.setQueryData([queries.admin.apiKeys], (current: IApiKeyView[]) => {
+          if (!current) return []
+          return current.filter((key) => key.id !== id)
+        })
 
       } catch (error) {
         console.error(error)
-        return { error: "An error occurred while deleting the API key" }
+        return
       }
     },
     onSuccess: () => {
