@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Delete, Query } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Get, Delete, Query, Param } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthLoginInput } from "./dto/auth-login.input"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger"
@@ -77,7 +77,7 @@ export class AuthController {
     description: 'Invalid API key ID',
     example: 'Invalid API key ID'
   })
-  deleteApiKey(@Query('id') id: string) {
+  deleteApiKey(@Param('id') id: string) {
     return this.authService.deleteApiKey(id)
   }
 }

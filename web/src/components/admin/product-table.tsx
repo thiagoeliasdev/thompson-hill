@@ -70,7 +70,7 @@ export default function ProductsTable({
       },
       {
         accessorKey: "createdAt",
-        header: () => <p className="hidden sm:block text-center">Criado em</p>,
+        header: () => <p className="hidden sm:block text-center">Cadastrado em</p>,
         cell: (row) => <p className="hidden sm:block text-center">{format(new Date(row.getValue() as string), "dd/MMM/yy", {
           locale: ptBR
         })}</p>,

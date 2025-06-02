@@ -1,3 +1,5 @@
+import { createApiKeyAction, deleteApiKeyAction, getApiKeysAction } from "@/actions/auth"
+import { CreateApiKeyInput } from "@/actions/auth/dto/create-api-key.input"
 import { createPartnershipAction, getPartnershipsAction, updatePartnershipAction } from "@/actions/partnerships"
 import { CreatePartnershipInput } from "@/actions/partnerships/dto/create-partnership.input"
 import { UpdatePartnershipInput } from "@/actions/partnerships/dto/update-partnership.input"
@@ -12,6 +14,7 @@ import { CreateUserInput } from "@/actions/users/dtos/create-user.input"
 import { UpdateUserInput } from "@/actions/users/dtos/update-user.input"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
+import { IApiKeyView } from "@/models/api-key"
 import { IPartnershipView } from "@/models/partnerships"
 import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
@@ -54,7 +57,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.users] })
     },
   })
 
@@ -79,7 +82,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.users] })
     },
   })
 
@@ -116,7 +119,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.services] })
     },
   })
 
@@ -141,7 +144,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.services] })
     },
   })
 
@@ -178,7 +181,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.products] })
     },
   })
 
@@ -203,7 +206,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.products] })
     },
   })
 
@@ -240,7 +243,7 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.partnerships] })
     },
   })
 
@@ -265,8 +268,69 @@ export const useAdmin = () => {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: [queries.admin.partnerships] })
     },
+  })
+
+  const { data: apiKeys, isLoading: isLoadingApiKeys } = useQuery({
+    queryKey: [queries.admin.apiKeys],
+    queryFn: async (): Promise<IApiKeyView[]> => {
+      const response = await getApiKeysAction()
+
+      if (response.data) {
+        return response.data.map((key) => ({
+          ...key,
+          createdAt: new Date(key.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
+  const { mutateAsync: createApiKey } = useMutation({
+    mutationKey: ["createApiKey"],
+    mutationFn: async (data: CreateApiKeyInput): Promise<IActionResponse<IApiKeyView>> => {
+      const response = await createApiKeyAction(data)
+
+      if (response.data) {
+        queryClient.setQueryData([queries.admin.apiKeys], (current: IApiKeyView[]) => {
+          if (!current) return [response.data]
+          return [...current, response.data]
+        })
+
+        return response
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queries.admin.apiKeys] })
+    },
+  })
+
+  const { mutateAsync: deleteApiKey } = useMutation({
+    mutationKey: ["deleteApiKey"],
+    mutationFn: async (id: string): Promise<IActionResponse<void>> => {
+      try {
+        const response = await deleteApiKeyAction(id)
+
+        if (response.data === undefined) {
+          queryClient.setQueryData([queries.admin.apiKeys], (current: IApiKeyView[]) => {
+            return current?.filter((key) => key.id !== id)
+          })
+          return response
+        }
+        return response
+
+      } catch (error) {
+        console.error(error)
+        return { error: "An error occurred while deleting the API key" }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queries.admin.apiKeys] })
+    }
   })
 
   return {
@@ -286,5 +350,9 @@ export const useAdmin = () => {
     isLoadingPartnerships,
     createPartnership,
     updatePartnership,
+    apiKeys,
+    isLoadingApiKeys,
+    createApiKey,
+    deleteApiKey
   }
 }

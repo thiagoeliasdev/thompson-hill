@@ -10,6 +10,7 @@ export const queries = {
     customers: "admin_customers",
     appointments: "admin_appointments",
     partnerships: "admin_partnerships",
+    apiKeys: "admin_api_keys",
   },
   totem: {
     attendants: "totem_attendants",
