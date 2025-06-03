@@ -66,7 +66,8 @@ export class AppointmentsController {
     }
   })
   async findOne(@Param('id') id: string) {
-    return new AppointmentView(await this.appointmentsService.findOne(id))
+    const response = new AppointmentView(await this.appointmentsService.findOne(id))
+    return response
   }
 
   @Put(':id')

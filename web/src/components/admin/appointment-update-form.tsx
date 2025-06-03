@@ -15,7 +15,6 @@ import { IUserView } from "@/models/user"
 import { IServiceView } from "@/models/service"
 import { updateAppointmentSchema } from "@/actions/appointments/dto/update-appointment.input"
 import { PlusIcon, XIcon } from "lucide-react"
-import { formatCurrency } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { useAppointments, UseAppointmentsParams } from "@/hooks/use-appointments"
 import { IProductView } from "@/models/product"
@@ -63,7 +62,7 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
 
   const productsOptions = useMemo(() => {
     return products.map((product) => ({
-      label: `${product.name} - ${formatCurrency(product.promoEnabled && product.promoValue ? product.promoValue : product.value)}`,
+      label: product.name,
       value: product.id,
     }))
   }, [products])

@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from 'react'
 
 export default function AttendantCheckoutPage() {
-  const { findAttendance, isFindingAttendance, services, products } = useAttendant()
+  const { findAttendance, isFindingAttendance, services, products, partnerships } = useAttendant()
   const [attendance, setAttendance] = useState<IAppointmentView | null>(null)
 
   const searchParams = useSearchParams()
@@ -57,6 +57,7 @@ export default function AttendantCheckoutPage() {
                 appointment={attendance}
                 services={services || []}
                 products={products || []}
+                partnerships={partnerships || []}
                 onSuccess={() => {
                   router.push(EPages.ATTENDANCE_DASHBOARD)
                 }}

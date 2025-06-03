@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormItem, FormMessage } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { ChevronLeftIcon, PlusIcon, XIcon } from "lucide-react"
+import { CheckIcon, ChevronLeftIcon, PlusIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { updateAppointmentSchema } from "@/actions/appointments/dto/update-appointment.input"
@@ -18,24 +18,26 @@ import Indicator from "../ui/indicator"
 import { Label } from "../ui/label"
 import { IProductView } from "@/models/product"
 import { useAppointments } from "@/hooks/use-appointments"
+import { EPartnershipType, IPartnershipView } from "@/models/partnerships"
 
 interface Props {
   attendantId: string
   appointment: IAppointmentView
   services: IServiceView[]
   products: IProductView[]
+  partnerships: IPartnershipView[]
   onSuccess?: () => void
   onError?: () => void
 }
 
-const FINAL_SUBMIT_STEP = 3
+const FINAL_SUBMIT_STEP = 4
 
-export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, onSuccess, onError }: Props) {
+export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, partnerships, onSuccess, onError }: Props) {
   const formSchema = updateAppointmentSchema
 
   const [step, setStep] = useState(0)
 
-  const steps = ["Serviços Realizados", "Produtos", "Método de Pagamento", "Confirmação"]
+  const steps = ["Serviços Realizados", "Produtos", "Estacionamento", "Método de Pagamento", "Confirmação"]
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +47,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
       status: EAppointmentStatuses.ON_SERVICE,
       serviceIds: appointment.services.map((service) => service.id) || [],
       productIds: appointment.products.map((product) => product.id) || [],
+      partnershipIds: appointment.partnerships?.map((partnership) => partnership.id) || [],
     },
   })
 
@@ -56,10 +59,12 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   // Log form errors
   useEffect(() => {
-    console.log(form.formState.errors)
+    console.log("Form errors", form.formState.errors)
   }, [form.formState.errors])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("Submitting form with values:", values)
+
     try {
       const updatedData = await updateAppointment({
         id: appointment.id,
@@ -69,11 +74,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         }
       })
 
+      console.log("Updated appointment data:", updatedData)
+
       if (updatedData.data) {
         setUpdatedAppointment(updatedData.data)
       }
 
-      // toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
+      toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
       if (onSuccess && step === FINAL_SUBMIT_STEP) onSuccess()
     } catch (error) {
       console.error(error)
@@ -95,6 +102,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
       value: product.id,
     }))
   }, [products])
+
+  const parkingOptions = useMemo(() => {
+    return partnerships.filter(partnership => partnership.type === EPartnershipType.PARKING).map((partnership) => ({
+      label: partnership.name,
+      value: partnership.id,
+    }))
+  }, [partnerships])
 
   function handleAddService() {
     const serviceIds = form.getValues("serviceIds")
@@ -120,6 +134,22 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     form.reset({ ...form.getValues(), productIds: newProductIds })
   }
 
+  function handleAddPartnership(id: string) {
+    const partnershipIds = form.getValues("partnershipIds") || []
+    if (!partnershipIds.includes(id)) {
+      form.setValue("partnershipIds", [...partnershipIds, id])
+      form.clearErrors("partnershipIds")
+    }
+    handleNextStep()
+  }
+
+  function handleRemoveParkingPartnership() {
+    const partnershipIds = form.getValues("partnershipIds") || []
+    const newPartnershipIds = partnershipIds.filter((id) => !parkingOptions.some((option) => option.value === id))
+    form.reset({ ...form.getValues(), partnershipIds: newPartnershipIds })
+    handleNextStep()
+  }
+
   function handleNextStep() {
     switch (step) {
       // Services step
@@ -138,14 +168,20 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           })
         break
 
-      // Payment method step && first submit 1 step
+      // Parking step
       case 2:
+        console.log("from step 2")
         setStep((prev) => prev + 1)
+        break
+
+      // Payment method step && first submit 1 step
+      case 3:
         formRef.current?.requestSubmit()
+        setStep((prev) => prev + 1)
         break
 
       // Final Submit step
-      case 3:
+      case 4:
         formRef.current?.requestSubmit()
         break
 
@@ -271,8 +307,41 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           </FormItem>
         )}
 
-        {/* Payment Method */}
+        {/* Parking */}
         {step === 2 && (
+          <FormItem>
+            {parkingOptions.map((item) => (
+              <Button
+                key={item.value}
+                type="button"
+                size="lg"
+                variant={form.watch("partnershipIds")?.includes(item.value) ? "default" : "outline"}
+                onClick={() => {
+                  handleAddPartnership(item.value)
+                }}
+                className="text-lg sm:text-2xl"
+              >
+                {item.label}
+              </Button>
+            ))}
+            <Button
+              type="button"
+              size="lg"
+              // variant={form.watch("partnershipIds") === item ? "default" : "outline"}
+              variant={!form.watch("partnershipIds")?.length ? "default" : "outline"}
+              onClick={() => {
+                handleRemoveParkingPartnership()
+              }}
+              className="text-lg sm:text-2xl"
+            >
+              {"Sem estacionamento"}
+            </Button>
+          </FormItem>
+        )}
+
+
+        {/* Payment Method */}
+        {step === 3 && (
           <FormItem>
             {Object.values(EPaymentMethod).map((item) => (
               <Button
@@ -293,7 +362,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         )}
 
         {/* Checkout */}
-        {step === 3 && (
+        {step === 4 && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
               <Label className="flex-1 text-lg sm:text-2xl">Sub Total</Label>
@@ -315,7 +384,6 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         )}
 
         <div className="flex flex-row gap-2 w-full pt-6">
-
           <Button
             disabled={form.formState.isSubmitting}
             type="button"
@@ -332,8 +400,10 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             size="lg"
             className="flex-1 text-lg sm:text-2xl"
             disabled={
-              // Disable next button if on step is payment method and no payment method is selected
-              (step === 2 && form.watch().paymentMethod === undefined)
+              // Disable next button if on step payment method
+              (step === 3)
+              // Disable next button if step is parking
+              || (step === 2)
             }
             onClick={handleNextStep}
           >{step === FINAL_SUBMIT_STEP ? "Finalizar" : "Próximo"}</Button>

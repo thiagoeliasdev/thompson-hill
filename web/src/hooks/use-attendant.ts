@@ -1,9 +1,11 @@
 import { getAppointmentByIdAction, startAttendingAppointmentAction } from "@/actions/appointments"
+import { getPartnershipsAction } from "@/actions/partnerships"
 import { getProductsAction } from "@/actions/products"
 import { getServicesAction } from "@/actions/services"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
 import { IAppointmentView } from "@/models/appointment"
+import { IPartnershipView } from "@/models/partnerships"
 import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -65,6 +67,22 @@ export const useAttendant = () => {
     },
   })
 
+  const { data: partnerships } = useQuery({
+    queryKey: [queries.admin.partnerships],
+    queryFn: async (): Promise<IPartnershipView[]> => {
+      const response = await getPartnershipsAction()
+
+      if (response.data) {
+        return response.data.map((partnership) => ({
+          ...partnership,
+          createdAt: new Date(partnership.createdAt)
+        }))
+      }
+
+      return response.data || []
+    },
+  })
+
   return {
     startAttendance,
     isStartingAttendance,
@@ -74,5 +92,6 @@ export const useAttendant = () => {
     isLoadingServices,
     products,
     isLoadingProducts,
+    partnerships
   }
 }

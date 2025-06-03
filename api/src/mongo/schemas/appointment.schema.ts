@@ -6,7 +6,7 @@ import { IMongoCustomer, toCustomer } from "./customer.schema"
 import { CustomerNotFoundException } from "../../errors"
 import { IMongoUser, toUser } from "./user.schema"
 import { IMongoProduct, toProduct } from "./product.schema"
-import { IMongoPartnership } from "./partnership.schema"
+import { IMongoPartnership, toPartnership } from "./partnership.schema"
 
 
 export interface IMongoAppointment extends Document {
@@ -105,7 +105,7 @@ export function toAppointment(appointment: IMongoAppointment): Appointment {
     attendant: appointment.attendant ? toUser(appointment.attendant) : undefined,
     services: appointment.services?.map(toService) || [],
     products: appointment.products?.map(toProduct) || [],
-    partnerships: appointment.partnerships || [],
+    partnerships: appointment.partnerships?.map(toPartnership) || [],
     totalPrice: appointment.totalPrice,
     discount: appointment.discount,
     finalPrice: appointment.finalPrice,

@@ -1,3 +1,5 @@
+import { IPartnershipView } from "./partnerships"
+
 export enum EPaymentMethod {
   CASH = 'CASH',
   CREDIT_CARD = 'CREDIT_CARD',
@@ -78,7 +80,8 @@ export interface IAppointmentView {
     id: string
     name: string
     value: number
-  }[]
+  }[],
+  partnerships?: IPartnershipView[]
   totalPrice: number
   discount?: number
   finalPrice: number
