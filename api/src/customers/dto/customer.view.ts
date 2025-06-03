@@ -14,6 +14,8 @@ export class CustomerView {
     this.referralCodeUsed = customer.referralCodeUsed
     this.referralCodeCount = customer.referralCodeCount
     this.createdAt = customer.createdAt
+    this.partnershipId = customer.partnershipId
+    this.partnershipIdentificationId = customer.partnershipIdentificationId
   }
 
   @ApiProperty()
