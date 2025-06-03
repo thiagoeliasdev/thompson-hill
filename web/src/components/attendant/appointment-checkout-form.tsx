@@ -28,14 +28,14 @@ interface Props {
   onError?: () => void
 }
 
-const FINAL_SUBMIT_STEP = 2
+const FINAL_SUBMIT_STEP = 3
 
 export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, onSuccess, onError }: Props) {
   const formSchema = updateAppointmentSchema
 
   const [step, setStep] = useState(0)
 
-  const steps = ["Serviços Realizados", "Método de Pagamento", "Confirmação"]
+  const steps = ["Serviços Realizados", "Produtos", "Método de Pagamento", "Confirmação"]
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,6 +89,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     }))
   }, [services])
 
+  const productsOptions = useMemo(() => {
+    return products.map((product) => ({
+      label: `${product.name} - ${formatCurrency(product.promoEnabled && product.promoValue ? product.promoValue : product.value)}`,
+      value: product.id,
+    }))
+  }, [products])
+
   function handleAddService() {
     const serviceIds = form.getValues("serviceIds")
     form.setValue("serviceIds", [...serviceIds, ""])
@@ -107,6 +114,12 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     form.reset({ ...form.getValues(), serviceIds: newServicesIds })
   }
 
+  function handleRemoveProduct(index: number) {
+    const productIds = form.getValues("productIds")
+    const newProductIds = productIds?.filter((_, i) => i !== index)
+    form.reset({ ...form.getValues(), productIds: newProductIds })
+  }
+
   function handleNextStep() {
     switch (step) {
       // Services step
@@ -117,14 +130,22 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           })
         break
 
-      // Payment method step && first submit 1 step
+      // Products step
       case 1:
+        form.trigger("productIds")
+          .then((isValid) => {
+            if (isValid) setStep((prev) => prev + 1)
+          })
+        break
+
+      // Payment method step && first submit 1 step
+      case 2:
         setStep((prev) => prev + 1)
         formRef.current?.requestSubmit()
         break
 
       // Final Submit step
-      case 2:
+      case 3:
         formRef.current?.requestSubmit()
         break
 
@@ -197,8 +218,61 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           </FormItem>
         )}
 
-        {/* Payment Method */}
+        {/* Products */}
         {step === 1 && (
+          <FormItem>
+            <FormMessage>{form.getFieldState("productIds").error?.message}</FormMessage>
+            {form.watch().productIds?.map((_, index) => (
+              <div
+                key={index}
+              >
+                <div
+                  className="w-full flex justify-start items-center gap-1"
+                >
+                  <Select
+                    onValueChange={(value) => {
+                      form.setValue(`productIds.${index}`, value)
+                    }}
+                    defaultValue={form.getValues(`productIds.${index}`)}
+                    value={form.getValues(`productIds.${index}`) || ""}
+                  >
+                    <SelectTrigger className="w-full text-lg sm:text-2xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {productsOptions.map((item, index) => (
+                        <SelectItem
+                          key={index}
+                          value={item.value}
+                          className="text-lg sm:text-2xl"
+                        >{item.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="destructive"
+                    onClick={() => handleRemoveProduct(index)}
+                    className="h-14 w-12"
+                  ><XIcon className="size-6" /></Button>
+                </div>
+                <FormMessage>{form.getFieldState(`productIds.${index}`).error?.message}</FormMessage>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={handleAddProduct}
+              className="w-full border-3 border-dashed"
+            ><PlusIcon /> Adicionar Produto</Button>
+          </FormItem>
+        )}
+
+        {/* Payment Method */}
+        {step === 2 && (
           <FormItem>
             {Object.values(EPaymentMethod).map((item) => (
               <Button
@@ -219,10 +293,10 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         )}
 
         {/* Checkout */}
-        {step === 2 && (
+        {step === 3 && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
-              <Label className="flex-1 text-lg sm:text-2xl">Serviços</Label>
+              <Label className="flex-1 text-lg sm:text-2xl">Sub Total</Label>
               <Indicator className="flex-1 justify-end text-lg sm:text-2xl md:text-2xl text-foreground/70">{formatCurrency(updatedAppointment.totalPrice)}</Indicator>
             </div>
             <div className="flex flex-row justify-between items-center gap-2">
@@ -256,8 +330,11 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             isLoading={form.formState.isSubmitting}
             type="button"
             size="lg"
-            className="flex-1"
-            disabled={(step === 1 && form.watch().paymentMethod === undefined)}
+            className="flex-1 text-lg sm:text-2xl"
+            disabled={
+              // Disable next button if on step is payment method and no payment method is selected
+              (step === 2 && form.watch().paymentMethod === undefined)
+            }
             onClick={handleNextStep}
           >{step === FINAL_SUBMIT_STEP ? "Finalizar" : "Próximo"}</Button>
         </div>
