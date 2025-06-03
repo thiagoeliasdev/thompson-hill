@@ -8,6 +8,8 @@ import { UpdateAppointmentInput } from "./dto/update-appointment.input"
 import { createPaginatedDto } from "../common/dto/paginated.view"
 import { AppointmentQuery } from "./dto/appointment.query"
 import { CombinedAuthGuard } from "../auth/guards/jwt-api-key/jwt-api-key.guard"
+import { AppointmentSummaryView } from "./dto/appointment-summary.view"
+import { EAppointmentStatuses } from "./entities/appointment.entity"
 
 const PaginatedAppointmentView = createPaginatedDto(AppointmentView)
 
@@ -68,6 +70,29 @@ export class AppointmentsController {
   async findOne(@Param('id') id: string) {
     const response = new AppointmentView(await this.appointmentsService.findOne(id))
     return response
+  }
+
+  @Get("summary/:userId")
+  @UseGuards(CombinedAuthGuard)
+  @ApiBearerAuth()
+  @ApiHeader({
+    name: 'x-api-key',
+    description: 'API Key for alternative authentication',
+    required: false,
+  })
+  @ApiOperation({ summary: 'Get day summary overview for a user' })
+  @ApiOkResponse({ type: AppointmentSummaryView })
+  async getSummary(@Param("userId") userId: string) {
+    const { results, total } = await this.appointmentsService.findAll({
+      onlyToday: true,
+      attendantId: userId,
+      limit: 1000,
+      status: EAppointmentStatuses.FINISHED,
+      sortBy: 'createdAt',
+      order: 'asc',
+    })
+
+    return new AppointmentSummaryView(results)
   }
 
   @Put(':id')

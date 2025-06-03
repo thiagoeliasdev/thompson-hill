@@ -97,6 +97,7 @@ export class AppointmentsService {
       customerName,
       status,
       paymentMethod,
+      attendantId
     } = filters
 
     const skip = (page - 1) * limit
@@ -154,6 +155,14 @@ export class AppointmentsService {
       pipeline.push({
         $match: {
           'customer.name': { $regex: customerName, $options: 'i' }, // case-insensitive
+        },
+      })
+    }
+
+    if (attendantId) {
+      pipeline.push({
+        $match: {
+          attendantId: attendantId,
         },
       })
     }

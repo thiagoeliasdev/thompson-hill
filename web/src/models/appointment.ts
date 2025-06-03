@@ -71,6 +71,7 @@ export interface IAppointmentView {
   services: IServiceView[]
   products: IProductView[],
   partnerships?: IPartnershipView[]
+  totalServiceWeight: number
   totalPrice: number
   discount?: number
   finalPrice: number

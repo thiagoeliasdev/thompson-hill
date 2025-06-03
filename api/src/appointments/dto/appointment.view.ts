@@ -39,6 +39,9 @@ export class AppointmentView {
   partnerships?: PartnershipView[]
 
   @ApiProperty()
+  totalServiceWeight: number
+
+  @ApiProperty()
   totalPrice: number
 
   @ApiProperty()

@@ -47,6 +47,11 @@ export default function AppointmentsTable({
         cell: (row) => <p className="text-center">{formatCurrency(Number(row.getValue()))}</p>,
       },
       {
+        accessorKey: "totalServiceWeight",
+        header: () => <p className="text-center">Serviços</p>,
+        cell: (row) => <p className="text-center">{Number(row.getValue())}</p>,
+      },
+      {
         accessorKey: "status",
         header: () => <p className="text-center max-w-32">Status</p>,
         cell: (row) => {

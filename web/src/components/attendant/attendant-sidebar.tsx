@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { EPages } from "@/lib/pages.enum"
-import { LayoutDashboard, LogOutIcon } from "lucide-react"
+import { LayoutDashboard, LogOutIcon, NotebookPenIcon } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 import React from "react"
 
@@ -24,6 +24,13 @@ const routes = [
     urlPrefix: EPages.ATTENDANCE_DASHBOARD,
     url: EPages.ATTENDANCE_DASHBOARD,
     icon: <LayoutDashboard />
+  },
+  {
+    slug: "sumario",
+    title: "Resumo do Dia",
+    urlPrefix: EPages.ATTENDANCE_SUMMARY,
+    url: EPages.ATTENDANCE_SUMMARY,
+    icon: <NotebookPenIcon />
   }
 ]
 

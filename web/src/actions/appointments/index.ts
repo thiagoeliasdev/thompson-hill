@@ -6,6 +6,7 @@ import { EAppointmentStatuses, IAppointmentView } from "@/models/appointment"
 import axiosClient from "@/lib/axios"
 import { UpdateAppointmentInput, updateAppointmentSchema } from "./dto/update-appointment.input"
 import { IPaginated } from "@/hooks/use-paginated-query"
+import { IAppointmentSummaryView } from "@/models/appointments-summary"
 
 const APPOINTMENTS_END_POINT = "/appointments"
 
@@ -119,6 +120,26 @@ export async function startAttendingAppointmentAction(id: string, attendantId: s
       attendantId: attendantId,
       status: EAppointmentStatuses.ON_SERVICE
     })
+    return { data }
+
+  } catch (err) {
+    const error = err as Error
+    if (error.message.includes("ECONNREFUSED")) {
+      return {
+        error: "Servidor não está disponível, tente novamente mais tarde."
+      }
+    }
+
+    console.error(error)
+    return {
+      error: error.message
+    }
+  }
+}
+
+export async function getUserAppointmentsSummaryAction(userId: string): Promise<IActionResponse<IAppointmentSummaryView>> {
+  try {
+    const { data } = await axiosClient.get<IAppointmentSummaryView>(`${APPOINTMENTS_END_POINT}/summary/${userId}`)
     return { data }
 
   } catch (err) {

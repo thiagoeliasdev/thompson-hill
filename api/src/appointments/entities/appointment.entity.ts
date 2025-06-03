@@ -46,6 +46,7 @@ export class Appointment {
   services: Service[]
   products: Product[]
   partnerships?: Partnership[]
+  totalServiceWeight: number
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -67,6 +68,8 @@ export class Appointment {
     this.services = appointment.services.map(service => new Service(service))
     this.products = appointment.products.map(product => new Product(product))
     this.partnerships = appointment.partnerships ? appointment.partnerships.map(partnership => new Partnership(partnership)) : undefined
+
+    this.totalServiceWeight = this.services.reduce((total, service) => total + (service.weight || 0), 0)
   }
 
   toFirebaseObject() {
