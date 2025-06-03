@@ -38,8 +38,6 @@ export default function AttendantCheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentId, attendantId])
 
-  console.log('Attendance:', attendance)
-
   return (
     <div className="w-full">
       {isFindingAttendance && (

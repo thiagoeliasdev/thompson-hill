@@ -7,18 +7,18 @@ import { Form, FormItem, FormMessage } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { CheckIcon, ChevronLeftIcon, PlusIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { updateAppointmentSchema } from "@/actions/appointments/dto/update-appointment.input"
 import { EAppointmentStatuses, EPaymentMethod, EPaymentMethodMapper, IAppointmentView } from "@/models/appointment"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { IServiceView } from "@/models/service"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatPercentage } from "@/lib/utils"
 import { H2 } from "../ui/typography"
 import Indicator from "../ui/indicator"
 import { Label } from "../ui/label"
 import { IProductView } from "@/models/product"
 import { useAppointments } from "@/hooks/use-appointments"
-import { EPartnershipType, IPartnershipView } from "@/models/partnerships"
+import { EPartnershipDiscountType, EPartnershipType, IPartnershipView } from "@/models/partnerships"
 
 interface Props {
   attendantId: string
@@ -57,14 +57,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   const [updatedAppointment, setUpdatedAppointment] = useState<IAppointmentView>(appointment)
 
-  // Log form errors
-  useEffect(() => {
-    console.log("Form errors", form.formState.errors)
-  }, [form.formState.errors])
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Submitting form with values:", values)
-
     try {
       const updatedData = await updateAppointment({
         id: appointment.id,
@@ -73,8 +66,6 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           status: step === FINAL_SUBMIT_STEP ? EAppointmentStatuses.FINISHED : EAppointmentStatuses.ON_SERVICE,
         }
       })
-
-      console.log("Updated appointment data:", updatedData)
 
       if (updatedData.data) {
         setUpdatedAppointment(updatedData.data)
@@ -105,7 +96,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   const parkingOptions = useMemo(() => {
     return partnerships.filter(partnership => partnership.type === EPartnershipType.PARKING).map((partnership) => ({
-      label: partnership.name,
+      label: `${partnership.name} - ${partnership.discountType === EPartnershipDiscountType.FIXED ? formatCurrency(partnership.discountValue) : formatPercentage(partnership.discountValue)}`,
       value: partnership.id,
     }))
   }, [partnerships])
@@ -359,7 +350,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         {/* Partnership */}
         {step === 3 && (
           <FormItem className="flex flex-col gap-4">
-            <Indicator className="text-lg sm:text-2xl">{partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.name || ""}</Indicator>
+            <Indicator className="text-lg sm:text-2xl">
+
+              {partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.name || ""}
+              {" - "}
+              {partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.discountType === EPartnershipDiscountType.FIXED ? formatCurrency(partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.discountValue) : formatPercentage(partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.discountValue)}
+
+            </Indicator>
             <Indicator className="text-lg sm:text-2xl">{appointment.customer.partnershipIdentificationId}</Indicator>
             <div className="w-full flex flex-row justify-between items-center gap-4">
               <Button
