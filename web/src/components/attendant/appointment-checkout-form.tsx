@@ -30,14 +30,14 @@ interface Props {
   onError?: () => void
 }
 
-const FINAL_SUBMIT_STEP = 4
+const FINAL_SUBMIT_STEP = 5
 
 export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, partnerships, onSuccess, onError }: Props) {
   const formSchema = updateAppointmentSchema
 
   const [step, setStep] = useState(0)
 
-  const steps = ["Serviços Realizados", "Produtos", "Estacionamento", "Método de Pagamento", "Confirmação"]
+  const steps = ["Serviços Realizados", "Produtos", "Estacionamento", "Convênios", "Método de Pagamento", "Confirmação"]
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,6 +110,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     }))
   }, [partnerships])
 
+
   function handleAddService() {
     const serviceIds = form.getValues("serviceIds")
     form.setValue("serviceIds", [...serviceIds, ""])
@@ -150,6 +151,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     handleNextStep()
   }
 
+  function handleRemoveCommonPartnership() {
+    const partnershipIds = form.getValues("partnershipIds") || []
+    const newPartnershipIds = partnershipIds.filter((id) => id !== appointment.customer.partnershipId)
+    form.reset({ ...form.getValues(), partnershipIds: newPartnershipIds })
+    handleNextStep()
+  }
+
   function handleNextStep() {
     switch (step) {
       // Services step
@@ -170,18 +178,27 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
       // Parking step
       case 2:
-        console.log("from step 2")
+        // Check if customer has other partnerships and skip next if not
+        if (appointment.customer.partnershipId) {
+          setStep((prev) => prev + 1)
+        } else {
+          setStep((prev) => prev + 2)
+        }
+        break
+
+      // Partnership step
+      case 3:
         setStep((prev) => prev + 1)
         break
 
       // Payment method step && first submit 1 step
-      case 3:
+      case 4:
         formRef.current?.requestSubmit()
         setStep((prev) => prev + 1)
         break
 
       // Final Submit step
-      case 4:
+      case 5:
         formRef.current?.requestSubmit()
         break
 
@@ -339,9 +356,41 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           </FormItem>
         )}
 
+        {/* Partnership */}
+        {step === 3 && (
+          <FormItem className="flex flex-col gap-4">
+            <Indicator className="text-lg sm:text-2xl">{partnerships.find(partnership => partnership.id === appointment.customer.partnershipId)?.name || ""}</Indicator>
+            <Indicator className="text-lg sm:text-2xl">{appointment.customer.partnershipIdentificationId}</Indicator>
+            <div className="w-full flex flex-row justify-between items-center gap-4">
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => {
+                  handleAddPartnership(appointment.customer.partnershipId || "")
+                }}
+                className="text-lg sm:text-2xl flex-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckIcon className="size-6" />
+                Confirmar Convênio
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="destructive"
+                onClick={() => {
+                  handleRemoveCommonPartnership()
+                }}
+                className="text-lg sm:text-2xl flex-1"
+              >
+                <XIcon className="size-6" />
+                Negar Convênio
+              </Button>
+            </div>
+          </FormItem>
+        )}
 
         {/* Payment Method */}
-        {step === 3 && (
+        {step === 4 && (
           <FormItem>
             {Object.values(EPaymentMethod).map((item) => (
               <Button
@@ -362,7 +411,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         )}
 
         {/* Checkout */}
-        {step === 4 && (
+        {step === 5 && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
               <Label className="flex-1 text-lg sm:text-2xl">Sub Total</Label>
@@ -401,9 +450,11 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             className="flex-1 text-lg sm:text-2xl"
             disabled={
               // Disable next button if on step payment method
-              (step === 3)
+              (step === 4)
               // Disable next button if step is parking
               || (step === 2)
+              // Disable next button if step is partnership
+              || (step === 3)
             }
             onClick={handleNextStep}
           >{step === FINAL_SUBMIT_STEP ? "Finalizar" : "Próximo"}</Button>
