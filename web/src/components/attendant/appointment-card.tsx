@@ -17,13 +17,19 @@ interface IAppointmentCardProps {
   onAttendanceStart: (appointment: IFirebaseAppointment) => void
   onAttendanceEnd: (appointment: IFirebaseAppointment) => void
   isStartingAttendance: boolean
+  userId: string
 }
 
-export default function AttendanceAppointmentCard({ index, appointment, onAttendanceStart, isStartingAttendance, onAttendanceEnd }: IAppointmentCardProps) {
+export default function AttendanceAppointmentCard({ index, appointment, onAttendanceStart, isStartingAttendance, onAttendanceEnd, userId }: IAppointmentCardProps) {
   return (
     <>
       {index === 0 && (
         <Card className="w-full">
+          {
+            userId !== appointment.attendant?.id && (
+              <div className="w-full"><p className="w-full text-center text-2xl font-semibold">Cliente da Fila: <strong className="text-primary">{appointment.attendant?.name}</strong></p></div>
+            )
+          }
           <CardHeader>
             <div className="w-full flex items-center justify-between">
               <p className={cn("text-primary font-semibold", index === 0 ? "text-primary" : "text-transparent")}>{appointment.status === EAppointmentStatuses.WAITING ? "Próximo Cliente" : "Atendendo"}</p>

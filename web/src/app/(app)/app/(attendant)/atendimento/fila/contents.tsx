@@ -15,11 +15,27 @@ export default function AttendantQueuePageContents({ userId }: { userId: string 
   const router = useRouter()
 
   const userQueue = useMemo(() => {
-    const officialQueue = queue[userId] || []
-    if (officialQueue.length > 0) return officialQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING || appointment.status === EAppointmentStatuses.ON_SERVICE)
 
+    // Check if the user has an official queue
+    const officialQueue = queue[userId] || []
+    if (officialQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING || appointment.status === EAppointmentStatuses.ON_SERVICE).length > 0) {
+      return officialQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING || appointment.status === EAppointmentStatuses.ON_SERVICE)
+    }
+
+    // Check if general queue has waiting appointments
     const generalQueue = queue["fila_geral"] || []
-    return generalQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING)
+    if (generalQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING).length > 0) {
+      return generalQueue.filter(appointment => appointment.status === EAppointmentStatuses.WAITING)
+    }
+
+    // Check if there are other users' queues with waiting appointments
+    const otherUsersQueue = Object.values(queue).flat().filter(appointment => appointment.status === EAppointmentStatuses.WAITING)
+    if (otherUsersQueue.length > 0) {
+      return otherUsersQueue
+    }
+
+    // If no appointments found, return an empty array
+    return []
   }, [queue, userId])
 
   async function onAttendanceStart(appointment: IFirebaseAppointment) {
@@ -38,15 +54,19 @@ export default function AttendantQueuePageContents({ userId }: { userId: string 
     router.push(`${EPages.ATTENDANCE_CHECKOUT}?appointmentId=${appointment.id}&attendantId=${userId}`)
   }
 
-  console.log("User Queue:", userQueue)
-
   return (
     <div className="w-full space-y-2">
+      {userQueue.length === 0 && (
+        <div className="text-center text-2xl sm:text-3xl font-bold">
+          Não há atendimentos na fila
+        </div>
+      )}
       {userQueue?.map((appointment, index) => (
         <AttendanceAppointmentCard
           key={appointment.id}
           index={index}
           appointment={appointment}
+          userId={userId}
           onAttendanceStart={onAttendanceStart}
           onAttendanceEnd={onAttendanceEnd}
           isStartingAttendance={isStartingAttendance}
