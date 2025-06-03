@@ -55,7 +55,8 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
 
   const servicesOptions = useMemo(() => {
     return services.map((service) => ({
-      label: `${service.name} - ${formatCurrency(service.promoEnabled && service.promoValue ? service.promoValue : service.value)}`,
+      // label: `${service.name} - ${formatCurrency(service.promoEnabled && service.promoValue ? service.promoValue : service.value)}`,
+      label: service.name,
       value: service.id,
     }))
   }, [services])

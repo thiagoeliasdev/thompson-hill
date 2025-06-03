@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormItem, FormMessage } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { CheckIcon, ChevronLeftIcon, PlusIcon, XIcon } from "lucide-react"
+import { ChevronLeftIcon, PlusIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { updateAppointmentSchema } from "@/actions/appointments/dto/update-appointment.input"
@@ -28,6 +28,8 @@ interface Props {
   onError?: () => void
 }
 
+const FINAL_SUBMIT_STEP = 2
+
 export default function AppointmentCheckoutForm({ attendantId, appointment, services, products, onSuccess, onError }: Props) {
   const formSchema = updateAppointmentSchema
 
@@ -40,7 +42,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     defaultValues: {
       attendantId,
       paymentMethod: appointment.paymentMethod,
-      status: EAppointmentStatuses.FINISHED,
+      status: EAppointmentStatuses.ON_SERVICE,
       serviceIds: appointment.services.map((service) => service.id) || [],
       productIds: appointment.products.map((product) => product.id) || [],
     },
@@ -50,6 +52,8 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   const { updateAppointment } = useAppointments()
 
+  const [updatedAppointment, setUpdatedAppointment] = useState<IAppointmentView>(appointment)
+
   // Log form errors
   useEffect(() => {
     console.log(form.formState.errors)
@@ -57,9 +61,20 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateAppointment({ id: appointment.id, data: { ...values } })
-      toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
-      if (onSuccess) onSuccess()
+      const updatedData = await updateAppointment({
+        id: appointment.id,
+        data: {
+          ...values,
+          status: step === FINAL_SUBMIT_STEP ? EAppointmentStatuses.FINISHED : EAppointmentStatuses.ON_SERVICE,
+        }
+      })
+
+      if (updatedData.data) {
+        setUpdatedAppointment(updatedData.data)
+      }
+
+      // toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
+      if (onSuccess && step === FINAL_SUBMIT_STEP) onSuccess()
     } catch (error) {
       console.error(error)
       toast.error("Erro ao salvar")
@@ -102,12 +117,13 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
           })
         break
 
-      // Payment method step
+      // Payment method step && first submit 1 step
       case 1:
         setStep((prev) => prev + 1)
+        formRef.current?.requestSubmit()
         break
 
-      // Submit step
+      // Final Submit step
       case 2:
         formRef.current?.requestSubmit()
         break
@@ -128,6 +144,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
         <H2 className="pb-4">{steps[step]}</H2>
 
+        {/* Services */}
         {step === 0 && (
           <FormItem>
             <FormMessage>{form.getFieldState("serviceIds").error?.message}</FormMessage>
@@ -145,12 +162,16 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
                     defaultValue={form.getValues(`serviceIds.${index}`)}
                     value={form.getValues(`serviceIds.${index}`) || ""}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full text-lg sm:text-2xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {servicesOptions.map((item, index) => (
-                        <SelectItem key={index} value={item.value}>{item.label}</SelectItem>
+                        <SelectItem
+                          key={index}
+                          value={item.value}
+                          className="text-lg sm:text-2xl"
+                        >{item.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -189,6 +210,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
                   form.setValue("paymentMethod", item)
                   handleNextStep()
                 }}
+                className="text-lg sm:text-2xl"
               >
                 {EPaymentMethodMapper[item]}
               </Button>
@@ -200,20 +222,20 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         {step === 2 && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
-              <Label className="flex-1">Serviços</Label>
-              <Indicator className="w-32 justify-end">{formatCurrency(appointment.totalPrice)}</Indicator>
+              <Label className="flex-1 text-lg sm:text-2xl">Serviços</Label>
+              <Indicator className="flex-1 justify-end text-lg sm:text-2xl md:text-2xl text-foreground/70">{formatCurrency(updatedAppointment.totalPrice)}</Indicator>
             </div>
             <div className="flex flex-row justify-between items-center gap-2">
-              <Label className="flex-1">Descontos</Label>
-              <Indicator className="w-32 justify-end">{formatCurrency(appointment.discount)}</Indicator>
+              <Label className="flex-1 text-lg sm:text-2xl">Descontos</Label>
+              <Indicator className="flex-1 justify-end text-lg sm:text-2xl md:text-2xl text-foreground/70">{formatCurrency(updatedAppointment.discount)}</Indicator>
             </div>
             <div className="flex flex-row justify-between items-center gap-2">
-              <Label className="flex-1">Total</Label>
-              <Indicator className="w-32 justify-end">{formatCurrency(appointment.finalPrice)}</Indicator>
+              <Label className="flex-1 text-lg sm:text-2xl">Total</Label>
+              <Indicator className="flex-1 justify-end text-lg sm:text-2xl md:text-2xl font-bold">{formatCurrency(updatedAppointment.finalPrice)}</Indicator>
             </div>
             <div className="flex flex-row justify-between items-center gap-2">
-              <Label className="flex-1">Método de Pagamento</Label>
-              <Indicator className="w-32 justify-end">{form.getValues().paymentMethod && EPaymentMethodMapper[form.getValues().paymentMethod as EPaymentMethod]}</Indicator>
+              <Label className="flex-1 text-lg sm:text-2xl">Método de Pagamento</Label>
+              <Indicator className="flex-1 justify-end text-lg sm:text-2xl md:text-2xl text-foreground/70">{form.getValues().paymentMethod && EPaymentMethodMapper[form.getValues().paymentMethod as EPaymentMethod]}</Indicator>
             </div>
           </div>
         )}
@@ -237,7 +259,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             className="flex-1"
             disabled={(step === 1 && form.watch().paymentMethod === undefined)}
             onClick={handleNextStep}
-          >{step === 2 ? "Finalizar" : "Próximo"}</Button>
+          >{step === FINAL_SUBMIT_STEP ? "Finalizar" : "Próximo"}</Button>
         </div>
       </form>
     </Form>
