@@ -23,4 +23,5 @@ export enum EPages {
 
   ATTENDANCE_DASHBOARD = "/app/atendimento/fila",
   ATTENDANCE_CHECKOUT = "/app/atendimento/checkout",
+  ATTENDANCE_POST_CHECKOUT = "/app/atendimento/pos-checkout",
 }

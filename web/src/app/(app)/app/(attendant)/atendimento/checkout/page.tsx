@@ -57,7 +57,7 @@ export default function AttendantCheckoutPage() {
                 products={products || []}
                 partnerships={partnerships || []}
                 onSuccess={() => {
-                  router.push(EPages.ATTENDANCE_DASHBOARD)
+                  router.push(`${EPages.ATTENDANCE_POST_CHECKOUT}?appointmentId=${attendance.id}`)
                 }}
               />
             </CardContent>

@@ -1,10 +1,13 @@
 import { getAppointmentByIdAction, startAttendingAppointmentAction } from "@/actions/appointments"
+import { updateCustomerAction } from "@/actions/customers"
+import { UpdateCustomerInput } from "@/actions/customers/dto/update-customer.input"
 import { getPartnershipsAction } from "@/actions/partnerships"
 import { getProductsAction } from "@/actions/products"
 import { getServicesAction } from "@/actions/services"
 import { queries } from "@/lib/query-client"
 import { IActionResponse } from "@/models/action-response"
 import { IAppointmentView } from "@/models/appointment"
+import { ICustomerView } from "@/models/customer"
 import { IPartnershipView } from "@/models/partnerships"
 import { IProductView } from "@/models/product"
 import { IServiceView } from "@/models/service"
@@ -83,6 +86,18 @@ export const useAttendant = () => {
     },
   })
 
+  const { mutateAsync: updateCustomerPhoto } = useMutation({
+    mutationKey: ["updateCustomerPhoto"],
+    mutationFn: async ({ id, profileImage, imageContentType }: { id: string, profileImage: string, imageContentType: string }): Promise<IActionResponse<ICustomerView>> => {
+      const response = await updateCustomerAction(id, {
+        profileImage,
+        imageContentType
+      } as UpdateCustomerInput)
+
+      return response
+    }
+  })
+
   return {
     startAttendance,
     isStartingAttendance,
@@ -92,6 +107,7 @@ export const useAttendant = () => {
     isLoadingServices,
     products,
     isLoadingProducts,
-    partnerships
+    partnerships,
+    updateCustomerPhoto
   }
 }

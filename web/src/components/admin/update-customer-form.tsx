@@ -83,6 +83,8 @@ export default function UpdateCustomerForm({ onSuccess, onError, customer, param
     const profileImage = selectedFile?.name
     const imageContentType = selectedFile?.type
 
+    if (!values.birthDate || !values.phoneNumber) return
+
     const [day, month, year] = values.birthDate?.split("/").map(Number)
     const birthDate = new Date(year, month - 1, day)
 
