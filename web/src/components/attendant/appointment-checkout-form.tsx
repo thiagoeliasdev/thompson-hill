@@ -149,6 +149,23 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     handleNextStep()
   }
 
+  function handleBackStep() {
+    switch (step) {
+      // Skip partnership step if customer has no partnership
+      case 4:
+        if (appointment.customer.partnershipId) {
+          setStep((prev) => prev - 1)
+        } else {
+          setStep((prev) => prev - 2)
+        }
+        break
+
+      default:
+        setStep((prev) => prev - 1)
+        break
+    }
+  }
+
   function handleNextStep() {
     switch (step) {
       // Services step
@@ -410,7 +427,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         {/* Checkout */}
         {step === 5 && form.formState.isSubmitting && (
           <div className="flex flex-col items-center justify-center gap-4">
-            <LoadingIndicator size="lg"></LoadingIndicator>
+            <LoadingIndicator size="lg" />
           </div>
         )}
         {step === 5 && !form.formState.isSubmitting && (
@@ -442,7 +459,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
             size="lg"
             className="w-8"
             hidden={step === 0}
-            onClick={() => setStep(prev => prev - 1)}
+            onClick={handleBackStep}
           ><ChevronLeftIcon className="size-6" /></Button>
 
           <Button

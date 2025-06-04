@@ -152,7 +152,7 @@ export default function PostCheckoutPage() {
               </div>
               <Link
                 href={EPages.ATTENDANCE_DASHBOARD}
-                className={buttonVariants({ size: "lg", className: "w-full" })}
+                className={buttonVariants({ size: "lg", className: "w-full text-lg sm:text-2xl" })}
               >
                 {isLoading ? <Loader2Icon className="animate-spin size-6" /> : "Voltar para fila"}
 
