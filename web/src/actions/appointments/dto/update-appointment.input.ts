@@ -8,7 +8,7 @@ export const updateAppointmentSchema = z.object({
   }),
   productIds: z.array(z.string().nonempty({ message: "Deve selecionar um produto" })).optional(),
   redeemCoupon: z.string().optional(),
-  status: z.nativeEnum(EAppointmentStatuses),
+  status: z.nativeEnum(EAppointmentStatuses).optional(),
   paymentMethod: z.nativeEnum(EPaymentMethod).optional(),
   partnershipIds: z.array(z.string().nonempty({ message: "Deve selecionar uma parceria" })).optional(),
 })

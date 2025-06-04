@@ -19,6 +19,7 @@ import { Label } from "../ui/label"
 import { IProductView } from "@/models/product"
 import { useAppointments } from "@/hooks/use-appointments"
 import { EPartnershipDiscountType, EPartnershipType, IPartnershipView } from "@/models/partnerships"
+import LoadingIndicator from "../ui/loading-indicator"
 
 interface Props {
   attendantId: string
@@ -44,7 +45,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
     defaultValues: {
       attendantId,
       paymentMethod: appointment.paymentMethod,
-      status: EAppointmentStatuses.ON_SERVICE,
+      // status: EAppointmentStatuses.ON_SERVICE,
       serviceIds: appointment.services.map((service) => service.id) || [],
       productIds: appointment.products.map((product) => product.id) || [],
       partnershipIds: appointment.partnerships?.map((partnership) => partnership.id) || [],
@@ -63,7 +64,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         id: appointment.id,
         data: {
           ...values,
-          status: step === FINAL_SUBMIT_STEP ? EAppointmentStatuses.FINISHED : EAppointmentStatuses.ON_SERVICE,
+          status: step === FINAL_SUBMIT_STEP ? EAppointmentStatuses.FINISHED : undefined,
         }
       })
 
@@ -71,7 +72,6 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         setUpdatedAppointment(updatedData.data)
       }
 
-      toast.success("Salvo com sucesso", { icon: <CheckIcon /> })
       if (onSuccess && step === FINAL_SUBMIT_STEP) onSuccess()
     } catch (error) {
       console.error(error)
@@ -408,7 +408,12 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
         )}
 
         {/* Checkout */}
-        {step === 5 && (
+        {step === 5 && form.formState.isSubmitting && (
+          <div className="flex flex-col items-center justify-center gap-4">
+            <LoadingIndicator size="lg"></LoadingIndicator>
+          </div>
+        )}
+        {step === 5 && !form.formState.isSubmitting && (
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-row justify-between items-center gap-2">
               <Label className="flex-1 text-lg sm:text-2xl">Sub Total</Label>
