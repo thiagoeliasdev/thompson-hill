@@ -244,7 +244,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
                     defaultValue={form.getValues(`serviceIds.${index}`)}
                     value={form.getValues(`serviceIds.${index}`) || ""}
                   >
-                    <SelectTrigger className="w-full text-lg sm:text-2xl">
+                    <SelectTrigger className="w-full text sm:text-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -297,7 +297,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
                     defaultValue={form.getValues(`productIds.${index}`)}
                     value={form.getValues(`productIds.${index}`) || ""}
                   >
-                    <SelectTrigger className="w-full text-lg sm:text-2xl">
+                    <SelectTrigger className="w-full text sm:text-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -375,14 +375,14 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
 
             </Indicator>
             <Indicator className="text-lg sm:text-2xl">{appointment.customer.partnershipIdentificationId}</Indicator>
-            <div className="w-full flex flex-row justify-between items-center gap-4">
+            <div className="w-full sm:flex flex-col sm:flex-row justify-start sm:justify-between items-center gap-4 space-y-2 sm:space-y-0">
               <Button
                 type="button"
                 size="lg"
                 onClick={() => {
                   handleAddPartnership(appointment.customer.partnershipId || "")
                 }}
-                className="text-lg sm:text-2xl flex-2 bg-green-600 hover:bg-green-700 text-white"
+                className="w-full text-lg sm:text-2xl sm:h-16 flex-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 <CheckIcon className="size-6" />
                 Confirmar Convênio
@@ -394,7 +394,7 @@ export default function AppointmentCheckoutForm({ attendantId, appointment, serv
                 onClick={() => {
                   handleRemoveCommonPartnership()
                 }}
-                className="text-lg sm:text-2xl flex-1"
+                className="w-full text-lg sm:text-2xl sm:h-16 flex-1"
               >
                 <XIcon className="size-6" />
                 Negar Convênio
