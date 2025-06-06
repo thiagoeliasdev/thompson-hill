@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
   const { users } = useAdmin()
 
   const activeAttendants = useMemo(() => {
-    return users?.filter((user) => user.role === EUserRole.ATTENDANT && user.status === EUserStatus.ACTIVE)
+    return users?.filter((user) => (user.role === EUserRole.ATTENDANT || user.role === EUserRole.ATTENDANT_MANAGER) && user.status === EUserStatus.ACTIVE)
   }, [users])
 
   console.log("Queue:", queue)
