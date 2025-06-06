@@ -37,7 +37,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
       password: undefined,
       userName: user?.userName,
       status: user?.status || EUserStatus.ACTIVE,
-      role: forRole
+      role: user?.role
     }
   })
 
@@ -64,7 +64,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
           data: {
             name: values.name,
             password: values.password,
-            role: forRole,
+            role: values.role,
             status: values.status,
             profileImage,
             imageContentType
@@ -299,6 +299,30 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
             </FormItem>
           )}
         />
+        {forRole === EUserRole.ATTENDANT && !!user && (
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel>Administrador</FormLabel>
+                  <FormDescription>
+                    Deixando o atendente como administrador permite que ele tenha acesso a algumas funcionalidades do sistema
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value === EUserRole.ATTENDANT_MANAGER}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked ? EUserRole.ATTENDANT_MANAGER : EUserRole.ATTENDANT)
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
         <FormField
           control={form.control}
           name="password"
