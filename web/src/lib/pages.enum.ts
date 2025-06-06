@@ -25,4 +25,5 @@ export enum EPages {
   ATTENDANCE_CHECKOUT = "/app/atendimento/checkout",
   ATTENDANCE_POST_CHECKOUT = "/app/atendimento/pos-checkout",
   ATTENDANCE_SUMMARY = "/app/atendimento/sumario",
+  ATTENDANCE_ATTENDANTS = "/app/atendimento/atendentes",
 }

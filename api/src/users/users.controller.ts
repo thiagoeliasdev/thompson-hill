@@ -108,7 +108,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by id' })
   @ApiOkResponse({

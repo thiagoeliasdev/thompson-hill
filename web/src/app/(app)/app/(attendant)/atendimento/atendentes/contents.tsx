@@ -7,7 +7,7 @@ import LoadingIndicator from "@/components/ui/loading-indicator"
 import { useAttendant } from "@/hooks/use-attendant"
 import { formatCurrency } from "@/lib/utils"
 import { IAppointmentSummaryView } from "@/models/appointments-summary"
-// import { format } from "date-fns"
+import { format } from "date-fns"
 import { useEffect, useState } from "react"
 
 export default function AttendantSummaryPage({ userId }: { userId: string }) {
@@ -28,11 +28,11 @@ export default function AttendantSummaryPage({ userId }: { userId: string }) {
   }, [getSummary, userId])
 
   return (
-    <div className="w-full flex flex-col items-center justify-center mx-auto">
+    <div className="w-full">
       {isGettingDaySummary && (<LoadingIndicator size="lg" />)}
 
       {summary && (
-        <Card className="w-full max-w-lg">
+        <Card className="max-w-lg">
           <CardHeader>
             <CardTitle>Resumo do Dia</CardTitle>
             <CardDescription>
@@ -60,7 +60,7 @@ export default function AttendantSummaryPage({ userId }: { userId: string }) {
               <Label className="flex-1">Faturamento <i>(líquido)</i> </Label>
               <Indicator className="flex-1 justify-center text-lg md:text-lg font-semibold">{formatCurrency(summary.totalFinalPrice)}</Indicator>
             </div>
-            {/* {summary.firstAppointmentDate && (
+            {summary.firstAppointmentDate && (
               <div className="w-full flex flex-row justify-between items-center gap-4">
                 <Label className="flex-1">Primeiro Atendimento </Label>
                 <Indicator className="flex-1 justify-center text-lg md:text-lg font-semibold">{format(new Date(summary.firstAppointmentDate), "HH:mm:ss")}</Indicator>
@@ -83,7 +83,7 @@ export default function AttendantSummaryPage({ userId }: { userId: string }) {
                 <Label className="flex-1">Tempo Médio por Serviço </Label>
                 <Indicator className="flex-1 justify-center text-lg md:text-lg font-semibold">{summary.meanAttendanceTimeByServicesInMinutes.toFixed(2)} minutos</Indicator>
               </div>
-            )} */}
+            )}
           </CardContent>
         </Card>
       )}

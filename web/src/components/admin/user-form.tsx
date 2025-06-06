@@ -37,7 +37,7 @@ export default function UserForm({ onSuccess, onError, forRole, user }: Props) {
       password: undefined,
       userName: user?.userName,
       status: user?.status || EUserStatus.ACTIVE,
-      role: user?.role
+      role: user?.role || forRole
     }
   })
 
