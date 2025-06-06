@@ -9,7 +9,7 @@ import { CustomersService } from "../customers/customers.service"
 import { UsersService } from "../users/users.service"
 import { ServicesService } from "../services/services.service"
 import { AppointmentQuery } from "./dto/appointment.query"
-import { endOfDay, startOfDay } from "date-fns"
+import { endOfDay, startOfDay, subHours } from "date-fns"
 import { UpdateAppointmentInput } from "./dto/update-appointment.input"
 import { FirebaseService } from "../firebase/firebase.service"
 import { ProductsService } from "../products/products.service"
@@ -105,8 +105,8 @@ export class AppointmentsService {
 
     if (onlyToday) {
       const today = new Date()
-      const start = startOfDay(today)
-      const end = endOfDay(today)
+      const start = subHours(startOfDay(today), 3)
+      const end = subHours(endOfDay(today), 3)
       matchFilters.createdAt = { $gte: start, $lte: end }
     }
 
