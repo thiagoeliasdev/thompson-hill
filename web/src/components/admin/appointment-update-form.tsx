@@ -5,9 +5,9 @@ import { EAppointmentStatuses, EAppointmentStatusesMapper, EPaymentMethod, EPaym
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import ReactSelect from 'react-select'
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Indicator from "../ui/indicator"
 import { differenceInMinutes, format } from "date-fns"
@@ -18,6 +18,7 @@ import { PlusIcon, XIcon } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { useAppointments, UseAppointmentsParams } from "@/hooks/use-appointments"
 import { IProductView } from "@/models/product"
+import { Checkbox } from "../ui/checkbox"
 
 interface Props {
   params: UseAppointmentsParams
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function AppointmentUpdateForm({ appointment, attendants, services, products, isLoading, onSuccess, params }: Props) {
+  const [enableSaveButton, setEnableSaveButton] = useState(false)
   const formSchema = updateAppointmentSchema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -464,13 +466,26 @@ export default function AppointmentUpdateForm({ appointment, attendants, service
             </FormItem>
           )}
         />
-
-        <Button
-          isLoading={form.formState.isSubmitting}
-          type="submit"
-          size="lg"
-          className="w-full"
-        >Salvar</Button>
+        <FormDescription
+          hidden={appointment.status !== EAppointmentStatuses.FINISHED}
+        >
+          Alterar um atendimento que já foi finalizado não é recomendado, pois pode causar inconsistências nos dados.
+        </FormDescription>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            className="size-8 border-2"
+            checked={enableSaveButton}
+            onCheckedChange={() => setEnableSaveButton(!enableSaveButton)}
+            hidden={appointment.status !== EAppointmentStatuses.FINISHED}
+          />
+          <Button
+            isLoading={form.formState.isSubmitting}
+            type="submit"
+            size="lg"
+            className="w-full flex-1"
+            disabled={appointment.status === EAppointmentStatuses.FINISHED && !enableSaveButton}
+          >Salvar</Button>
+        </div>
       </form>
     </Form>
   )

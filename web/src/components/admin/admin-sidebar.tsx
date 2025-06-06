@@ -61,6 +61,13 @@ const routes = [
     icon: <ShoppingBagIcon />
   },
   {
+    slug: "convenios",
+    title: "Convênios",
+    urlPrefix: EPages.ADMIN_PARTNERSHIPS,
+    url: EPages.ADMIN_PARTNERSHIPS,
+    icon: <HandshakeIcon />
+  },
+  {
     slug: "clientes",
     title: "Clientes",
     urlPrefix: EPages.ADMIN_CUSTOMERS,
@@ -73,13 +80,6 @@ const routes = [
     urlPrefix: EPages.ADMIN_APPOINTMENTS,
     url: EPages.ADMIN_APPOINTMENTS,
     icon: <CalendarCheck />
-  },
-  {
-    slug: "convenios",
-    title: "Convênios",
-    urlPrefix: EPages.ADMIN_PARTNERSHIPS,
-    url: EPages.ADMIN_PARTNERSHIPS,
-    icon: <HandshakeIcon />
   },
   {
     slug: "configuracoes",
