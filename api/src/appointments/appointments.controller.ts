@@ -51,6 +51,24 @@ export class AppointmentsController {
     }
   }
 
+  @Get("adminSummary")
+  @UseGuards(CombinedAuthGuard)
+  @ApiBearerAuth()
+  @ApiHeader({
+    name: 'x-api-key',
+    description: 'API Key for alternative authentication',
+    required: false,
+  })
+  @ApiOperation({ summary: 'Get day summary overview' })
+  @ApiOkResponse({ type: [AppointmentSummaryView] })
+  async getSummaryAdmin() {
+    const response = await this.appointmentsService.adminSummary()
+
+    // await new Promise(resolve => setTimeout(resolve, response.length * 1400))
+
+    return response
+  }
+
   @Get(':id')
   @UseGuards(CombinedAuthGuard)
   @ApiBearerAuth()
@@ -91,6 +109,8 @@ export class AppointmentsController {
       sortBy: 'createdAt',
       order: 'asc',
     })
+
+    // await new Promise(resolve => setTimeout(resolve, 2200))
 
     return new AppointmentSummaryView(results)
   }

@@ -73,6 +73,7 @@ export class FirebaseService {
   }
 
   async deleteAllAppointments(): Promise<void> {
+    // return
     const collectionRef = this.getFirestore().collection(this.APPOINTMENTS_COLLECTION)
 
     try {

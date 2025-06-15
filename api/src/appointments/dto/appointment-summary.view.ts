@@ -15,6 +15,8 @@ export class AppointmentSummaryView {
       this.lastAppointmentDate = null
       this.totalAttendanceMinutes = 0
       this.meanAttendanceTimeByServicesInMinutes = 0
+      this.finalServicesPrice = 0
+      this.finalProductsPrice = 0
       return
     }
 
@@ -24,22 +26,27 @@ export class AppointmentSummaryView {
     this.totalAppointments = appointments.length
     this.totalServiceWeight = appointments.reduce((total, appointment) => total + appointment.totalServiceWeight, 0)
 
-    this.totalPrice = appointments.reduce((total, appointment) => total + appointment.totalPrice, 0)
+    this.finalServicesPrice = appointments.reduce((total, appointment) => total + appointment.finalServicesPrice, 0)
+    this.finalProductsPrice = appointments.reduce((total, appointment) => total + appointment.finalProductsPrice, 0)
+
+    this.totalPrice = this.finalServicesPrice + this.finalProductsPrice
     this.totalDiscount = appointments.reduce((total, appointment) => total + (appointment.discount || 0), 0)
-    this.totalFinalPrice = appointments.reduce((total, appointment) => total + appointment.finalPrice, 0),
+    this.totalFinalPrice = this.totalPrice - this.totalDiscount
 
-      this.firstAppointmentDate = appointments.length > 0 ? appointments[0].onServiceAt : null,
-      this.lastAppointmentDate = appointments.length > 0 ? appointments[appointments.length - 1].finishedAt : null,
+    this.firstAppointmentDate = appointments.length > 0 ? appointments[0].onServiceAt : null
+    this.lastAppointmentDate = appointments.length > 0 ? appointments[appointments.length - 1].finishedAt : null
 
-      this.totalAttendanceMinutes = appointments.reduce((total, appointment) => {
-        const start = appointment.onServiceAt ? new Date(appointment.onServiceAt).getTime() : 0
-        const end = appointment.finishedAt ? new Date(appointment.finishedAt).getTime() : 0
-        return total + (end - start) / (1000 * 60)
-      }, 0)
+    this.totalAttendanceMinutes = appointments.reduce((total, appointment) => {
+      const start = appointment.onServiceAt ? new Date(appointment.onServiceAt).getTime() : 0
+      const end = appointment.finishedAt ? new Date(appointment.finishedAt).getTime() : 0
+      return total + (end - start) / (1000 * 60)
+    }, 0)
 
     this.meanAttendanceTimeByServicesInMinutes = this.totalServiceWeight > 0
       ? this.totalAttendanceMinutes / this.totalServiceWeight
       : 0
+
+
   }
 
   @ApiProperty()
@@ -68,4 +75,10 @@ export class AppointmentSummaryView {
   totalAttendanceMinutes: number | null = null
   @ApiProperty()
   meanAttendanceTimeByServicesInMinutes: number | null = null
+
+  @ApiProperty()
+  finalServicesPrice: number
+
+  @ApiProperty()
+  finalProductsPrice: number
 }

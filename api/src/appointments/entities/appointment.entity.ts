@@ -28,6 +28,9 @@ export interface IAppointment {
   services: IService[]
   products: IProduct[]
   partnerships?: IPartnership[]
+  finalServicesPrice: number
+  finalProductsPrice: number
+  totalServiceWeight: number
   totalPrice: number
   discount?: number
   finalPrice: number
@@ -46,6 +49,8 @@ export class Appointment {
   services: Service[]
   products: Product[]
   partnerships?: Partnership[]
+  finalServicesPrice: number
+  finalProductsPrice: number
   totalServiceWeight: number
   totalPrice: number
   discount?: number
@@ -69,7 +74,7 @@ export class Appointment {
     this.products = appointment.products.map(product => new Product(product))
     this.partnerships = appointment.partnerships ? appointment.partnerships.map(partnership => new Partnership(partnership)) : undefined
 
-    this.totalServiceWeight = this.services.reduce((total, service) => total + (service.weight || 0), 0)
+    // this.totalServiceWeight = this.services.reduce((total, service) => total + (service.weight || 0), 0)
   }
 
   toFirebaseObject() {
@@ -78,17 +83,17 @@ export class Appointment {
       customer: this.customer.toFirebaseObject(),
       attendant: this.attendant ? this.attendant.toFirebaseObject() : null,
       services: this.services.map(service => service.toFirebaseObject()),
-      products: this.products.map(product => product.toFirebaseObject()),
-      partnerships: this.partnerships ? this.partnerships.map(partnership => partnership.toFirebaseObject()) : null,
-      totalPrice: this.totalPrice,
-      discount: this.discount || 0,
-      finalPrice: this.finalPrice,
-      paymentMethod: this.paymentMethod || null,
-      redeemCoupon: this.redeemCoupon || null,
+      // products: this.products.map(product => product.toFirebaseObject()),
+      // partnerships: this.partnerships ? this.partnerships.map(partnership => partnership.toFirebaseObject()) : null,
+      // totalPrice: this.totalPrice,
+      // discount: this.discount || 0,
+      // finalPrice: this.finalPrice,
+      // paymentMethod: this.paymentMethod || null,
+      // redeemCoupon: this.redeemCoupon || null,
       status: this.status,
       createdAt: this.createdAt.toISOString(),
       onServiceAt: this.onServiceAt ? this.onServiceAt.toISOString() : null,
-      finishedAt: this.finishedAt ? this.finishedAt.toISOString() : null,
+      // finishedAt: this.finishedAt ? this.finishedAt.toISOString() : null,
     }
   }
 }
