@@ -11,7 +11,7 @@ import { getRandomCustomerCreateInputData } from "../customers/mocks"
 import { ServicesService } from "../services/services.service"
 import { ServicesModule } from "../services/services.module"
 import { getRandomServiceCreateInputData } from "../services/mocks"
-import { EAppointmentStatuses, EPaymentMethod } from "./entities/appointment.entity"
+import { Appointment, EAppointmentStatuses, EPaymentMethod, IAppointment } from "./entities/appointment.entity"
 import { AppointmentNotFoundException, CustomerNotFoundException, MissingServicesException, ProductNotFoundException, ServiceNotFoundException, UserNotFoundException } from "../errors"
 import { FirebaseModule } from "../firebase/firebase.module"
 import { UpdateServiceInput } from "../services/dto/update-service.input"
@@ -23,6 +23,10 @@ import { PartnershipsService } from "../partnerships/partnerships.service"
 import { getRandomPartnershipCreateInputData } from "../partnerships/mocks"
 import { EPartnershipDiscountType, EPartnershipType } from "../partnerships/entities/partnership.entity"
 import { subDays } from "date-fns"
+import { faker } from "@faker-js/faker/."
+import { AppointmentSummaryView } from "./dto/appointment-summary.view"
+import { SettingsModule } from "../settings/settings.module"
+import { SettingsService } from "../settings/settings.service"
 
 describe("Appointment Module", () => {
   let appointmentsService: AppointmentsService
@@ -31,7 +35,11 @@ describe("Appointment Module", () => {
   let productsService: ProductsService
   let customersService: CustomersService
   let partnershipsService: PartnershipsService
+  let settingService: SettingsService
   let app: TestingModule
+
+  const CREDIT_CARD_FEE = 1.73
+  const DEBIT_CARD_FEE = 1.28
 
   beforeAll(async () => {
     app = await Test.createTestingModule({
@@ -46,6 +54,7 @@ describe("Appointment Module", () => {
         ServicesModule,
         ProductsModule,
         CustomersModule,
+        SettingsModule,
         PartnershipsModule
       ]
     }).compile()
@@ -56,6 +65,12 @@ describe("Appointment Module", () => {
     servicesService = app.get<ServicesService>(ServicesService)
     productsService = app.get<ProductsService>(ProductsService)
     partnershipsService = app.get<PartnershipsService>(PartnershipsService)
+    settingService = app.get<SettingsService>(SettingsService)
+
+    await settingService.updateSettings({
+      creditCardFee: CREDIT_CARD_FEE,
+      debitCardFee: DEBIT_CARD_FEE
+    })
   })
 
   afterAll(async () => {
@@ -597,6 +612,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -630,6 +647,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -726,6 +745,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -759,6 +780,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -826,6 +849,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -859,6 +884,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -928,6 +955,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -961,6 +990,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -1029,6 +1060,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -1062,6 +1095,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -1124,6 +1159,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -1151,6 +1188,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -1218,6 +1257,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
 
+      expect(updatedAppointment.paymentFee).toBe(0)
+
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
       expect(foundAppointment.customer.id).toBe(customer.id)
@@ -1248,6 +1289,8 @@ describe("Appointment Module", () => {
       )
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+
+      expect(foundAppointment.paymentFee).toBe(0)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -1325,7 +1368,7 @@ describe("Appointment Module", () => {
       await usersService.remove({ id: attendant.id })
     })
 
-    it("should update an appointment payment method", async () => {
+    it("should update an appointment payment method to PIX", async () => {
       const attendant = await usersService.create(getRandomUserData())
       const customer = await customersService.create(getRandomCustomerCreateInputData())
       const service1 = await servicesService.create(getRandomServiceCreateInputData())
@@ -1345,6 +1388,7 @@ describe("Appointment Module", () => {
       const updatedAppointment = await appointmentsService.update(appointment.id, {
         paymentMethod: EPaymentMethod.PIX
       })
+
       expect(updatedAppointment).toBeDefined()
       expect(updatedAppointment.customer.id).toBe(customer.id)
       expect(updatedAppointment.customer.name).toBe(customer.name)
@@ -1378,6 +1422,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
       expect(updatedAppointment.paymentMethod).toBe(EPaymentMethod.PIX)
+
+      expect(updatedAppointment.paymentFee).toBe(0)
 
       const foundAppointment = await appointmentsService.findOne(appointment.id)
       expect(foundAppointment).toBeDefined()
@@ -1413,6 +1459,422 @@ describe("Appointment Module", () => {
       expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
       expect(foundAppointment.paymentMethod).toBe(EPaymentMethod.PIX)
+
+      expect(foundAppointment.paymentFee).toBe(0)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should update an appointment payment method to PIX", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData())
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        paymentMethod: EPaymentMethod.CASH
+      })
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.customer.id).toBe(customer.id)
+      expect(updatedAppointment.customer.name).toBe(customer.name)
+      expect(updatedAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(updatedAppointment.attendant?.id).toBe(attendant.id)
+      expect(updatedAppointment.attendant?.name).toBe(attendant.name)
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.services[0].id).toBe(service1.id)
+      expect(updatedAppointment.services[1].id).toBe(service2.id)
+      expect(updatedAppointment.services[2].id).toBe(service3.id)
+      expect(updatedAppointment.products[0].id).toBe(product1.id)
+      expect(updatedAppointment.products[1].id).toBe(product2.id)
+      expect(updatedAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(updatedAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(updatedAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.discount).toBe(0)
+      expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(updatedAppointment.paymentMethod).toBe(EPaymentMethod.CASH)
+
+      expect(updatedAppointment.paymentFee).toBe(0)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.customer.id).toBe(customer.id)
+      expect(foundAppointment.customer.name).toBe(customer.name)
+      expect(foundAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(foundAppointment.attendant?.id).toBe(attendant.id)
+      expect(foundAppointment.attendant?.name).toBe(attendant.name)
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.services[0].id).toBe(service1.id)
+      expect(foundAppointment.services[1].id).toBe(service2.id)
+      expect(foundAppointment.services[2].id).toBe(service3.id)
+      expect(foundAppointment.products[0].id).toBe(product1.id)
+      expect(foundAppointment.products[1].id).toBe(product2.id)
+      expect(foundAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(foundAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(foundAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(foundAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.discount).toBe(0)
+      expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(foundAppointment.paymentMethod).toBe(EPaymentMethod.CASH)
+
+      expect(foundAppointment.paymentFee).toBe(0)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should update an appointment payment method to TRANSFER", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData())
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        paymentMethod: EPaymentMethod.TRANSFER
+      })
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.customer.id).toBe(customer.id)
+      expect(updatedAppointment.customer.name).toBe(customer.name)
+      expect(updatedAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(updatedAppointment.attendant?.id).toBe(attendant.id)
+      expect(updatedAppointment.attendant?.name).toBe(attendant.name)
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.services[0].id).toBe(service1.id)
+      expect(updatedAppointment.services[1].id).toBe(service2.id)
+      expect(updatedAppointment.services[2].id).toBe(service3.id)
+      expect(updatedAppointment.products[0].id).toBe(product1.id)
+      expect(updatedAppointment.products[1].id).toBe(product2.id)
+      expect(updatedAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(updatedAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(updatedAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.discount).toBe(0)
+      expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(updatedAppointment.paymentMethod).toBe(EPaymentMethod.TRANSFER)
+
+      expect(updatedAppointment.paymentFee).toBe(0)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.customer.id).toBe(customer.id)
+      expect(foundAppointment.customer.name).toBe(customer.name)
+      expect(foundAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(foundAppointment.attendant?.id).toBe(attendant.id)
+      expect(foundAppointment.attendant?.name).toBe(attendant.name)
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.services[0].id).toBe(service1.id)
+      expect(foundAppointment.services[1].id).toBe(service2.id)
+      expect(foundAppointment.services[2].id).toBe(service3.id)
+      expect(foundAppointment.products[0].id).toBe(product1.id)
+      expect(foundAppointment.products[1].id).toBe(product2.id)
+      expect(foundAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(foundAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(foundAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(foundAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.discount).toBe(0)
+      expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(foundAppointment.paymentMethod).toBe(EPaymentMethod.TRANSFER)
+
+      expect(foundAppointment.paymentFee).toBe(0)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should update an appointment payment method to credit card and calculate fee tax", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData())
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        paymentMethod: EPaymentMethod.CREDIT_CARD
+      })
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.customer.id).toBe(customer.id)
+      expect(updatedAppointment.customer.name).toBe(customer.name)
+      expect(updatedAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(updatedAppointment.attendant?.id).toBe(attendant.id)
+      expect(updatedAppointment.attendant?.name).toBe(attendant.name)
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.services[0].id).toBe(service1.id)
+      expect(updatedAppointment.services[1].id).toBe(service2.id)
+      expect(updatedAppointment.services[2].id).toBe(service3.id)
+      expect(updatedAppointment.products[0].id).toBe(product1.id)
+      expect(updatedAppointment.products[1].id).toBe(product2.id)
+      expect(updatedAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(updatedAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(updatedAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.discount).toBe(0)
+      expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(updatedAppointment.paymentMethod).toBe(EPaymentMethod.CREDIT_CARD)
+
+      expect(updatedAppointment.paymentFee).toBe(((service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)) * CREDIT_CARD_FEE)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.customer.id).toBe(customer.id)
+      expect(foundAppointment.customer.name).toBe(customer.name)
+      expect(foundAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(foundAppointment.attendant?.id).toBe(attendant.id)
+      expect(foundAppointment.attendant?.name).toBe(attendant.name)
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.services[0].id).toBe(service1.id)
+      expect(foundAppointment.services[1].id).toBe(service2.id)
+      expect(foundAppointment.services[2].id).toBe(service3.id)
+      expect(foundAppointment.products[0].id).toBe(product1.id)
+      expect(foundAppointment.products[1].id).toBe(product2.id)
+      expect(foundAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(foundAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(foundAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(foundAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.discount).toBe(0)
+      expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(foundAppointment.paymentMethod).toBe(EPaymentMethod.CREDIT_CARD)
+
+      await appointmentsService.remove(appointment.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await usersService.remove({ id: attendant.id })
+    })
+
+    it("should update an appointment payment method to debit card and calculate fee tax", async () => {
+      const attendant = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData())
+
+      const appointment = await appointmentsService.create({
+        customerId: customer.id,
+        attendantId: attendant.id,
+        serviceIds: [service1.id, service2.id, service3.id],
+        productIds: [product1.id, product2.id]
+      })
+
+      const updatedAppointment = await appointmentsService.update(appointment.id, {
+        paymentMethod: EPaymentMethod.DEBIT_CARD
+      })
+
+      expect(updatedAppointment).toBeDefined()
+      expect(updatedAppointment.customer.id).toBe(customer.id)
+      expect(updatedAppointment.customer.name).toBe(customer.name)
+      expect(updatedAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(updatedAppointment.attendant?.id).toBe(attendant.id)
+      expect(updatedAppointment.attendant?.name).toBe(attendant.name)
+      expect(updatedAppointment.services).toHaveLength(3)
+      expect(updatedAppointment.products).toHaveLength(2)
+      expect(updatedAppointment.services[0].id).toBe(service1.id)
+      expect(updatedAppointment.services[1].id).toBe(service2.id)
+      expect(updatedAppointment.services[2].id).toBe(service3.id)
+      expect(updatedAppointment.products[0].id).toBe(product1.id)
+      expect(updatedAppointment.products[1].id).toBe(product2.id)
+      expect(updatedAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(updatedAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(updatedAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(updatedAppointment.discount).toBe(0)
+      expect(updatedAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(updatedAppointment.paymentMethod).toBe(EPaymentMethod.DEBIT_CARD)
+
+      expect(updatedAppointment.paymentFee).toBe(((service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)) * DEBIT_CARD_FEE)
+
+      const foundAppointment = await appointmentsService.findOne(appointment.id)
+
+      expect(foundAppointment).toBeDefined()
+      expect(foundAppointment.customer.id).toBe(customer.id)
+      expect(foundAppointment.customer.name).toBe(customer.name)
+      expect(foundAppointment.customer.phoneNumber).toBe(customer.phoneNumber)
+      expect(foundAppointment.attendant?.id).toBe(attendant.id)
+      expect(foundAppointment.attendant?.name).toBe(attendant.name)
+      expect(foundAppointment.services).toHaveLength(3)
+      expect(foundAppointment.products).toHaveLength(2)
+      expect(foundAppointment.services[0].id).toBe(service1.id)
+      expect(foundAppointment.services[1].id).toBe(service2.id)
+      expect(foundAppointment.services[2].id).toBe(service3.id)
+      expect(foundAppointment.products[0].id).toBe(product1.id)
+      expect(foundAppointment.products[1].id).toBe(product2.id)
+      expect(foundAppointment.finalServicesPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value
+      )
+      expect(foundAppointment.finalProductsPrice).toBeCloseTo(
+        product1.value + product2.value
+      )
+      expect(foundAppointment.totalServiceWeight).toBeCloseTo(
+        (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
+      )
+      expect(foundAppointment.totalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.finalPrice).toBeCloseTo(
+        service1.value + service2.value + service3.value +
+        product1.value + product2.value
+      )
+      expect(foundAppointment.discount).toBe(0)
+      expect(foundAppointment.status).toBe(EAppointmentStatuses.WAITING)
+      expect(foundAppointment.paymentMethod).toBe(EPaymentMethod.DEBIT_CARD)
 
       await appointmentsService.remove(appointment.id)
       await customersService.remove(customer.id)
@@ -1852,8 +2314,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
         (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
       )
-      expect(updatedAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
-      expect(updatedAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+      expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
 
       const foundAppointment = await appointmentsService.findOne(appointment.id)
@@ -1864,8 +2326,8 @@ describe("Appointment Module", () => {
       expect(foundAppointment.totalServiceWeight).toBeCloseTo(
         (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
       )
-      expect(foundAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value)
-      expect(foundAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue!)
+      expect(foundAppointment.totalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
+      expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue!)
 
       await appointmentsService.remove(appointment.id)
@@ -1925,8 +2387,8 @@ describe("Appointment Module", () => {
       expect(updatedAppointment.totalServiceWeight).toBeCloseTo(
         (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
       )
-      expect(updatedAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value + product1.value + product2.value)
-      expect(updatedAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue! + product1.value - product1.promoValue!)
+      expect(updatedAppointment.totalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue! + product1.promoValue! + product2.value)
+      expect(updatedAppointment.discount).toBe(0)
       expect(updatedAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue! + product1.promoValue! + product2.value)
 
       const foundAppointment = await appointmentsService.findOne(appointment.id)
@@ -1937,8 +2399,8 @@ describe("Appointment Module", () => {
       expect(foundAppointment.totalServiceWeight).toBeCloseTo(
         (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
       )
-      expect(foundAppointment.totalPrice).toBeCloseTo(service1.value + service2.value + service3.value + product1.value + product2.value)
-      expect(foundAppointment.discount).toBe(service1.value - service1.promoValue! + service3.value - service3.promoValue! + product1.value - product1.promoValue!)
+      expect(foundAppointment.totalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue! + product1.promoValue! + product2.value)
+      expect(foundAppointment.discount).toBe(0)
       expect(foundAppointment.finalPrice).toBeCloseTo(service1.promoValue! + service2.value + service3.promoValue! + product1.promoValue! + product2.value)
 
       await appointmentsService.remove(appointment.id)
@@ -2288,9 +2750,9 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = product1.value + product2.promoValue!
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership.discountValue
+      const totalPrice = service1.value + service2.value + service3.promoValue! +
+        product1.value + product2.promoValue!
+      const discount = partnership.discountValue
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2438,9 +2900,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = product1.value + product2.promoValue!
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership.discountValue
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = partnership.discountValue
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2588,9 +3049,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = product1.value + product2.promoValue!
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = (service3.value - service3.promoValue! + product2.value - product2.promoValue!) + (totalPrice - (service3.value - service3.promoValue! + product2.value - product2.promoValue!)) * (partnership.discountValue / 100)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = totalPrice * (partnership.discountValue / 100)
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2744,9 +3204,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = product1.value + product2.promoValue!
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue) + (totalPrice - (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue)) * (partnership1.discountValue / 100)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = partnership2.discountValue + totalPrice * (partnership1.discountValue / 100)
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2823,9 +3282,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.value
       const finalProductsPrice = product1.value + product2.value
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = partnership2.discountValue + (totalPrice - partnership2.discountValue) * (partnership1.discountValue / 100)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = partnership2.discountValue + totalPrice * (partnership1.discountValue / 100)
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2909,9 +3367,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = product1.value + product2.promoValue!
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value +
-        product1.value + product2.value
-      const discount = (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue) + (totalPrice - (service3.value - service3.promoValue! + product2.value - product2.promoValue! + partnership2.discountValue)) * (partnership1.discountValue / 100)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = partnership2.discountValue + totalPrice * (partnership1.discountValue / 100)
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -2948,7 +3405,7 @@ describe("Appointment Module", () => {
       await usersService.remove({ id: attendant1.id })
     })
 
-    it("should simulate checkout 1", async () => {
+    it("should simulate checkout 2", async () => {
       // Add services and add partnerships to an appointment and check the final prices
 
       const attendant1 = await usersService.create(getRandomUserData())
@@ -2987,8 +3444,8 @@ describe("Appointment Module", () => {
       const finalServicesPrice = service1.value + service2.value + service3.promoValue!
       const finalProductsPrice = 0
       const servicesWeight = (service1.weight || 0) + (service2.weight || 0) + (service3.weight || 0)
-      const totalPrice = service1.value + service2.value + service3.value
-      const discount = (service3.value - service3.promoValue! + partnership2.discountValue) + (totalPrice - (service3.value - service3.promoValue! + partnership2.discountValue)) * (partnership1.discountValue / 100)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = partnership2.discountValue + totalPrice * (partnership1.discountValue / 100)
       const finalPrice = totalPrice - discount
 
       expect(updatedAppointment).toBeDefined()
@@ -3020,6 +3477,379 @@ describe("Appointment Module", () => {
       await servicesService.remove(service1.id)
       await servicesService.remove(service2.id)
       await servicesService.remove(service3.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should simulate attendant day summary", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70,
+        promoValue: 60,
+        promoEnabled: true
+      }))
+      const service4 = await servicesService.create(getRandomServiceCreateInputData())
+      const service5 = await servicesService.create(getRandomServiceCreateInputData())
+      const service6 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 4,
+        promoEnabled: true
+      }))
+      const product3 = await productsService.create(getRandomProductCreateInputData())
+      const product4 = await productsService.create(getRandomProductCreateInputData())
+      const product5 = await productsService.create(getRandomProductCreateInputData())
+
+      const partnership1 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const partnership2 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const appointments: Appointment[] = []
+
+      for (let i = 0; i < 15; i++) {
+        const appointment = await appointmentsService.create({
+          customerId: customer.id,
+          attendantId: attendant1.id,
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 1 }),
+        })
+        appointments.push(appointment)
+      }
+
+      // Start Attendance
+      for (const appointment of appointments) {
+        await appointmentsService.update(appointment.id, {
+          status: EAppointmentStatuses.ON_SERVICE
+        })
+      }
+
+      // Finish Attendance
+      const updatedAppointments: Appointment[] = []
+
+      for (let i = 0; i < 15; i++) {
+        const appointment = appointments[i]
+        const updatedAppointment = await appointmentsService.update(appointment.id, {
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 2 }),
+          productIds: faker.helpers.arrayElements([product1.id, product2.id, product3.id, product4.id, product5.id], { min: 0, max: 2 }),
+          partnershipIds: faker.helpers.arrayElements([partnership1.id, partnership2.id], { min: 0, max: 2 }),
+          status: EAppointmentStatuses.FINISHED
+        })
+        updatedAppointments.push(updatedAppointment)
+      }
+
+      const { results, total } = await appointmentsService.findAll({
+        onlyToday: true,
+        attendantId: attendant1.id,
+        limit: 1000,
+        status: EAppointmentStatuses.FINISHED,
+        sortBy: 'createdAt',
+        order: 'asc',
+      })
+
+      const summaryView = new AppointmentSummaryView(results)
+
+      const finalServicesPrice = updatedAppointments.reduce((total, appointment) => {
+        return total + appointment.finalServicesPrice
+      }, 0)
+      const finalProductsPrice = updatedAppointments.reduce((total, appointment) => {
+        return total + appointment.finalProductsPrice
+      }, 0)
+      const servicesWeight = updatedAppointments.reduce((total, appointment) => {
+        return total + appointment.totalServiceWeight
+      }, 0)
+      const totalPrice = finalServicesPrice + finalProductsPrice
+      const discount = updatedAppointments.reduce((total, appointment) => {
+        return total + (appointment.discount || 0)
+      }, 0)
+      const finalPrice = totalPrice - discount
+
+      expect(summaryView).toBeDefined()
+      expect(summaryView.attendantId).toBe(attendant1.id)
+      expect(summaryView.attendantName).toBe(attendant1.name)
+      expect(summaryView.finalProductsPrice).toBe(finalProductsPrice)
+      expect(summaryView.finalServicesPrice).toBe(finalServicesPrice)
+      expect(summaryView.totalAppointments).toBe(15)
+      expect(summaryView.totalDiscount).toBe(discount)
+      expect(summaryView.totalFinalPrice).toBe(finalPrice)
+      expect(summaryView.totalPrice).toBe(totalPrice)
+      expect(summaryView.totalServiceWeight).toBe(servicesWeight)
+
+      // Delete appointments and clean up
+      for (const appointment of updatedAppointments) {
+        await appointmentsService.remove(appointment.id)
+      }
+
+      await partnershipsService.remove(partnership1.id)
+      await partnershipsService.remove(partnership2.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await servicesService.remove(service4.id)
+      await servicesService.remove(service5.id)
+      await servicesService.remove(service6.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await productsService.remove(product3.id)
+      await productsService.remove(product4.id)
+      await productsService.remove(product5.id)
+      await usersService.remove({ id: attendant1.id })
+    })
+
+    it("should get attendant day summary from a specific date", async () => {
+      const attendant1 = await usersService.create(getRandomUserData())
+      const customer = await customersService.create(getRandomCustomerCreateInputData())
+      const service1 = await servicesService.create(getRandomServiceCreateInputData())
+      const service2 = await servicesService.create(getRandomServiceCreateInputData())
+      const service3 = await servicesService.create(getRandomServiceCreateInputData({
+        value: 70,
+        promoValue: 60,
+        promoEnabled: true
+      }))
+      const service4 = await servicesService.create(getRandomServiceCreateInputData())
+      const service5 = await servicesService.create(getRandomServiceCreateInputData())
+      const service6 = await servicesService.create(getRandomServiceCreateInputData())
+
+      const product1 = await productsService.create(getRandomProductCreateInputData())
+      const product2 = await productsService.create(getRandomProductCreateInputData({
+        value: 12.74,
+        promoValue: 4,
+        promoEnabled: true
+      }))
+      const product3 = await productsService.create(getRandomProductCreateInputData())
+      const product4 = await productsService.create(getRandomProductCreateInputData())
+      const product5 = await productsService.create(getRandomProductCreateInputData())
+
+      const partnership1 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.PERCENTAGE,
+        discountValue: 10,
+        type: EPartnershipType.COMMON
+      }))
+
+      const partnership2 = await partnershipsService.create(getRandomPartnershipCreateInputData({
+        discountType: EPartnershipDiscountType.FIXED,
+        discountValue: 8.08,
+        type: EPartnershipType.PARKING
+      }))
+
+      const todayAppointments: Appointment[] = []
+
+      for (let i = 0; i < 10; i++) {
+        const appointment = await appointmentsService.create({
+          customerId: customer.id,
+          attendantId: attendant1.id,
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 1 }),
+        })
+        todayAppointments.push(appointment)
+      }
+
+      const pastAppointments: Appointment[] = []
+      const pastDate = subDays(new Date(), 4)
+
+      for (let i = 0; i < 10; i++) {
+        const appointment = await appointmentsService.create({
+          customerId: customer.id,
+          attendantId: attendant1.id,
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 1 }),
+          createdAt: pastDate
+        })
+        pastAppointments.push(appointment)
+      }
+
+      // Start Attendance
+      for (const appointment of todayAppointments) {
+        await appointmentsService.update(appointment.id, {
+          status: EAppointmentStatuses.ON_SERVICE
+        })
+      }
+
+      // Start Attendance for past appointments
+      for (const appointment of pastAppointments) {
+        await appointmentsService.update(appointment.id, {
+          status: EAppointmentStatuses.ON_SERVICE
+        })
+      }
+
+      // Finish Attendance
+      const updatedTodayAppointments: Appointment[] = []
+
+      for (let i = 0; i < 10; i++) {
+        const appointment = todayAppointments[i]
+        const updatedAppointment = await appointmentsService.update(appointment.id, {
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 2 }),
+          productIds: faker.helpers.arrayElements([product1.id, product2.id, product3.id, product4.id, product5.id], { min: 0, max: 2 }),
+          partnershipIds: faker.helpers.arrayElements([partnership1.id, partnership2.id], { min: 0, max: 2 }),
+          status: EAppointmentStatuses.FINISHED
+        })
+        updatedTodayAppointments.push(updatedAppointment)
+      }
+
+      const updatedPastAppointments: Appointment[] = []
+
+      for (let i = 0; i < 10; i++) {
+        const appointment = pastAppointments[i]
+        const updatedAppointment = await appointmentsService.update(appointment.id, {
+          serviceIds: faker.helpers.arrayElements([service1.id, service2.id, service3.id, service4.id, service5.id, service6.id], { min: 1, max: 2 }),
+          productIds: faker.helpers.arrayElements([product1.id, product2.id, product3.id, product4.id, product5.id], { min: 0, max: 2 }),
+          partnershipIds: faker.helpers.arrayElements([partnership1.id, partnership2.id], { min: 0, max: 2 }),
+          status: EAppointmentStatuses.FINISHED
+        })
+        updatedPastAppointments.push(updatedAppointment)
+      }
+
+      const { results: today } = await appointmentsService.findAll({
+        onlyToday: true,
+        attendantId: attendant1.id,
+        limit: 1000,
+        status: EAppointmentStatuses.FINISHED,
+        sortBy: 'createdAt',
+        order: 'asc',
+      })
+
+      const todaySummaryView = new AppointmentSummaryView(today)
+
+      const todayFinalServicesPrice = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.finalServicesPrice
+      }, 0)
+      const todayFinalProductsPrice = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.finalProductsPrice
+      }, 0)
+      const todayServicesWeight = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.totalServiceWeight
+      }, 0)
+      const todayTotalPrice = todayFinalServicesPrice + todayFinalProductsPrice
+      const todayDiscount = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + (appointment.discount || 0)
+      }, 0)
+      const todayFinalPrice = todayTotalPrice - todayDiscount
+
+      expect(todaySummaryView).toBeDefined()
+      expect(todaySummaryView.attendantId).toBe(attendant1.id)
+      expect(todaySummaryView.attendantName).toBe(attendant1.name)
+      expect(todaySummaryView.finalProductsPrice).toBe(todayFinalProductsPrice)
+      expect(todaySummaryView.finalServicesPrice).toBe(todayFinalServicesPrice)
+      expect(todaySummaryView.totalAppointments).toBe(10)
+      expect(todaySummaryView.totalDiscount).toBe(todayDiscount)
+      expect(todaySummaryView.totalFinalPrice).toBe(todayFinalPrice)
+      expect(todaySummaryView.totalPrice).toBe(todayTotalPrice)
+      expect(todaySummaryView.totalServiceWeight).toBe(todayServicesWeight)
+
+      const { results: past } = await appointmentsService.findAll({
+        attendantId: attendant1.id,
+        limit: 1000,
+        status: EAppointmentStatuses.FINISHED,
+        sortBy: 'createdAt',
+        order: 'asc',
+        fromDate: pastDate
+      })
+
+      const pastSummaryView = new AppointmentSummaryView(past)
+      const pastFinalServicesPrice = updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.finalServicesPrice
+      }, 0)
+      const pastFinalProductsPrice = updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.finalProductsPrice
+      }, 0)
+      const pastServicesWeight = updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.totalServiceWeight
+      }, 0)
+      const pastTotalPrice = pastFinalServicesPrice + pastFinalProductsPrice
+      const pastDiscount = updatedPastAppointments.reduce((total, appointment) => {
+        return total + (appointment.discount || 0)
+      }, 0)
+      const pastFinalPrice = pastTotalPrice - pastDiscount
+
+      expect(pastSummaryView).toBeDefined()
+      expect(pastSummaryView.attendantId).toBe(attendant1.id)
+      expect(pastSummaryView.attendantName).toBe(attendant1.name)
+      expect(pastSummaryView.finalProductsPrice).toBe(pastFinalProductsPrice)
+      expect(pastSummaryView.finalServicesPrice).toBe(pastFinalServicesPrice)
+      expect(pastSummaryView.totalAppointments).toBe(10)
+      expect(pastSummaryView.totalDiscount).toBe(pastDiscount)
+      expect(pastSummaryView.totalFinalPrice).toBe(pastFinalPrice)
+      expect(pastSummaryView.totalPrice).toBe(pastTotalPrice)
+      expect(pastSummaryView.totalServiceWeight).toBe(pastServicesWeight)
+
+      const { results: rangeResults } = await appointmentsService.findAll({
+        attendantId: attendant1.id,
+        limit: 1000,
+        status: EAppointmentStatuses.FINISHED,
+        sortBy: 'createdAt',
+        order: 'asc',
+        fromDate: pastDate,
+        toDate: new Date()
+      })
+
+      const rangeSummaryView = new AppointmentSummaryView(rangeResults)
+
+      const rangeFinalServicesPrice = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.finalServicesPrice
+      }, 0) + updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.finalServicesPrice
+      }, 0)
+      const rangeFinalProductsPrice = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.finalProductsPrice
+      }, 0) + updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.finalProductsPrice
+      }, 0)
+      const rangeServicesWeight = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + appointment.totalServiceWeight
+      }, 0) + updatedPastAppointments.reduce((total, appointment) => {
+        return total + appointment.totalServiceWeight
+      }, 0)
+      const rangeTotalPrice = rangeFinalServicesPrice + rangeFinalProductsPrice
+      const rangeDiscount = updatedTodayAppointments.reduce((total, appointment) => {
+        return total + (appointment.discount || 0)
+      }, 0) + updatedPastAppointments.reduce((total, appointment) => {
+        return total + (appointment.discount || 0)
+      }, 0)
+      const rangeFinalPrice = rangeTotalPrice - rangeDiscount
+
+      expect(rangeSummaryView).toBeDefined()
+      expect(rangeSummaryView.attendantId).toBe(attendant1.id)
+      expect(rangeSummaryView.attendantName).toBe(attendant1.name)
+      expect(rangeSummaryView.finalProductsPrice).toBeCloseTo(rangeFinalProductsPrice)
+      expect(rangeSummaryView.finalServicesPrice).toBeCloseTo(rangeFinalServicesPrice)
+      expect(rangeSummaryView.totalAppointments).toBe(20)
+      expect(rangeSummaryView.totalDiscount).toBeCloseTo(rangeDiscount)
+      expect(rangeSummaryView.totalFinalPrice).toBeCloseTo(rangeFinalPrice)
+      expect(rangeSummaryView.totalPrice).toBeCloseTo(rangeTotalPrice)
+      expect(rangeSummaryView.totalServiceWeight).toBe(rangeServicesWeight)
+
+      // Delete appointments and clean up
+      for (const appointment of updatedTodayAppointments) {
+        await appointmentsService.remove(appointment.id)
+      }
+
+      for (const appointment of updatedPastAppointments) {
+        await appointmentsService.remove(appointment.id)
+      }
+
+      await partnershipsService.remove(partnership1.id)
+      await partnershipsService.remove(partnership2.id)
+      await customersService.remove(customer.id)
+      await servicesService.remove(service1.id)
+      await servicesService.remove(service2.id)
+      await servicesService.remove(service3.id)
+      await servicesService.remove(service4.id)
+      await servicesService.remove(service5.id)
+      await servicesService.remove(service6.id)
+      await productsService.remove(product1.id)
+      await productsService.remove(product2.id)
+      await productsService.remove(product3.id)
+      await productsService.remove(product4.id)
+      await productsService.remove(product5.id)
       await usersService.remove({ id: attendant1.id })
     })
   })

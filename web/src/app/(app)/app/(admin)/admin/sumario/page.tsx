@@ -5,35 +5,108 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { H1 } from "@/components/ui/typography"
 import { useAdmin } from "@/hooks/use-admin"
-import { formatCurrency } from "@/lib/utils"
-import { RefreshCwIcon } from "lucide-react"
-import { useMemo } from "react"
+import { cn, formatCurrency } from "@/lib/utils"
+import { IAppointmentSummaryView } from "@/models/appointments-summary"
+import { CalendarIcon, RefreshCwIcon } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
-// import { format } from "date-fns"
+import { DateRange } from "react-day-picker"
+import { Calendar } from "@/components/ui/calendar"
+import { addHours } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { format } from "date-fns"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 export default function AttendantSummaryPage() {
-  const { daySummary, isGettingDaySummary, refetchSummary, isRefetchingSummary } = useAdmin()
+  const today = new Date()
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: today,
+    to: undefined,
+  })
+  const [refetchCount, setRefetchCount] = useState(0)
+  const [summaryData, setSummaryData] = useState<IAppointmentSummaryView[] | null>(null)
+  const { daySummary, isGettingDaySummary } = useAdmin()
+
+  useEffect(() => {
+    console.log("Fetching day summary for date range:", date)
+
+    const from = date?.from ? addHours(new Date(date.from), 3) : new Date()
+    const to = date?.to ? addHours(new Date(date.to), 3) : new Date()
+
+    daySummary({ from, to })
+      .then((data) => {
+        setSummaryData(data)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daySummary, refetchCount])
 
   const summary = useMemo(() => {
-    if (!daySummary) return null
+    if (!summaryData) return null
 
     return {
-      totalServicesValue: daySummary.reduce((acc, item) => acc + item.finalServicesPrice, 0),
-      totalProductsValue: daySummary.reduce((acc, item) => acc + item.finalProductsPrice, 0),
-      totalGrossRevenue: daySummary.reduce((acc, item) => acc + item.totalPrice, 0),
-      totalDiscount: daySummary.reduce((acc, item) => acc + item.totalDiscount, 0),
-      totalNetRevenue: daySummary.reduce((acc, item) => acc + (item.totalPrice - item.totalDiscount), 0),
+      totalServicesValue: summaryData.reduce((acc, item) => acc + item.finalServicesPrice, 0),
+      totalProductsValue: summaryData.reduce((acc, item) => acc + item.finalProductsPrice, 0),
+      totalGrossRevenue: summaryData.reduce((acc, item) => acc + item.totalPrice, 0),
+      totalDiscount: summaryData.reduce((acc, item) => acc + item.totalDiscount, 0),
+      totalNetRevenue: summaryData.reduce((acc, item) => acc + (item.totalPrice - item.totalDiscount), 0),
     }
-  }, [daySummary])
-
+  }, [summaryData])
 
   return (
     <div className="w-full flex flex-col max-w-[1440px] mx-auto">
       <div className="w-full flex flex-row justify-between items-center mb-4">
         <H1>Resumo do Dia</H1>
+        <div className="hidden">
+          <div className="*:not-first:mt-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="group bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]"
+                >
+                  <span
+                    className={cn("truncate", !date && "text-muted-foreground")}
+                  >
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "dd LLL y", { locale: ptBR })} -{" "}
+                          {format(date.to, "dd LLL y", { locale: ptBR })}
+                        </>
+                      ) : (
+                        format(date.from, "dd LLL y", { locale: ptBR })
+                      )
+                    ) : (
+                      "Pick a date range"
+                    )}
+                  </span>
+                  <CalendarIcon
+                    size={16}
+                    className="text-muted-foreground/80 group-hover:text-foreground shrink-0 transition-colors"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" align="start">
+                <Calendar
+                  mode="range"
+                  selected={date}
+                  onSelect={setDate}
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
         <Button
-          isLoading={isGettingDaySummary || isRefetchingSummary}
-          onClick={() => refetchSummary()}
+          isLoading={isGettingDaySummary}
+          onClick={() => {
+            setRefetchCount(prev => prev + 1)
+          }}
         ><RefreshCwIcon />Atualizar</Button>
       </div>
       <div className="w-full flex flex-row justify-start items-start gap-6">
@@ -81,8 +154,8 @@ export default function AttendantSummaryPage() {
       <Card className="mt-2">
         <CardContent>
           <AdminSummaryTable
-            data={daySummary?.filter(item => item.totalPrice > 0) || []}
-            isLoading={isGettingDaySummary || isRefetchingSummary}
+            data={summaryData?.filter(item => item.totalPrice > 0) || []}
+            isLoading={isGettingDaySummary}
           />
         </CardContent>
       </Card>
