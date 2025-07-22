@@ -3,9 +3,12 @@ import { AppModule } from './app.module'
 import { ValidationPipe } from "@nestjs/common"
 import { useContainer } from "class-validator"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
+import * as cors from 'cors'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
+  app.use(cors())
 
   app.setGlobalPrefix('v1')
 
@@ -33,7 +36,7 @@ async function bootstrap() {
   setInterval(() => {
     const mem = process.memoryUsage()
     console.log(`[MEMORY] Heap: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB / ${(mem.heapTotal / 1024 / 1024).toFixed(2)} MB | RSS: ${(mem.rss / 1024 / 1024).toFixed(2)} MB`)
-  }, 5000)
+  }, 10 * 60000)
 
   await app.listen(process.env.PORT ?? 3000)
   console.log(`Application is running on: ${await app.getUrl()}`)
