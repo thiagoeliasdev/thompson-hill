@@ -42,6 +42,7 @@ export class AppointmentsController {
   @ApiOkResponse({ type: PaginatedAppointmentView })
   async findAll(@Query() query: AppointmentQuery) {
     const { page = 1, limit = 10 } = query
+    console.log("Query:", query)
     const { results, total } = await this.appointmentsService.findAll(query)
 
     return {
