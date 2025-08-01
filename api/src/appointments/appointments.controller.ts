@@ -27,6 +27,7 @@ export class AppointmentsController {
   @ApiBody({ type: CreateAppointmentInput })
   @ApiCreatedResponse({ type: AppointmentView })
   async create(@Body() dto: CreateAppointmentInput) {
+    console.log("Creating appointment |", new Date().getTime(), dto)
     return new AppointmentView(await this.appointmentsService.create(dto))
   }
 
@@ -42,7 +43,6 @@ export class AppointmentsController {
   @ApiOkResponse({ type: PaginatedAppointmentView })
   async findAll(@Query() query: AppointmentQuery) {
     const { page = 1, limit = 10 } = query
-    console.log("Query:", query)
     const { results, total } = await this.appointmentsService.findAll(query)
 
     return {
@@ -132,6 +132,7 @@ export class AppointmentsController {
     }
   })
   async update(@Param('id') id: string, @Body() dto: UpdateAppointmentInput) {
+    console.log("Updating appointment |", new Date().getTime(), id, dto)
     return new AppointmentView(await this.appointmentsService.update(id, dto))
   }
 

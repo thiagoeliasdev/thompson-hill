@@ -36,6 +36,7 @@ export class CustomersController {
     }
   })
   async create(@Body() dto: CreateCustomerInput) {
+    console.log("Creating customer |", new Date().getTime(), dto)
     return new CustomerView(await this.customersService.create(dto))
   }
 
@@ -77,6 +78,7 @@ export class CustomersController {
     }
   })
   async findOneByPhoneNumber(@Param('phoneNumber') phoneNumber: string) {
+    console.log("Finding customer by phone number |", new Date().getTime(), phoneNumber)
     return new CustomerView(await this.customersService.findOne({ phoneNumber }))
   }
 

@@ -345,10 +345,7 @@ export const useAdmin = () => {
       const response = await getAdminAppointmentsSummaryAction(data)
 
       return response.data || []
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [queries.admin.apiKeys] })
-    },
+    }
   })
 
   const { data: settings, isLoading: isLoadingSettings } = useQuery({

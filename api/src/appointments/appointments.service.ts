@@ -162,12 +162,8 @@ export class AppointmentsService {
       matchFilters.createdAt = { $gte: start, $lte: end }
     }
 
-    console.log("Match Filters:", matchFilters)
-
     if (status) matchFilters.status = status
     if (paymentMethod) matchFilters.paymentMethod = paymentMethod
-
-    // console.log('Match Filters:', matchFilters)
 
     const pipeline: any[] = [
       { $match: matchFilters },
